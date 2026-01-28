@@ -7,13 +7,13 @@ import { signOut } from "next-auth/react"
 import { User2, User, LayoutDashboard, Hospital, Users, CalendarDays, Wallet, Settings } from "lucide-react"
 
 const items = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/clinics", label: "Clínicas", icon: Hospital },
-  { href: "/dashboard/patients", label: "Pacientes", icon: Users },
-  { href: "/dashboard/appointments", label: "Agendamentos", icon: CalendarDays },
-  { href: "/dashboard/dentists", label: "Dentistas", icon: User },
-  { href: "/dashboard/services", label: "Serviços", icon: Wallet },
-  { href: "/dashboard/settings", label: "Configurações", icon: Settings }
+  { href: "/home", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/clinics", label: "Clínicas", icon: Hospital },
+  { href: "/patients", label: "Pacientes", icon: Users },
+  { href: "/appointments", label: "Agendamentos", icon: CalendarDays },
+  { href: "/dentists", label: "Dentistas", icon: User },
+  { href: "/services", label: "Serviços", icon: Wallet },
+  { href: "/settings", label: "Configurações", icon: Settings }
 ]
 
 export function Sidebar() {
@@ -21,7 +21,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
       <div className="flex h-16 items-center justify-center border-b">
-        <Link href="/dashboard" className="text-lg font-bold text-primary">Odonto SaaS</Link>
+        <Link href="/home" className="text-lg font-bold text-primary">Odonto SaaS</Link>
       </div>
       <nav className="flex-1 p-2">
         <ul className="space-y-1">
