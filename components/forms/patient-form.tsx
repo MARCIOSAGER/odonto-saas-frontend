@@ -18,6 +18,7 @@ export function PatientForm({
   loading?: boolean;
   initialData?: any;
 }) {
+  const isEditing = !!initialData
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PatientInput>({
     resolver: zodResolver(patientSchema),
     defaultValues: initialData || { status: "Ativo" }
@@ -89,7 +90,7 @@ export function PatientForm({
                 Salvando...
               </>
             ) : (
-              "Salvar"
+              isEditing ? "Atualizar" : "Cadastrar"
             )}
           </Button>
         </div>

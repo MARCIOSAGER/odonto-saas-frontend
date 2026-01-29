@@ -9,9 +9,19 @@ import { useAppointments } from "@/hooks/useAppointments"
 import { Calendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle } from "lucide-react"
+import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react"
 import { AppointmentForm } from "@/components/forms/appointment-form"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -19,15 +29,33 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 export default function AppointmentsPage() {
   const [view, setView] = useState<"lista" | "calendario">("lista")
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { appointments, isLoading, createAppointment, confirmAppointment, cancelAppointment } = useAppointments()
+  const [editingItem, setEditingItem] = useState<any | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const { appointments, isLoading, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
 
-  const handleCreateAppointment = async (data: any) => {
+  const handleCreate = () => {
+    setEditingItem(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEdit = (item: any) => {
+    setEditingItem(item)
+    setIsModalOpen(true)
+  }
+
+  const handleFormSubmit = async (data: any) => {
     try {
-      await createAppointment.mutateAsync(data)
+      if (editingItem) {
+        await updateAppointment.mutateAsync({ id: editingItem.id, ...data })
+        toast.success("Agendamento atualizado com sucesso!")
+      } else {
+        await createAppointment.mutateAsync(data)
+        toast.success("Agendamento criado com sucesso!")
+      }
       setIsModalOpen(false)
-      toast.success("Agendamento criado com sucesso!")
+      setEditingItem(null)
     } catch (error) {
-      toast.error("Erro ao criar agendamento")
+      toast.error(editingItem ? "Erro ao atualizar agendamento" : "Erro ao criar agendamento")
     }
   }
 
@@ -40,13 +68,15 @@ export default function AppointmentsPage() {
     }
   }
 
-  const handleCancel = async (id: string) => {
-    if (!confirm("Deseja realmente cancelar este agendamento?")) return
+  const handleDelete = async () => {
+    if (!deleteId) return
     try {
-      await cancelAppointment.mutateAsync(id)
+      await cancelAppointment.mutateAsync(deleteId)
       toast.success("Agendamento cancelado!")
     } catch (error) {
       toast.error("Erro ao cancelar agendamento")
+    } finally {
+      setDeleteId(null)
     }
   }
 
@@ -98,7 +128,7 @@ export default function AppointmentsPage() {
               Calendário
             </Button>
           </div>
-          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Button className="gap-2" onClick={handleCreate}>
             <Plus size={18} />
             Novo Agendamento
           </Button>
@@ -108,20 +138,42 @@ export default function AppointmentsPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">Novo Agendamento</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">
+              {editingItem ? "Editar Agendamento" : "Novo Agendamento"}
+            </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              Selecione o paciente, dentista e serviço para marcar uma nova consulta.
+              {editingItem 
+                ? "Atualize as informações da consulta selecionada." 
+                : "Selecione o paciente, dentista e serviço para marcar uma nova consulta."}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
             <AppointmentForm 
-              onSubmit={handleCreateAppointment}
+              initialData={editingItem}
+              onSubmit={handleFormSubmit}
               onCancel={() => setIsModalOpen(false)}
-              loading={createAppointment.isPending}
+              loading={createAppointment.isPending || updateAppointment.isPending}
             />
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar Agendamento</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja cancelar esta consulta? Esta ação removerá o horário da agenda.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Confirmar Cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
@@ -190,12 +242,21 @@ export default function AppointmentsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
+                              className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
+                              onClick={() => handleEdit(a)}
+                              title="Editar"
+                            >
+                              <Pencil size={14} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
                               className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
-                              onClick={() => handleCancel(a.id)}
+                              onClick={() => setDeleteId(a.id)}
                               title="Cancelar"
                               disabled={cancelAppointment.isPending}
                             >
-                              {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                              {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                             </Button>
                           </div>
                         </TD>

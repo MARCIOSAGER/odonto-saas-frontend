@@ -24,10 +24,9 @@ export default function ClinicSettingsPage() {
       address: "",
       city: "",
       state: "",
-      zip_code: "",
+      cep: "",
       primary_color: "#0EA5E9",
       secondary_color: "#64748B",
-      logo: ""
     }
   })
 
@@ -44,10 +43,9 @@ export default function ClinicSettingsPage() {
         address: clinic.address || "",
         city: clinic.city || "",
         state: clinic.state || "",
-        zip_code: clinic.zip_code || "",
+        cep: clinic.cep || clinic.zip_code || "",
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
-        logo: clinic.logo || ""
       })
       if (clinic.logo) {
         setLogoPreview(clinic.logo)
@@ -99,7 +97,6 @@ export default function ClinicSettingsPage() {
         if (response.data?.data?.logo) {
           const newLogo = response.data.data.logo
           setLogoPreview(newLogo)
-          setValue("logo", newLogo)
         }
       }
     } catch (error: any) {
@@ -112,8 +109,8 @@ export default function ClinicSettingsPage() {
 
   const onSubmit = async (data: any) => {
     try {
-      // Apenas campos válidos para o backend
-      const payload = {
+      // NÃO incluir logo aqui - logo usa endpoint separado
+      const profileData = {
         name: data.name,
         cnpj: data.cnpj,
         phone: data.phone,
@@ -121,15 +118,21 @@ export default function ClinicSettingsPage() {
         address: data.address,
         city: data.city,
         state: data.state,
-        zip_code: data.zip_code,
+        cep: data.cep, // NÃO zip_code
         primary_color: data.primary_color,
         secondary_color: data.secondary_color,
-        logo: data.logo
       }
-      await updateClinic.mutateAsync(payload)
+
+      // Remover campos undefined/null/vazios
+      const cleanData = Object.fromEntries(
+        Object.entries(profileData).filter(([_, v]) => v !== undefined && v !== null && v !== "")
+      )
+
+      await updateClinic.mutateAsync(cleanData)
       toast.success("Configurações salvas!")
-    } catch (error) {
-      toast.error("Erro ao salvar configurações")
+    } catch (error: any) {
+      const message = error.response?.data?.message
+      toast.error(Array.isArray(message) ? message.join(", ") : message || "Erro ao salvar")
     }
   }
 
@@ -300,7 +303,7 @@ export default function ClinicSettingsPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CEP</label>
-                <Input {...register("zip_code")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
+                <Input {...register("cep")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
             </div>
           </CardContent>
