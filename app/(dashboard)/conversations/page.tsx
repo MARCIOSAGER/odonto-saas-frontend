@@ -12,46 +12,29 @@ import { ptBR } from "date-fns/locale"
 
 export default function ConversationsPage() {
   const [search, setSearch] = useState("")
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedPhone, setSelectedPhone] = useState<string | null>(null)
 
-  // Mock de conversas para visualização enquanto a API não retorna dados
+  // Buscar lista de conversas (agrupadas por telefone)
   const { data: conversations, isLoading } = useQuery({
     queryKey: ["conversations", search],
     queryFn: async () => {
-      try {
-        const res = await api.get("/conversations", { params: { q: search } })
-        return res.data?.data || []
-      } catch {
-        return [
-          { id: "1", name: "João Silva", phone: "11999998888", lastMessage: "Gostaria de agendar para amanhã.", time: new Date().toISOString(), unread: 2 },
-          { id: "2", name: "Maria Oliveira", phone: "11977776666", lastMessage: "Obrigada pelo atendimento!", time: new Date(Date.now() - 3600000).toISOString(), unread: 0 },
-          { id: "3", name: "Pedro Santos", phone: "11955554444", lastMessage: "Qual o valor da limpeza?", time: new Date(Date.now() - 86400000).toISOString(), unread: 0 },
-        ]
-      }
+      const res = await api.get("/conversations", { params: { q: search } })
+      return res.data?.data || []
     }
   })
 
-  // Buscar histórico de mensagens da conversa selecionada
+  // Buscar histórico de mensagens do telefone selecionado
   const { data: messages, isLoading: loadingChat } = useQuery({
-    queryKey: ["messages", selectedId],
+    queryKey: ["messages", selectedPhone],
     queryFn: async () => {
-      if (!selectedId) return []
-      try {
-        const res = await api.get(`/conversations/${selectedId}/messages`)
-        return res.data?.data || []
-      } catch {
-        return [
-          { id: "m1", text: "Olá! Como posso ajudar?", sender: "bot", time: "10:00" },
-          { id: "m2", text: "Gostaria de agendar uma consulta.", sender: "user", time: "10:05" },
-          { id: "m3", text: "Temos horários disponíveis amanhã às 14h. Pode ser?", sender: "bot", time: "10:06" },
-          { id: "m4", text: "Perfeito!", sender: "user", time: "10:10" },
-        ]
-      }
+      if (!selectedPhone) return []
+      const res = await api.get(`/conversations/${selectedPhone}`)
+      return res.data?.data || []
     },
-    enabled: !!selectedId
+    enabled: !!selectedPhone
   })
 
-  const selectedConversation = conversations?.find((c: any) => c.id === selectedId)
+  const selectedConversation = conversations?.find((c: any) => c.phone === selectedPhone)
 
   return (
     <div className="flex h-[calc(100vh-120px)] gap-6 overflow-hidden">
@@ -75,11 +58,11 @@ export default function ConversationsPage() {
               <div className="divide-y divide-border">
                 {conversations?.map((c: any) => (
                   <button
-                    key={c.id}
-                    onClick={() => setSelectedId(c.id)}
+                    key={c.phone}
+                    onClick={() => setSelectedPhone(c.phone)}
                     className={cn(
                       "w-full p-4 flex gap-3 hover:bg-muted/50 transition-colors text-left",
-                      selectedId === c.id && "bg-primary/5 border-l-4 border-primary"
+                      selectedPhone === c.phone && "bg-primary/5 border-l-4 border-primary"
                     )}
                   >
                     <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs shrink-0">
@@ -109,7 +92,7 @@ export default function ConversationsPage() {
 
       {/* Janela de Chat */}
       <Card className="flex-1 border-border bg-card shadow-sm flex flex-col overflow-hidden">
-        {selectedId ? (
+        {selectedPhone ? (
           <>
             {/* Header do Chat */}
             <div className="p-4 border-b border-border bg-muted/5 flex items-center justify-between">

@@ -1,9 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -11,23 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Wifi, WifiOff } from "lucide-react"
 
 export default function WhatsAppSettingsPage() {
-  const { data: session } = useSession()
-  const { success, error: toastError } = useToast()
-  const queryClient = useQueryClient()
+  const { clinic, isLoading, updateClinic, testWhatsApp } = useClinic()
   
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
-  const [isTesting, setIsTesting] = useState(false)
-
-  // Buscar dados da clínica
-  const { data: clinic, isLoading } = useQuery({
-    queryKey: ["clinic-settings", (session?.user as any)?.id],
-    queryFn: async () => {
-      const res = await api.get(`/auth/me`) // O endpoint me retorna os dados da clínica também
-      return res.data?.data
-    },
-    enabled: !!session
-  })
 
   useEffect(() => {
     if (clinic) {
@@ -36,31 +20,8 @@ export default function WhatsAppSettingsPage() {
     }
   }, [clinic])
 
-  const updateMutation = useMutation({
-    mutationFn: async () => {
-      await api.put(`/clinics/${clinic.clinic_id}`, {
-        z_api_instance: instanceId,
-        z_api_token: token
-      })
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clinic-settings"] })
-      success("Configurações do WhatsApp salvas!")
-    },
-    onError: () => toastError("Erro ao salvar configurações")
-  })
-
   const handleTestConnection = async () => {
-    setIsTesting(true)
-    try {
-      // Simulação de teste de conexão com Z-API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      success("Conexão com WhatsApp estabelecida com sucesso!")
-    } catch (err) {
-      toastError("Falha na conexão. Verifique o Instance ID e Token.")
-    } finally {
-      setIsTesting(false)
-    }
+    testWhatsApp.mutate()
   }
 
   if (isLoading) {
@@ -134,20 +95,20 @@ export default function WhatsAppSettingsPage() {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
               <Button 
-                onClick={() => updateMutation.mutate()} 
-                disabled={updateMutation.isPending}
+                onClick={() => updateClinic.mutate({ z_api_instance: instanceId, z_api_token: token })} 
+                disabled={updateClinic.isPending}
                 className="flex-1 h-11"
               >
-                {updateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                {updateClinic.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                 Salvar Configuração
               </Button>
               <Button 
                 variant="outline" 
                 onClick={handleTestConnection} 
-                disabled={isTesting || !isConnected}
+                disabled={testWhatsApp.isPending || !isConnected}
                 className="flex-1 h-11"
               >
-                {isTesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
+                {testWhatsApp.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
                 Testar Conexão
               </Button>
             </div>

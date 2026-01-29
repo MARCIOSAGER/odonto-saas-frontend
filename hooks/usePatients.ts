@@ -11,18 +11,23 @@ export type Patient = {
   status: "Ativo" | "Inativo"
 }
 
-export function usePatients(search?: string, status?: string) {
+export function usePatients(search?: string, status?: string, page = 1, limit = 10) {
   const queryClient = useQueryClient()
   const { success, error: toastError } = useToast()
 
-  const query = useQuery<Patient[]>({
-    queryKey: ["patients", search, status],
+  const query = useQuery({
+    queryKey: ["patients", search, status, page, limit],
     queryFn: async () => {
       const res = await api.get("/patients", {
-        params: { q: search, status: status === "Todos" ? undefined : status }
+        params: { 
+          q: search, 
+          status: status === "Todos" ? undefined : status,
+          page,
+          limit
+        }
       })
-      // O backend retorna { success: true, data: [...] }
-      return res.data?.data || []
+      // O backend retorna { success: true, data: [...], meta: { total, pages, ... } }
+      return res.data
     }
   })
 
@@ -68,7 +73,8 @@ export function usePatients(search?: string, status?: string) {
   })
 
   return {
-    patients: query.data || [],
+    patients: query.data?.data || [],
+    meta: query.data?.meta,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
