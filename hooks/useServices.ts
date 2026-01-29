@@ -54,10 +54,25 @@ export function useServices() {
     }
   })
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...payload }: Partial<Service> & { id: string }) => {
+      const res = await api.put(`/services/${id}`, payload)
+      return res.data?.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services"] })
+      toast.success("Serviço atualizado com sucesso")
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao atualizar serviço")
+    }
+  })
+
   return {
     services: query.data || [],
     isLoading: query.isLoading,
     createService: createMutation,
-    deleteService: deleteMutation
+    deleteService: deleteMutation,
+    updateService: updateMutation
   }
 }

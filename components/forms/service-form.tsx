@@ -8,13 +8,14 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 
 interface ServiceFormProps {
-  initialData?: any
+  initialData?: any | null
   onSubmit: (data: any) => void
   onCancel: () => void
   loading?: boolean
 }
 
 export function ServiceForm({ initialData, onSubmit, onCancel, loading }: ServiceFormProps) {
+  const isEditing = !!initialData
   const {
     register,
     handleSubmit,
@@ -55,21 +56,21 @@ export function ServiceForm({ initialData, onSubmit, onCancel, loading }: Servic
         <Textarea {...register("description")} placeholder="Breve descrição do procedimento..." className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
       </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={loading} className="min-w-[120px]">
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              "Salvar Serviço"
-            )}
-          </Button>
-        </div>
-      </form>
+      <div className="flex justify-end gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={loading} className="min-w-[120px]">
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Salvando...
+            </>
+          ) : (
+            isEditing ? "Atualizar" : "Cadastrar"
+          )}
+        </Button>
+      </div>
+    </form>
   )
 }

@@ -10,12 +10,23 @@ import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
 import { Search, Plus, FilterX, Loader2, Edit2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function PatientsPage() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"Todos" | "Ativo" | "Inativo">("Todos")
   const [open, setOpen] = useState(false)
-  const [editingPatient, setEditingPatient] = useState<any>(null)
+  const [editingItem, setEditingItem] = useState<any | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { 
     patients, 
@@ -25,36 +36,37 @@ export default function PatientsPage() {
     deletePatient 
   } = usePatients(search, status)
 
-  const handleEdit = (patient: any) => {
-    setEditingPatient(patient)
-    setOpen(true)
-  }
-
   const handleCreate = () => {
-    setEditingPatient(null)
+    setEditingItem(null)
     setOpen(true)
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Tem certeza que deseja remover este paciente?")) {
-      try {
-        await deletePatient.mutateAsync(id)
-        toast.success("Paciente removido com sucesso!")
-      } catch (error) {
-        toast.error("Erro ao remover paciente")
-      }
+  const handleEdit = (item: any) => {
+    setEditingItem(item)
+    setOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!deleteId) return
+    try {
+      await deletePatient.mutateAsync(deleteId)
+      toast.success("Paciente removido com sucesso!")
+    } catch (error) {
+      toast.error("Erro ao remover paciente")
+    } finally {
+      setDeleteId(null)
     }
   }
 
   const handleClose = () => {
     setOpen(false)
-    setEditingPatient(null)
+    setEditingItem(null)
   }
 
   const handleSubmit = async (v: any) => {
     try {
-      if (editingPatient) {
-        await updatePatient.mutateAsync({ id: editingPatient.id, ...v })
+      if (editingItem) {
+        await updatePatient.mutateAsync({ id: editingItem.id, ...v })
         toast.success("Paciente atualizado com sucesso!")
       } else {
         await createPatient.mutateAsync(v)
@@ -83,14 +95,16 @@ export default function PatientsPage() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-gray-100">{editingPatient ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">{editingItem ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
               <DialogDescription className="text-gray-500 dark:text-gray-400">
-                Preencha os dados pessoais e de contato do paciente.
+                {editingItem 
+                  ? "Atualize os dados pessoais e de contato do paciente." 
+                  : "Preencha os dados pessoais e de contato do paciente."}
               </DialogDescription>
             </DialogHeader>
             <div className="p-6 pt-0">
               <PatientForm
-                initialData={editingPatient}
+                initialData={editingItem}
                 onSubmit={handleSubmit}
                 onCancel={handleClose}
                 loading={createPatient.isPending || updatePatient.isPending}
@@ -98,6 +112,23 @@ export default function PatientsPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <Card className="border-border bg-card shadow-sm">
@@ -189,7 +220,7 @@ export default function PatientsPage() {
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
-                              onClick={() => handleDelete(p.id)}
+                              onClick={() => setDeleteId(p.id)}
                             >
                               <Trash2 size={14} />
                             </Button>

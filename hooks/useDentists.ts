@@ -55,10 +55,25 @@ export function useDentists() {
     }
   })
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...payload }: Partial<Dentist> & { id: string }) => {
+      const res = await api.put(`/dentists/${id}`, payload)
+      return res.data?.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dentists"] })
+      toast.success("Dentista atualizado com sucesso")
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao atualizar dentista")
+    }
+  })
+
   return {
     dentists: query.data || [],
     isLoading: query.isLoading,
     createDentist: createMutation,
-    deleteDentist: deleteMutation
+    deleteDentist: deleteMutation,
+    updateDentist: updateMutation
   }
 }

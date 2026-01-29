@@ -85,6 +85,20 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     }
   })
 
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...payload }: Partial<Appointment> & { id: string }) => {
+      const res = await api.put(`/appointments/${id}`, payload)
+      return res.data?.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      toast.success("Agendamento atualizado com sucesso")
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao atualizar agendamento")
+    }
+  })
+
   return {
     appointments: query.data?.data || [],
     meta: query.data?.meta,
@@ -92,6 +106,7 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     isError: query.isError,
     createAppointment: createMutation,
     confirmAppointment: confirmMutation,
-    cancelAppointment: cancelMutation
+    cancelAppointment: cancelMutation,
+    updateAppointment: updateMutation
   }
 }

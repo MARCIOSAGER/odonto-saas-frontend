@@ -15,12 +15,14 @@ import { api } from "@/lib/api"
 import { toast } from "sonner"
 
 interface AppointmentFormProps {
+  initialData?: any | null
   onSubmit: (data: any) => void
   onCancel: () => void
   loading?: boolean
 }
 
-export function AppointmentForm({ onSubmit, onCancel, loading }: AppointmentFormProps) {
+export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: AppointmentFormProps) {
+  const isEditing = !!initialData
   const [patients, setPatients] = useState([])
   const [dentists, setDentists] = useState([])
   const [services, setServices] = useState([])
@@ -29,10 +31,32 @@ export function AppointmentForm({ onSubmit, onCancel, loading }: AppointmentForm
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors }
   } = useForm<AppointmentInput>({
-    resolver: zodResolver(appointmentSchema)
+    resolver: zodResolver(appointmentSchema),
+    defaultValues: {
+      patient_id: initialData?.patient_id || "",
+      dentist_id: initialData?.dentist_id || "",
+      service_id: initialData?.service_id || "",
+      date: initialData?.date_time ? initialData.date_time.split('T')[0] : "",
+      time: initialData?.date_time ? initialData.date_time.split('T')[1].substring(0, 5) : "",
+      notes: initialData?.notes || ""
+    }
   })
+
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        patient_id: initialData.patient_id,
+        dentist_id: initialData.dentist_id,
+        service_id: initialData.service_id,
+        date: initialData.date_time ? initialData.date_time.split('T')[0] : "",
+        time: initialData.date_time ? initialData.date_time.split('T')[1].substring(0, 5) : "",
+        notes: initialData.notes || ""
+      })
+    }
+  }, [initialData, reset])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -149,7 +173,7 @@ export function AppointmentForm({ onSubmit, onCancel, loading }: AppointmentForm
                 Salvando...
               </>
             ) : (
-              "Salvar Agendamento"
+              isEditing ? "Atualizar" : "Cadastrar"
             )}
           </Button>
         </div>

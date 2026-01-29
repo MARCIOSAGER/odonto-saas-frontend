@@ -5,31 +5,61 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { useServices } from "@/hooks/useServices"
-import { Plus, Loader2, Trash2, Clock, Settings2 } from "lucide-react"
+import { Plus, Loader2, Trash2, Clock, Settings2, Pencil } from "lucide-react"
 import { ServiceForm } from "@/components/forms/service-form"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { services, isLoading, createService, deleteService } = useServices()
+  const [editingItem, setEditingItem] = useState<any | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const { services, isLoading, createService, deleteService, updateService } = useServices()
 
-  const handleCreateService = async (data: any) => {
+  const handleCreate = () => {
+    setEditingItem(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEdit = (item: any) => {
+    setEditingItem(item)
+    setIsModalOpen(true)
+  }
+
+  const handleFormSubmit = async (data: any) => {
     try {
-      await createService.mutateAsync(data)
+      if (editingItem) {
+        await updateService.mutateAsync({ id: editingItem.id, ...data })
+        toast.success("Serviço atualizado com sucesso!")
+      } else {
+        await createService.mutateAsync(data)
+        toast.success("Serviço criado com sucesso!")
+      }
       setIsModalOpen(false)
-      toast.success("Serviço criado com sucesso!")
+      setEditingItem(null)
     } catch (error) {
-      toast.error("Erro ao criar serviço")
+      toast.error(editingItem ? "Erro ao atualizar serviço" : "Erro ao criar serviço")
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Deseja realmente remover este serviço?")) return
+  const handleDelete = async () => {
+    if (!deleteId) return
     try {
-      await deleteService.mutateAsync(id)
+      await deleteService.mutateAsync(deleteId)
       toast.success("Serviço removido!")
     } catch (error) {
       toast.error("Erro ao remover serviço")
+    } finally {
+      setDeleteId(null)
     }
   }
 
@@ -40,7 +70,7 @@ export default function ServicesPage() {
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Serviços</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Configure os procedimentos e valores da clínica.</p>
         </div>
-        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+        <Button className="gap-2" onClick={handleCreate}>
           <Plus size={18} />
           Novo Serviço
         </Button>
@@ -49,20 +79,42 @@ export default function ServicesPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">Novo Serviço</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">
+              {editingItem ? "Editar Serviço" : "Novo Serviço"}
+            </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              Cadastre um novo procedimento com nome, duração e preço.
+              {editingItem 
+                ? "Atualize as informações do procedimento selecionado." 
+                : "Cadastre um novo procedimento com nome, duração e preço."}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
             <ServiceForm 
-              onSubmit={handleCreateService}
+              initialData={editingItem}
+              onSubmit={handleFormSubmit}
               onCancel={() => setIsModalOpen(false)}
-              loading={createService.isPending}
+              loading={createService.isPending || updateService.isPending}
             />
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
@@ -112,15 +164,24 @@ export default function ServicesPage() {
                           </div>
                         </TD>
                         <TD className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
-                            onClick={() => handleDelete(s.id)}
-                            disabled={deleteService.isPending}
-                          >
-                            {deleteService.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
+                              onClick={() => handleEdit(s)}
+                            >
+                              <Pencil size={14} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
+                              onClick={() => setDeleteId(s.id)}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
                         </TD>
                       </TR>
                     ))
