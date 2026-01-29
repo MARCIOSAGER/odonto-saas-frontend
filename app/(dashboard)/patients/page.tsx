@@ -1,131 +1,183 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/api"
-import { mockPatients } from "@/lib/mock"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader } from "@/components/ui/dialog"
 import { useState } from "react"
+import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
-import { useToast } from "@/components/ui/toast"
-
-type Patient = {
-  id: string
-  nome: string
-  telefone: string
-  cpf?: string
-  email?: string
-  status: "Ativo" | "Inativo"
-}
+import { Search, Plus, FilterX, Loader2, Edit2, Trash2, User } from "lucide-react"
 
 export default function PatientsPage() {
-  const qc = useQueryClient()
-  const { success, error } = useToast()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"Todos" | "Ativo" | "Inativo">("Todos")
   const [open, setOpen] = useState(false)
+  const [editingPatient, setEditingPatient] = useState<any>(null)
 
-  const { data = [] } = useQuery<Patient[]>({
-    queryKey: ["patients", search, status],
-    queryFn: async () => {
-      try {
-        const res = await api.get("/api/patients", { params: { q: search, status: status === "Todos" ? undefined : status } })
-        return res.data
-      } catch {
-        return mockPatients
-      }
+  const { 
+    patients, 
+    isLoading, 
+    createPatient, 
+    updatePatient, 
+    deletePatient 
+  } = usePatients(search, status)
+
+  const handleEdit = (patient: any) => {
+    setEditingPatient(patient)
+    setOpen(true)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Tem certeza que deseja remover este paciente?")) {
+      await deletePatient.mutateAsync(id)
     }
-  })
+  }
 
-  const createMutation = useMutation({
-    mutationFn: async (payload: Omit<Patient, "id">) => {
-      try {
-        const res = await api.post("/api/patients", payload)
-        return res.data
-      } catch {
-        return { ...payload, id: Math.random().toString(36).slice(2) }
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["patients"] })
-      success("Paciente criado com sucesso")
-      setOpen(false)
-    },
-    onError: () => error("Erro ao criar paciente")
-  })
+  const handleClose = () => {
+    setOpen(false)
+    setEditingPatient(null)
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Pacientes</h2>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pacientes</h1>
+          <p className="text-sm text-muted-foreground">Gerencie o cadastro de pacientes da sua clínica.</p>
+        </div>
+        
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>+ Novo Paciente</Button>
+            <Button className="gap-2">
+              <Plus size={18} />
+              Novo Paciente
+            </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader title="+ Novo Paciente" />
-            <CardContent>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader title={editingPatient ? "Editar Paciente" : "Novo Paciente"} />
+            <div className="p-6 pt-0">
               <PatientForm
-                onSubmit={(v) => createMutation.mutate({ ...v })}
-                onCancel={() => setOpen(false)}
-                loading={createMutation.isPending}
+                initialData={editingPatient}
+                onSubmit={(v) => {
+                  if (editingPatient) {
+                    updatePatient.mutate({ id: editingPatient.id, ...v })
+                  } else {
+                    createPatient.mutate(v)
+                  }
+                  handleClose()
+                }}
+                onCancel={handleClose}
+                loading={createPatient.isPending || updatePatient.isPending}
               />
-            </CardContent>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Card>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Input
-              placeholder="Buscar (nome, telefone, CPF)"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Buscar pacientes"
-            />
-            <select
-              className="h-10 rounded-lg border border-gray-300 px-3 text-sm"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as any)}
-              aria-label="Filtro de status"
-            >
-              <option>Todos</option>
-              <option>Ativo</option>
-              <option>Inativo</option>
-            </select>
-            <Button variant="ghost" onClick={() => { setSearch(""); setStatus("Todos") }}>Limpar filtros</Button>
+      <Card className="border-border bg-card shadow-sm">
+        <CardContent className="p-6 space-y-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome, telefone ou CPF..."
+                className="pl-10 h-11 bg-muted/30 border-none"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <select
+                className="h-11 rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as any)}
+              >
+                <option>Todos</option>
+                <option>Ativo</option>
+                <option>Inativo</option>
+              </select>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-11 w-11 text-muted-foreground hover:text-foreground"
+                onClick={() => { setSearch(""); setStatus("Todos") }}
+                title="Limpar filtros"
+              >
+                <FilterX size={18} />
+              </Button>
+            </div>
           </div>
-          <Table>
-            <THead>
-              <TR>
-                <TH>Nome</TH>
-                <TH>Telefone</TH>
-                <TH>CPF</TH>
-                <TH>Email</TH>
-                <TH>Status</TH>
-                <TH>Ações</TH>
-              </TR>
-            </THead>
-            <TBody>
-              {data.slice(0, 10).map((p) => (
-                <TR key={p.id}>
-                  <TD>{p.nome}</TD>
-                  <TD>{p.telefone}</TD>
-                  <TD>{p.cpf}</TD>
-                  <TD>{p.email}</TD>
-                  <TD>{p.status}</TD>
-                  <TD className="space-x-2">
-                    <Button variant="ghost" size="sm">Ver</Button>
-                    <Button variant="outline" size="sm">Editar</Button>
-                    <Button variant="destructive" size="sm">Inativar</Button>
-                  </TD>
-                </TR>
-              ))}
-            </TBody>
-          </Table>
+
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="rounded-md border border-border overflow-hidden">
+              <Table>
+                <THead className="bg-muted/50">
+                  <TR>
+                    <TH className="font-semibold text-foreground">Nome</TH>
+                    <TH className="font-semibold text-foreground">Telefone</TH>
+                    <TH className="font-semibold text-foreground">CPF</TH>
+                    <TH className="font-semibold text-foreground">Status</TH>
+                    <TH className="text-right font-semibold text-foreground">Ações</TH>
+                  </TR>
+                </THead>
+                <TBody>
+                  {patients.length === 0 ? (
+                    <TR>
+                      <TD colSpan={5} className="h-32 text-center text-muted-foreground">
+                        Nenhum paciente encontrado.
+                      </TD>
+                    </TR>
+                  ) : (
+                    patients.map((p) => (
+                      <TR key={p.id} className="hover:bg-muted/30 transition-colors">
+                        <TD>
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                              {p.nome.charAt(0)}
+                            </div>
+                            <span className="font-medium text-foreground">{p.nome}</span>
+                          </div>
+                        </TD>
+                        <TD className="text-muted-foreground">{p.telefone}</TD>
+                        <TD className="text-muted-foreground">{p.cpf || "---"}</TD>
+                        <TD>
+                          <Badge variant={p.status === "Ativo" ? "green" : "gray"}>
+                            {p.status}
+                          </Badge>
+                        </TD>
+                        <TD className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-muted-foreground hover:text-primary"
+                              onClick={() => handleEdit(p)}
+                            >
+                              <Edit2 size={14} />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={() => handleDelete(p.id)}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </div>
+                        </TD>
+                      </TR>
+                    ))
+                  )}
+                </TBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

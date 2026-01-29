@@ -1,92 +1,155 @@
 "use client"
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/lib/api"
-import { mockAppointments } from "@/lib/mock"
+import { Badge } from "@/components/ui/badge"
+import { useAppointments } from "@/hooks/useAppointments"
 import { Calendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle } from "lucide-react"
 
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
-type Appointment = {
-  id: string
-  data: string
-  hora: string
-  paciente: string
-  dentista: string
-  servico: string
-  status: "Confirmado" | "Pendente" | "Cancelado"
-}
-
 export default function AppointmentsPage() {
   const [view, setView] = useState<"lista" | "calendario">("lista")
-  const { data = [] } = useQuery<Appointment[]>({
-    queryKey: ["appointments"],
-    queryFn: async () => {
-      try {
-        const res = await api.get("/api/appointments")
-        return res.data
-      } catch {
-        return mockAppointments
-      }
-    }
-  })
+  const { appointments, isLoading, confirmAppointment, cancelAppointment } = useAppointments()
 
   const events = useMemo(
     () =>
-      data.map((a) => {
-        const [h] = a.hora.split(":")
+      appointments.map((a) => {
         const start = new Date(`${a.data}T${a.hora}:00`)
         const end = new Date(start)
-        end.setHours(parseInt(h) + 1)
-        return { id: a.id, title: `${a.paciente} • ${a.servico}`, start, end, resource: a }
+        end.setHours(start.getHours() + 1)
+        return { 
+          id: a.id, 
+          title: `${a.paciente} • ${a.servico}`, 
+          start, 
+          end, 
+          resource: a 
+        }
       }),
-    [data]
+    [appointments]
   )
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Agendamentos</h2>
-        <div className="space-x-2">
-          <Button variant={view === "lista" ? "default" : "ghost"} onClick={() => setView("lista")}>Lista</Button>
-          <Button variant={view === "calendario" ? "default" : "ghost"} onClick={() => setView("calendario")}>Calendário</Button>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Agendamentos</h1>
+          <p className="text-sm text-muted-foreground">Gerencie as consultas e horários da clínica.</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="bg-muted p-1 rounded-lg flex gap-1">
+            <Button 
+              variant={view === "lista" ? "default" : "ghost"} 
+              size="sm" 
+              className="h-8 gap-2"
+              onClick={() => setView("lista")}
+            >
+              <LayoutList size={14} />
+              Lista
+            </Button>
+            <Button 
+              variant={view === "calendario" ? "default" : "ghost"} 
+              size="sm" 
+              className="h-8 gap-2"
+              onClick={() => setView("calendario")}
+            >
+              <CalendarIcon size={14} />
+              Calendário
+            </Button>
+          </div>
+          <Button className="gap-2">
+            <Plus size={18} />
+            Novo Agendamento
+          </Button>
         </div>
       </div>
-      <Card>
-        <CardContent>
-          {view === "lista" ? (
-            <Table>
-              <THead>
-                <TR>
-                  <TH>Data</TH>
-                  <TH>Hora</TH>
-                  <TH>Paciente</TH>
-                  <TH>Dentista</TH>
-                  <TH>Serviço</TH>
-                  <TH>Status</TH>
-                </TR>
-              </THead>
-              <TBody>
-                {data.map((a) => (
-                  <TR key={a.id}>
-                    <TD>{a.data}</TD>
-                    <TD>{a.hora}</TD>
-                    <TD>{a.paciente}</TD>
-                    <TD>{a.dentista}</TD>
-                    <TD>{a.servico}</TD>
-                    <TD>{a.status}</TD>
+
+      <Card className="border-border bg-card shadow-sm">
+        <CardContent className="p-6">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : view === "lista" ? (
+            <div className="rounded-md border border-border overflow-hidden">
+              <Table>
+                <THead className="bg-muted/50">
+                  <TR>
+                    <TH className="font-semibold text-foreground">Data/Hora</TH>
+                    <TH className="font-semibold text-foreground">Paciente</TH>
+                    <TH className="font-semibold text-foreground">Dentista</TH>
+                    <TH className="font-semibold text-foreground">Serviço</TH>
+                    <TH className="font-semibold text-foreground">Status</TH>
+                    <TH className="text-right font-semibold text-foreground">Ações</TH>
                   </TR>
-                ))}
-              </TBody>
-            </Table>
+                </THead>
+                <TBody>
+                  {appointments.length === 0 ? (
+                    <TR>
+                      <TD colSpan={6} className="h-32 text-center text-muted-foreground">
+                        Nenhum agendamento encontrado.
+                      </TD>
+                    </TR>
+                  ) : (
+                    appointments.map((a) => (
+                      <TR key={a.id} className="hover:bg-muted/30 transition-colors">
+                        <TD>
+                          <div className="flex flex-col">
+                            <span className="font-medium text-foreground">{format(new Date(a.data), 'dd/MM/yyyy')}</span>
+                            <span className="text-xs text-muted-foreground">{a.hora}</span>
+                          </div>
+                        </TD>
+                        <TD className="font-medium text-foreground">{a.paciente}</TD>
+                        <TD className="text-muted-foreground text-sm">{a.dentista}</TD>
+                        <TD className="text-muted-foreground text-sm">{a.servico}</TD>
+                        <TD>
+                          <Badge variant={
+                            a.status === "Confirmado" ? "green" : 
+                            a.status === "Pendente" ? "yellow" : "red"
+                          }>
+                            {a.status}
+                          </Badge>
+                        </TD>
+                        <TD className="text-right">
+                          <div className="flex justify-end gap-1">
+                            {a.status === "Pendente" && (
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 text-success hover:bg-success/10"
+                                onClick={() => confirmAppointment.mutate(a.id)}
+                                title="Confirmar"
+                              >
+                                <CheckCircle size={14} />
+                              </Button>
+                            )}
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              onClick={() => {
+                                if (confirm("Cancelar este agendamento?")) cancelAppointment.mutate(a.id)
+                              }}
+                              title="Cancelar"
+                            >
+                              <XCircle size={14} />
+                            </Button>
+                          </div>
+                        </TD>
+                      </TR>
+                    ))
+                  )}
+                </TBody>
+              </Table>
+            </div>
           ) : (
-            <div className="h-[700px]">
+            <div className="h-[700px] font-sans">
               <Calendar
                 localizer={localizer}
                 events={events}
@@ -101,6 +164,7 @@ export default function AppointmentsPage() {
                   previous: "Anterior",
                   next: "Próximo"
                 }}
+                className="rounded-lg"
               />
             </div>
           )}
