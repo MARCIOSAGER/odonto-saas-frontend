@@ -3,7 +3,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import { 
   LayoutDashboard, 
   Hospital, 
@@ -15,31 +15,46 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Plus
+  MessageSquare,
+  ChevronDown,
+  Smartphone,
+  Bot,
+  UserCircle
 } from "lucide-react"
 import { useState } from "react"
 
-const items = [
+const mainItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/clinics", label: "Clínicas", icon: Hospital },
-  { href: "/dashboard/patients", label: "Pacientes", icon: Users },
+  { href: "/dashboard/conversations", label: "Conversas", icon: MessageSquare },
   { href: "/dashboard/appointments", label: "Agendamentos", icon: CalendarDays },
+  { href: "/dashboard/patients", label: "Pacientes", icon: Users },
+]
+
+const clinicItems = [
+  { href: "/dashboard/clinics", label: "Minha Clínica", icon: Hospital },
   { href: "/dashboard/dentists", label: "Dentistas", icon: User },
   { href: "/dashboard/services", label: "Serviços", icon: Wallet },
 ]
 
-const bottomItems = [
-  { href: "/dashboard/settings", label: "Configurações", icon: Settings },
+const settingsSubmenu = [
+  { href: "/dashboard/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
+  { href: "/dashboard/settings/ai", label: "Assistente IA", icon: Bot },
+  { href: "/dashboard/settings", label: "Minha Conta", icon: UserCircle },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(pathname.includes("/settings"))
+  
+  const user = session?.user
+  const userInitials = user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "US"
 
   return (
     <aside 
       className={cn(
-        "relative flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out",
+        "relative flex flex-col border-r border-border bg-card transition-all duration-300 ease-in-out z-40",
         isCollapsed ? "w-[70px]" : "w-64"
       )}
     >
@@ -61,6 +76,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-8">
+        {/* Menu Principal */}
         <div>
           {!isCollapsed && (
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
@@ -68,7 +84,7 @@ export function Sidebar() {
             </p>
           )}
           <ul className="space-y-1">
-            {items.map((item) => {
+            {mainItems.map((item) => {
               const Icon = item.icon
               const active = pathname === item.href
               return (
@@ -91,14 +107,15 @@ export function Sidebar() {
           </ul>
         </div>
 
+        {/* Gestão Clínica */}
         <div>
           {!isCollapsed && (
             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
-              Outros
+              Gestão Clínica
             </p>
           )}
           <ul className="space-y-1">
-            {bottomItems.map((item) => {
+            {clinicItems.map((item) => {
               const Icon = item.icon
               const active = pathname === item.href
               return (
@@ -119,6 +136,59 @@ export function Sidebar() {
               )
             })}
           </ul>
+        </div>
+
+        {/* Configurações com Submenu */}
+        <div>
+          {!isCollapsed && (
+            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
+              Sistema
+            </p>
+          )}
+          <div className="space-y-1">
+            <button
+              onClick={() => !isCollapsed && setSettingsOpen(!settingsOpen)}
+              className={cn(
+                "w-full group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                pathname.includes("/settings") && !settingsOpen
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <Settings size={18} className={cn("shrink-0", pathname.includes("/settings") ? "text-primary" : "group-hover:text-primary")} />
+              {!isCollapsed && (
+                <>
+                  <span className="flex-1 text-left">Configurações</span>
+                  <ChevronDown size={14} className={cn("transition-transform duration-200", settingsOpen && "rotate-180")} />
+                </>
+              )}
+            </button>
+            
+            {settingsOpen && !isCollapsed && (
+              <ul className="mt-1 ml-4 border-l border-border pl-2 space-y-1">
+                {settingsSubmenu.map((sub) => {
+                  const SubIcon = sub.icon
+                  const subActive = pathname === sub.href
+                  return (
+                    <li key={sub.href}>
+                      <Link
+                        href={sub.href}
+                        className={cn(
+                          "flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200",
+                          subActive 
+                            ? "text-primary bg-primary/5" 
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        )}
+                      >
+                        <SubIcon size={14} />
+                        <span>{sub.label}</span>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -128,11 +198,11 @@ export function Sidebar() {
           <div className="space-y-4">
             <div className="flex items-center gap-3 px-2">
               <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                US
+                {userInitials}
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold truncate text-foreground">Dr. Usuário</p>
-                <p className="text-[11px] text-muted-foreground truncate">dr@clinica.com</p>
+                <p className="text-sm font-semibold truncate text-foreground">{user?.name || "Usuário"}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{user?.email || "dr@clinica.com"}</p>
               </div>
             </div>
             <Button 
@@ -148,7 +218,7 @@ export function Sidebar() {
         ) : (
           <div className="flex flex-col items-center gap-4">
             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-              US
+              {userInitials}
             </div>
             <button 
               onClick={() => signOut({ callbackUrl: "/login" })}
@@ -163,7 +233,7 @@ export function Sidebar() {
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:text-primary transition-colors"
+        className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm hover:text-primary transition-colors z-50"
       >
         {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>

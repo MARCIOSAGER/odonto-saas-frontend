@@ -2,22 +2,18 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { useQuery } from "@tanstack/react-query"
+import { useSession } from "next-auth/react"
 import { api } from "@/lib/api"
-import { useGlobalStore } from "@/lib/store"
-import { mockAppointments } from "@/lib/mock"
 import { cn } from "@/lib/utils"
 import { 
-  LineChart, 
-  Line, 
-  CartesianGrid, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer
 } from "recharts"
 import { 
   Users, 
@@ -25,37 +21,53 @@ import {
   CalendarClock, 
   TrendingUp,
   ArrowUpRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2,
+  AlertCircle
 } from "lucide-react"
 
-type Appointment = {
-  id: string
-  data: string
-  hora: string
-  paciente: string
-  dentista: string
-  servico: string
-  status: "Confirmado" | "Pendente" | "Cancelado"
-}
-
 export default function DashboardHome() {
-  const mockMode = useGlobalStore((s) => s.mockMode)
-  const { data } = useQuery<Appointment[]>({
-    queryKey: ["appointments", "upcoming"],
+  const { data: session } = useSession()
+
+  // Buscar Estatísticas
+  const { data: stats, isLoading: loadingStats, isError: errorStats } = useQuery({
+    queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      try {
-        const res = await api.get("/api/appointments?range=30")
-        return res.data
-      } catch {
-        return mockAppointments
-      }
+      const res = await api.get("/clinics/stats")
+      return res.data?.data
     }
   })
 
-  const appointments = data || []
-  const confirmedCount = appointments.filter((a) => a.status === "Confirmado").length
-  const pendingCount = appointments.filter((a) => a.status === "Pendente").length
-  
+  // Buscar Agendamentos de Hoje
+  const { data: todayAppointments, isLoading: loadingAppts, isError: errorAppts } = useQuery({
+    queryKey: ["appointments-today"],
+    queryFn: async () => {
+      const res = await api.get("/appointments", { params: { date: new Date().toISOString().split('T')[0] } })
+      return res.data?.data || []
+    }
+  })
+
+  if (loadingStats || loadingAppts) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (errorStats || errorAppts) {
+    return (
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold">Erro ao carregar Dashboard</h2>
+          <p className="text-muted-foreground text-sm">Não foi possível conectar com a API. Verifique sua conexão.</p>
+        </div>
+        <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
+      </div>
+    )
+  }
+
   const chartData = [
     { name: 'Seg', valor: 12 },
     { name: 'Ter', valor: 18 },
@@ -67,56 +79,45 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Header Section */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Olá, Dr. Silva</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Olá, {session?.user?.name || "Doutor"}</h1>
         <p className="text-muted-foreground">Aqui está o que está acontecendo na sua clínica hoje.</p>
       </div>
 
-      {mockMode && (
-        <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-sm text-amber-700 flex items-center gap-3">
-          <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-          Modo de demonstração: Exibindo dados simulados.
-        </div>
-      )}
-
-      {/* Metrics Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard 
           title="Total de Pacientes" 
-          value="1,284" 
+          value={stats?.total_patients || 0} 
           change="+12.5%"
           icon={<Users className="text-primary" size={20} />} 
         />
         <MetricCard 
           title="Confirmados Hoje" 
-          value={confirmedCount} 
+          value={stats?.confirmed_today || 0} 
           change="+4"
           icon={<CalendarCheck className="text-success" size={20} />} 
         />
         <MetricCard 
           title="Agendamentos Pendentes" 
-          value={pendingCount} 
+          value={stats?.pending_appointments || 0} 
           change="-2"
           icon={<CalendarClock className="text-amber-500" size={20} />} 
         />
         <MetricCard 
           title="Faturamento Mensal" 
-          value="R$ 42.500" 
+          value={`R$ ${stats?.monthly_revenue?.toLocaleString('pt-BR') || '0,00'}`} 
           change="+18.2%"
           icon={<TrendingUp className="text-primary" size={20} />} 
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-7">
-        {/* Chart Section */}
         <Card className="lg:col-span-4 overflow-hidden border-border bg-card shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold tracking-tight">Fluxo de Pacientes</h3>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground">Fluxo de Pacientes</h3>
               <p className="text-sm text-muted-foreground">Desempenho da clínica nesta semana.</p>
             </div>
-            <Button variant="outline" size="sm">Download</Button>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
@@ -163,40 +164,45 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity Section */}
         <Card className="lg:col-span-3 border-border bg-card shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <h3 className="text-lg font-semibold tracking-tight">Próximos Hoje</h3>
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
+            <h3 className="text-lg font-semibold tracking-tight text-foreground">Próximos Hoje</h3>
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
               <MoreHorizontal size={20} />
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {appointments.slice(0, 5).map((a) => (
-                <div key={a.id} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs text-accent-foreground">
-                      {a.paciente.charAt(0)}
+              {todayAppointments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Nenhum agendamento para hoje.</p>
+              ) : (
+                todayAppointments.slice(0, 5).map((a: any) => (
+                  <div key={a.id} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs text-accent-foreground">
+                        {a.paciente?.charAt(0) || "P"}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{a.paciente}</p>
+                        <p className="text-xs text-muted-foreground">{a.servico}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{a.paciente}</p>
-                      <p className="text-xs text-muted-foreground">{a.servico}</p>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">{a.hora}</p>
+                      <Badge 
+                        variant={a.status === "Confirmado" ? "green" : "yellow"}
+                        className="text-[10px] py-0 h-4 px-1.5"
+                      >
+                        {a.status}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-foreground">{a.hora}</p>
-                    <Badge 
-                      variant={a.status === "Confirmado" ? "green" : "yellow"}
-                      className="text-[10px] py-0 h-4 px-1.5"
-                    >
-                      {a.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
-            <Button variant="outline" className="w-full mt-6 h-10 font-medium">Ver agenda completa</Button>
+            <Button variant="outline" className="w-full mt-6 h-10 font-medium text-foreground hover:bg-accent" onClick={() => window.location.href="/dashboard/appointments"}>
+              Ver agenda completa
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -207,7 +213,7 @@ export default function DashboardHome() {
 function MetricCard({ title, value, icon, change }: { title: string; value: string | number; icon: React.ReactNode; change: string }) {
   const isPositive = change.startsWith("+")
   return (
-    <Card className="border-border bg-card shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border-border bg-card shadow-sm hover:shadow-md transition-all duration-200">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="p-2 rounded-lg bg-accent/50 text-foreground">
