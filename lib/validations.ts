@@ -35,3 +35,20 @@ export const clinicSchema = z.object({
   status: z.enum(["Ativa", "Inativa"])
 })
 export type ClinicInput = z.infer<typeof clinicSchema>
+
+export const serviceSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  duracao: z.coerce.number().min(1, "Duração é obrigatória"),
+  preco: z.coerce.number().min(0, "Preço é obrigatório"),
+  descricao: z.string().optional()
+})
+export type ServiceInput = z.infer<typeof serviceSchema>
+
+export const dentistSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  cro: z.string().min(1, "CRO é obrigatório"),
+  especialidade: z.string().min(1, "Especialidade é obrigatória"),
+  telefone: z.string().optional(),
+  email: z.string().email().optional()
+})
+export type DentistInput = z.infer<typeof dentistSchema>
