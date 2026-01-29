@@ -1,17 +1,19 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, Save, Palette, Building2, Upload } from "lucide-react"
+import { Loader2, Save, Palette, Building2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
 
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
-  const [isUploading, setIsLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
@@ -25,13 +27,12 @@ export default function ClinicSettingsPage() {
       zip_code: "",
       primary_color: "#0EA5E9",
       secondary_color: "#64748B",
-      logo_url: ""
+      logo: ""
     }
   })
 
   const primaryColor = watch("primary_color")
   const secondaryColor = watch("secondary_color")
-  const logoUrl = watch("logo_url")
 
   useEffect(() => {
     if (clinic) {
@@ -46,8 +47,11 @@ export default function ClinicSettingsPage() {
         zip_code: clinic.zip_code || "",
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
-        logo_url: clinic.logo_url || ""
+        logo: clinic.logo || ""
       })
+      if (clinic.logo) {
+        setLogoPreview(clinic.logo)
+      }
       // Aplicar cores iniciais
       document.documentElement.style.setProperty('--primary', clinic.primary_color || "#0EA5E9")
       document.documentElement.style.setProperty('--secondary', clinic.secondary_color || "#64748B")
@@ -59,25 +63,54 @@ export default function ClinicSettingsPage() {
     document.documentElement.style.setProperty(`--${type}`, color)
   }
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    const formData = new FormData()
-    formData.append("file", file)
+    // Validar tipo
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem válida")
+      return
+    }
 
-    setIsLoading(true)
+    // Validar tamanho (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB")
+      return
+    }
+
+    // Preview local
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setLogoPreview(e.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+
+    // Upload para o backend
+    setUploading(true)
     try {
-      const res = await api.post("/clinics/my/upload-logo", formData)
-      const newLogoUrl = res.data?.data?.url
-      if (newLogoUrl) {
-        setValue("logo_url", newLogoUrl)
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await api.post("/clinics/my/upload-logo", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      if (response.data?.success) {
         toast.success("Logo atualizada com sucesso!")
+        if (response.data?.data?.logo) {
+          const newLogo = response.data.data.logo
+          setLogoPreview(newLogo)
+          setValue("logo", newLogo)
+        }
       }
-    } catch (error) {
-      toast.error("Erro ao fazer upload da logo")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Erro ao enviar logo")
+      setLogoPreview(clinic?.logo || null)
     } finally {
-      setIsLoading(false)
+      setUploading(false)
     }
   }
 
@@ -95,7 +128,7 @@ export default function ClinicSettingsPage() {
         zip_code: data.zip_code,
         primary_color: data.primary_color,
         secondary_color: data.secondary_color,
-        logo_url: data.logo_url
+        logo: data.logo
       }
       await updateClinic.mutateAsync(payload)
       toast.success("Configurações salvas!")
@@ -169,25 +202,38 @@ export default function ClinicSettingsPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Logo da Clínica</label>
-                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 bg-muted/10 gap-2">
-                    {logoUrl ? (
-                      <img src={logoUrl} alt="Logo" className="h-16 object-contain" />
-                    ) : (
-                      <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <Upload size={24} className="text-gray-500 dark:text-gray-400" />}
-                      </div>
-                    )}
-                    <div className="relative">
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-32 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
+                      {logoPreview ? (
+                        <img 
+                          src={logoPreview} 
+                          alt="Logo" 
+                          className="w-full h-full object-contain" 
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-sm text-center px-2">Sem logo</span>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
                       <input 
+                        ref={fileInputRef} 
                         type="file" 
-                        accept="image/*" 
-                        className="absolute inset-0 opacity-0 cursor-pointer" 
-                        onChange={handleLogoUpload}
-                        disabled={isUploading}
+                        accept="image/png,image/jpeg,image/svg+xml" 
+                        onChange={handleLogoChange} 
+                        className="hidden" 
                       />
-                      <Button variant="outline" size="sm" className="mt-2 h-8 text-xs text-gray-700 dark:text-gray-300" type="button" disabled={isUploading}>
-                        Alterar Logo
-                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => fileInputRef.current?.click()} 
+                        disabled={uploading} 
+                      > 
+                        {uploading ? "Enviando..." : "Alterar Logo"} 
+                      </Button> 
+                      <p className="text-xs text-muted-foreground"> 
+                        PNG, JPG ou SVG. Máximo 5MB. 
+                      </p> 
                     </div>
                   </div>
                 </div>
