@@ -5,6 +5,7 @@ import axios from "axios"
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-odonto.marciosager.com/api/v1"
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login"
@@ -20,18 +21,21 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null
         
         try {
-          // Chamar o endpoint real do backend: POST /auth/login
-          const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-            email: credentials.email,
-            password: credentials.password
+          const res = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password
+            }),
+            headers: { "Content-Type": "application/json" }
           })
 
-          const { success, data } = response.data
+          const response = await res.json()
 
-          if (success && data?.access_token) {
-            // O objeto retornado aqui será salvo no JWT
+          if (res.ok && response.success && response.data?.access_token) {
+            const { data } = response
             return {
-              id: data.user.id,
+              id: String(data.user.id),
               name: data.user.name,
               email: data.user.email,
               accessToken: data.access_token,
