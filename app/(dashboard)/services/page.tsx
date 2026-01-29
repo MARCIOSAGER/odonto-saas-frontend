@@ -1,5 +1,5 @@
 "use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,8 +37,8 @@ export default function ServicesPage() {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Serviços</h1>
-          <p className="text-sm text-muted-foreground">Configure os procedimentos e valores da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Serviços</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Configure os procedimentos e valores da clínica.</p>
         </div>
         <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
@@ -49,7 +49,10 @@ export default function ServicesPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Novo Serviço</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">Novo Serviço</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
+              Cadastre um novo procedimento com nome, duração e preço.
+            </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
             <ServiceForm 
@@ -72,16 +75,16 @@ export default function ServicesPage() {
               <Table>
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-semibold text-foreground">Procedimento</TH>
-                    <TH className="font-semibold text-foreground text-center">Duração</TH>
-                    <TH className="font-semibold text-foreground text-right">Preço</TH>
-                    <TH className="text-right font-semibold text-foreground">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Procedimento</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-center">Duração</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-right">Preço</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {!Array.isArray(services) || services.length === 0 ? (
                     <TR>
-                      <TD colSpan={4} className="h-32 text-center text-muted-foreground">
+                      <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum serviço cadastrado.
                       </TD>
                     </TR>
@@ -93,18 +96,18 @@ export default function ServicesPage() {
                             <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-600">
                               <Settings2 size={16} />
                             </div>
-                            <span className="font-medium text-foreground">{s.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{s.nome}</span>
                           </div>
                         </TD>
                         <TD className="text-center">
-                          <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-sm">
+                          <div className="flex items-center justify-center gap-1.5 text-gray-700 dark:text-gray-300 text-sm">
                             <Clock size={14} />
                             {s.duracao} min
                           </div>
                         </TD>
                         <TD className="text-right">
-                          <div className="flex items-center justify-end gap-1.5 font-semibold text-foreground">
-                            <span className="text-xs text-muted-foreground font-normal">R$</span>
+                          <div className="flex items-center justify-end gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">R$</span>
                             {(s.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </div>
                         </TD>
@@ -112,7 +115,7 @@ export default function ServicesPage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                             onClick={() => handleDelete(s.id)}
                             disabled={deleteService.isPending}
                           >

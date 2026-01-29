@@ -52,8 +52,8 @@ export default function AISettingsPage() {
     <div className="max-w-4xl space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Assistente de IA</h1>
-          <p className="text-sm text-muted-foreground">Personalize como sua assistente virtual interage com os pacientes.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Assistente de IA</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Personalize como sua assistente virtual interage com os pacientes.</p>
         </div>
         <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
           <Switch 
@@ -69,7 +69,7 @@ export default function AISettingsPage() {
         {/* Identidade */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Bot size={20} className="text-primary" />
               Identidade e Personalidade
             </CardTitle>
@@ -77,18 +77,18 @@ export default function AISettingsPage() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Nome da Assistente</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Assistente</label>
                 <Input 
                   value={settings.assistant_name}
                   onChange={(e) => setSettings({ ...settings, assistant_name: e.target.value })}
                   placeholder="Ex: Sofia"
-                  className="bg-muted/30 border-none h-11"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Personalidade</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Personalidade</label>
                 <select 
-                  className="w-full h-11 rounded-md border-none bg-muted/30 px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                  className="w-full h-11 rounded-md border-none bg-muted/30 px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
                   value={settings.assistant_personality}
                   onChange={(e) => setSettings({ ...settings, assistant_personality: e.target.value })}
                 >
@@ -99,9 +99,9 @@ export default function AISettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Mensagem de Boas-vindas</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem de Boas-vindas</label>
               <textarea 
-                className="flex min-h-[100px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-[100px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={settings.welcome_message}
                 onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
                 placeholder="Mensagem que a IA envia no início da conversa..."
@@ -113,8 +113,8 @@ export default function AISettingsPage() {
         {/* Permissões */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Capacidades e Permissões</CardTitle>
-            <CardDescription>Defina o que a IA tem autonomia para fazer no sistema.</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Capacidades e Permissões</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Defina o que a IA tem autonomia para fazer no sistema.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             <PermissionToggle 
@@ -141,14 +141,14 @@ export default function AISettingsPage() {
         {/* Instruções Customizadas */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Instruções Avançadas</CardTitle>
-            <CardDescription>Dê diretrizes específicas sobre o atendimento da sua clínica.</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Instruções Avançadas</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Dê diretrizes específicas sobre o atendimento da sua clínica.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Instruções Customizadas</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instruções Customizadas</label>
               <textarea 
-                className="flex min-h-[120px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-[120px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={settings.custom_instructions}
                 onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
                 placeholder="Ex: 'Sempre mencione que temos estacionamento gratuito.' ou 'Priorize agendamentos para o período da manhã.'"
@@ -156,25 +156,25 @@ export default function AISettingsPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Palavras-chave de Transferência</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Palavras-chave de Transferência</label>
                 <Input 
                   value={settings.transfer_keywords}
                   onChange={(e) => setSettings({ ...settings, transfer_keywords: e.target.value })}
                   placeholder="humano, atendente, ajuda"
-                  className="bg-muted/30 border-none h-11"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Tópicos Bloqueados</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tópicos Bloqueados</label>
                 <Input 
                   value={settings.blocked_topics}
                   onChange={(e) => setSettings({ ...settings, blocked_topics: e.target.value })}
                   placeholder="política, religião"
-                  className="bg-muted/30 border-none h-11"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
-            <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg">
+            <div className="mt-4 flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 bg-muted/20 p-3 rounded-lg">
               <Info size={14} className="shrink-0 mt-0.5" />
               <p>Essas instruções ajudam a IA a entender o contexto específico do seu consultório e agir de acordo com seus processos internos.</p>
             </div>
@@ -184,7 +184,7 @@ export default function AISettingsPage() {
         <div className="flex justify-end pt-4 border-t border-border">
           <Button 
             size="lg" 
-            className="w-full sm:w-auto px-12 gap-2"
+            className="w-full sm:w-auto px-12 gap-2 shadow-lg shadow-primary/20"
             onClick={handleSave}
             disabled={updateAISettings.isPending}
           >
@@ -201,8 +201,8 @@ function PermissionToggle({ label, description, checked, onChange }: { label: st
   return (
     <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-border bg-muted/10">
       <div className="space-y-0.5">
-        <p className="text-sm font-semibold text-foreground">{label}</p>
-        <p className="text-[11px] text-muted-foreground">{description}</p>
+        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{label}</p>
+        <p className="text-[11px] text-gray-500 dark:text-gray-400">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>

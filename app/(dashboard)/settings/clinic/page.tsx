@@ -115,25 +115,25 @@ export default function ClinicSettingsPage() {
   return (
     <div className="max-w-5xl space-y-8 pb-20">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Minha Clínica</h1>
-        <p className="text-sm text-muted-foreground">Personalize a identidade e informações públicas do seu consultório.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Minha Clínica</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Personalize a identidade e informações públicas do seu consultório.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8">
         {/* Identidade Visual */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Palette size={20} className="text-primary" />
               Identidade Visual
             </CardTitle>
-            <CardDescription>Defina as cores e logotipos que representam sua marca.</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Defina as cores e logotipos que representam sua marca.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Cor Primária</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cor Primária</label>
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
@@ -144,12 +144,12 @@ export default function ClinicSettingsPage() {
                     <Input 
                       {...register("primary_color")}
                       onChange={(e) => handleColorChange('primary', e.target.value)}
-                      className="flex-1 bg-muted/30 border-none uppercase"
+                      className="flex-1 bg-muted/30 border-none uppercase text-gray-900 dark:text-gray-100"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Cor Secundária</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cor Secundária</label>
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
@@ -160,7 +160,7 @@ export default function ClinicSettingsPage() {
                     <Input 
                       {...register("secondary_color")}
                       onChange={(e) => handleColorChange('secondary', e.target.value)}
-                      className="flex-1 bg-muted/30 border-none uppercase"
+                      className="flex-1 bg-muted/30 border-none uppercase text-gray-900 dark:text-gray-100"
                     />
                   </div>
                 </div>
@@ -168,13 +168,13 @@ export default function ClinicSettingsPage() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Logo da Clínica</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Logo da Clínica</label>
                   <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 bg-muted/10 gap-2">
                     {logoUrl ? (
                       <img src={logoUrl} alt="Logo" className="h-16 object-contain" />
                     ) : (
                       <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <Upload size={24} className="text-muted-foreground" />}
+                        {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <Upload size={24} className="text-gray-500 dark:text-gray-400" />}
                       </div>
                     )}
                     <div className="relative">
@@ -185,7 +185,7 @@ export default function ClinicSettingsPage() {
                         onChange={handleLogoUpload}
                         disabled={isUploading}
                       />
-                      <Button variant="outline" size="sm" className="mt-2 h-8 text-xs" type="button" disabled={isUploading}>
+                      <Button variant="outline" size="sm" className="mt-2 h-8 text-xs text-gray-700 dark:text-gray-300" type="button" disabled={isUploading}>
                         Alterar Logo
                       </Button>
                     </div>
@@ -195,7 +195,7 @@ export default function ClinicSettingsPage() {
             </div>
 
             <div className="p-4 rounded-xl bg-muted/20 border border-border">
-              <p className="text-sm font-semibold mb-3">Preview do Botão Principal</p>
+              <p className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Preview do Botão Principal</p>
               <Button type="button" className="bg-primary hover:opacity-90 transition-opacity">
                 Botão de Exemplo
               </Button>
@@ -206,59 +206,59 @@ export default function ClinicSettingsPage() {
         {/* Informações Gerais */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Building2 size={20} className="text-primary" />
               Informações Gerais
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Nome da Clínica</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Clínica</label>
               <Input 
                 {...register("name")}
-                className="bg-muted/30 border-none h-11"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">CNPJ</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CNPJ</label>
               <Input 
                 {...register("cnpj")}
-                className="bg-muted/30 border-none h-11"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Telefone de Contato</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Telefone de Contato</label>
               <Input 
                 {...register("phone")}
-                className="bg-muted/30 border-none h-11"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Email</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Email</label>
               <Input 
                 {...register("email")}
-                className="bg-muted/30 border-none h-11"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-semibold text-foreground">Endereço Completo</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Endereço Completo</label>
               <Input 
                 {...register("address")}
-                className="bg-muted/30 border-none h-11"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="grid grid-cols-3 gap-4 sm:col-span-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Cidade</label>
-                <Input {...register("city")} className="bg-muted/30 border-none h-11" />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cidade</label>
+                <Input {...register("city")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Estado</label>
-                <Input {...register("state")} className="bg-muted/30 border-none h-11" />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estado</label>
+                <Input {...register("state")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">CEP</label>
-                <Input {...register("zip_code")} className="bg-muted/30 border-none h-11" />
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CEP</label>
+                <Input {...register("zip_code")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
             </div>
           </CardContent>

@@ -52,8 +52,8 @@ export default function WhatsAppSettingsPage() {
   return (
     <div className="max-w-4xl space-y-6 pb-12">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Configurações do WhatsApp</h1>
-        <p className="text-sm text-muted-foreground">Conecte sua clínica ao WhatsApp para automações e lembretes.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Configurações do WhatsApp</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Conecte sua clínica ao WhatsApp para automações e lembretes.</p>
       </div>
 
       <div className="grid gap-6">
@@ -66,8 +66,8 @@ export default function WhatsAppSettingsPage() {
                   {isConnected ? <Smartphone size={24} /> : <AlertCircle size={24} />}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Status da Conexão</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">Status da Conexão</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {isConnected ? 'Sua instância do WhatsApp está ativa e conectada.' : 'WhatsApp não configurado ou desconectado.'}
                   </p>
                 </div>
@@ -82,28 +82,28 @@ export default function WhatsAppSettingsPage() {
         {/* Configuration Form */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Credenciais Z-API</CardTitle>
-            <CardDescription>Insira os dados da sua instância do Z-API para habilitar o envio de mensagens.</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Credenciais Z-API</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Insira os dados da sua instância do Z-API para habilitar o envio de mensagens.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Instance ID</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instance ID</label>
                 <Input 
                   placeholder="Ex: 3B8C..." 
                   value={instanceId}
                   onChange={(e) => setInstanceId(e.target.value)}
-                  className="bg-muted/30 border-none h-11"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Token</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Token</label>
                 <Input 
                   type="password"
                   placeholder="Seu token de segurança" 
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="bg-muted/30 border-none h-11"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function WhatsAppSettingsPage() {
                 variant="outline" 
                 onClick={handleTestConnection} 
                 disabled={testWhatsApp.isPending}
-                className="flex-1 h-11"
+                className="flex-1 h-11 text-gray-700 dark:text-gray-300"
               >
                 {testWhatsApp.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
                 Testar Conexão

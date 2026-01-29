@@ -1,5 +1,5 @@
 "use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -73,8 +73,8 @@ export default function AppointmentsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Agendamentos</h1>
-          <p className="text-sm text-muted-foreground">Gerencie as consultas e horários da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Agendamentos</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie as consultas e horários da clínica.</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -108,7 +108,10 @@ export default function AppointmentsPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Novo Agendamento</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">Novo Agendamento</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
+              Selecione o paciente, dentista e serviço para marcar uma nova consulta.
+            </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
             <AppointmentForm 
@@ -131,18 +134,18 @@ export default function AppointmentsPage() {
               <Table>
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-semibold text-foreground">Data/Hora</TH>
-                    <TH className="font-semibold text-foreground">Paciente</TH>
-                    <TH className="font-semibold text-foreground">Dentista</TH>
-                    <TH className="font-semibold text-foreground">Serviço</TH>
-                    <TH className="font-semibold text-foreground">Status</TH>
-                    <TH className="text-right font-semibold text-foreground">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Data/Hora</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Paciente</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Dentista</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Serviço</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Status</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {!Array.isArray(appointments) || appointments.length === 0 ? (
                     <TR>
-                      <TD colSpan={6} className="h-32 text-center text-muted-foreground">
+                      <TD colSpan={6} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum agendamento encontrado.
                       </TD>
                     </TR>
@@ -151,13 +154,13 @@ export default function AppointmentsPage() {
                       <TR key={a.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex flex-col">
-                            <span className="font-medium text-foreground">{format(new Date(a.data), 'dd/MM/yyyy')}</span>
-                            <span className="text-xs text-muted-foreground">{a.hora}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{format(new Date(a.data), 'dd/MM/yyyy')}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">{a.hora}</span>
                           </div>
                         </TD>
-                        <TD className="font-medium text-foreground">{a.paciente}</TD>
-                        <TD className="text-muted-foreground text-sm">{a.dentista}</TD>
-                        <TD className="text-muted-foreground text-sm">{a.servico}</TD>
+                        <TD className="font-semibold text-gray-900 dark:text-gray-100">{a.paciente}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.dentista}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.servico}</TD>
                         <TD>
                           <Badge variant={
                             a.status === "Confirmado" ? "green" : 
@@ -183,7 +186,7 @@ export default function AppointmentsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                               onClick={() => handleCancel(a.id)}
                               title="Cancelar"
                               disabled={cancelAppointment.isPending}

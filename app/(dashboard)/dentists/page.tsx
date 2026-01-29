@@ -1,5 +1,5 @@
 "use client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -37,8 +37,8 @@ export default function DentistsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dentistas</h1>
-          <p className="text-sm text-muted-foreground">Corpo clínico e profissionais da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Dentistas</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Corpo clínico e profissionais da clínica.</p>
         </div>
         <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
@@ -49,7 +49,10 @@ export default function DentistsPage() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Novo Dentista</DialogTitle>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">Novo Dentista</DialogTitle>
+            <DialogDescription className="text-gray-500 dark:text-gray-400">
+              Preencha as informações do novo profissional para cadastrá-lo no sistema.
+            </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
             <DentistForm 
@@ -72,16 +75,16 @@ export default function DentistsPage() {
               <Table>
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-semibold text-foreground">Nome Profissional</TH>
-                    <TH className="font-semibold text-foreground">CRO</TH>
-                    <TH className="font-semibold text-foreground">Especialidade</TH>
-                    <TH className="text-right font-semibold text-foreground">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Nome Profissional</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">CRO</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Especialidade</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {!Array.isArray(dentists) || dentists.length === 0 ? (
                     <TR>
-                      <TD colSpan={4} className="h-32 text-center text-muted-foreground">
+                      <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum dentista cadastrado.
                       </TD>
                     </TR>
@@ -93,17 +96,17 @@ export default function DentistsPage() {
                             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                               <UserCheck size={18} />
                             </div>
-                            <span className="font-medium text-foreground">{d.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{d.nome}</span>
                           </div>
                         </TD>
                         <TD>
-                          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 text-sm">
                             <IdCard size={14} />
                             {d.cro}
                           </div>
                         </TD>
                         <TD>
-                          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 text-sm">
                             <Stethoscope size={14} />
                             {d.especialidade}
                           </div>
@@ -112,7 +115,7 @@ export default function DentistsPage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                             onClick={() => handleDelete(d.id)}
                             disabled={deleteDentist.isPending}
                           >

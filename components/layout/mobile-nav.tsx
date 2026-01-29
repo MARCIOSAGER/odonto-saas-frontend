@@ -1,6 +1,6 @@
 "use client"
 import { Sidebar } from "./sidebar"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
 
 export function MobileNav() {
@@ -9,6 +9,10 @@ export function MobileNav() {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Menu Lateral</DialogTitle>
+            <DialogDescription>Navegação principal para dispositivos móveis</DialogDescription>
+          </DialogHeader>
           <Sidebar />
         </DialogContent>
       </Dialog>

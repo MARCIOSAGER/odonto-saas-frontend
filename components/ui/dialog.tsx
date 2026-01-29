@@ -24,9 +24,9 @@ export function DialogContent({ className, children }: { className?: string; chi
   )
 }
 
-export function DialogHeader({ title, description, children }: { title?: string; description?: string; children?: React.ReactNode }) {
+export function DialogHeader({ title, description, children, className }: { title?: string; description?: string; children?: React.ReactNode; className?: string }) {
   return (
-    <div className="border-b border-gray-200 p-4">
+    <div className={cn("border-b border-gray-200 p-4", className)}>
       {title && <h3 className="text-lg font-semibold">{title}</h3>}
       {description && <p className="text-sm text-gray-600">{description}</p>}
       {children}
