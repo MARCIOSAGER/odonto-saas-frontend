@@ -10,7 +10,12 @@ export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="light">
+      <ThemeProvider 
+        attribute="class" 
+        defaultTheme="system" 
+        enableSystem 
+        disableTransitionOnChange
+      >
         <QueryClientProvider client={queryClient}>
           <BrandingProvider>
             <Toaster richColors position="top-right" />
