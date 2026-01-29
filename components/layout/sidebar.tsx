@@ -25,21 +25,22 @@ import { useState } from "react"
 
 const mainItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/conversations", label: "Conversas", icon: MessageSquare },
-  { href: "/dashboard/appointments", label: "Agendamentos", icon: CalendarDays },
-  { href: "/dashboard/patients", label: "Pacientes", icon: Users },
+  { href: "/conversations", label: "Conversas", icon: MessageSquare },
+  { href: "/appointments", label: "Agendamentos", icon: CalendarDays },
+  { href: "/patients", label: "Pacientes", icon: Users },
 ]
 
 const clinicItems = [
-  { href: "/dashboard/clinics", label: "Minha Clínica", icon: Hospital },
-  { href: "/dashboard/dentists", label: "Dentistas", icon: User },
-  { href: "/dashboard/services", label: "Serviços", icon: Wallet },
+  { href: "/clinics", label: "Minha Clínica", icon: Hospital },
+  { href: "/dentists", label: "Dentistas", icon: User },
+  { href: "/services", label: "Serviços", icon: Wallet },
 ]
 
 const settingsSubmenu = [
-  { href: "/dashboard/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
-  { href: "/dashboard/settings/ai", label: "Assistente IA", icon: Bot },
-  { href: "/dashboard/settings", label: "Minha Conta", icon: UserCircle },
+  { href: "/settings/clinic", label: "Minha Clínica", icon: Hospital },
+  { href: "/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
+  { href: "/settings/ai", label: "Assistente IA", icon: Bot },
+  { href: "/settings", label: "Minha Conta", icon: UserCircle },
 ]
 
 export function Sidebar() {

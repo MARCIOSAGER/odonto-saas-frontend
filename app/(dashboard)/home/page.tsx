@@ -200,7 +200,7 @@ export default function DashboardHome() {
                 ))
               )}
             </div>
-            <Button variant="outline" className="w-full mt-6 h-10 font-medium text-foreground hover:bg-accent" onClick={() => window.location.href="/dashboard/appointments"}>
+            <Button variant="outline" className="w-full mt-6 h-10 font-medium text-foreground hover:bg-accent" onClick={() => window.location.href="/appointments"}>
               Ver agenda completa
             </Button>
           </CardContent>
