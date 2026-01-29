@@ -41,14 +41,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo - Visual Branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-primary p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-[#0369a1]" />
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-sky-700 to-blue-900" />
         
         {/* Decorativo */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
 
-        <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight">
+        <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
           <div className="bg-white p-1 rounded-lg">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0EA5E9"/>
@@ -58,35 +58,35 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 space-y-6">
-          <h1 className="text-5xl font-bold leading-tight">
+          <h1 className="text-5xl font-bold leading-tight text-white">
             Gestão moderna para o seu consultório.
           </h1>
-          <p className="text-xl text-white/80 max-w-lg">
+          <p className="text-xl text-white/90 max-w-lg">
             A plataforma completa para dentistas que buscam eficiência, 
             organização e crescimento.
           </p>
           <div className="flex items-center gap-4 pt-4">
             <div className="flex -space-x-2">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-primary bg-gray-200" />
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-sky-600 bg-gray-200" />
               ))}
             </div>
-            <p className="text-sm font-medium text-white/90">
+            <p className="text-sm font-medium text-white">
               Junte-se a +2.000 profissionais de odontologia.
             </p>
           </div>
         </div>
 
-        <div className="relative z-10 text-sm text-white/60">
+        <div className="relative z-10 text-sm text-white/70">
           © 2025 Odonto SaaS. Todos os direitos reservados.
         </div>
       </div>
 
       {/* Lado Direito - Formulário */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-3xl font-bold tracking-tight">Bem-vindo de volta</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Bem-vindo de volta</h2>
             <p className="text-muted-foreground">
               Entre com suas credenciais para acessar o painel.
             </p>
@@ -96,14 +96,14 @@ export default function LoginPage() {
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">
                     E-mail profissional
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       placeholder="nome@clinica.com" 
-                      className="pl-10 h-12"
+                      className="pl-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                       {...register("email")}
                     />
                   </div>
@@ -112,7 +112,7 @@ export default function LoginPage() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium leading-none">Senha</label>
+                    <label className="text-sm font-medium leading-none text-foreground">Senha</label>
                     <Link href="#" className="text-xs text-primary hover:underline font-medium">
                       Esqueceu a senha?
                     </Link>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
                       type={showPassword ? "text" : "password"} 
-                      className="pl-10 pr-10 h-12"
+                      className="pl-10 pr-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                       {...register("password")}
                     />
                     <button
