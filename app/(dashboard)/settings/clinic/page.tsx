@@ -81,9 +81,7 @@ export default function ClinicSettingsPage() {
 
     // Preview local
     const reader = new FileReader()
-    reader.onload = (e) => {
-      setLogoPreview(e.target?.result as string)
-    }
+    reader.onload = (e) => setLogoPreview(e.target?.result as string)
     reader.readAsDataURL(file)
 
     // Upload para o backend
@@ -93,9 +91,7 @@ export default function ClinicSettingsPage() {
       formData.append("file", file)
 
       const response = await api.post("/clinics/my/upload-logo", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       })
 
       if (response.data?.success) {
