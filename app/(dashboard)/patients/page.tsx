@@ -62,7 +62,7 @@ export default function PatientsPage() {
         <h2 className="text-xl font-semibold">Pacientes</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="success">+ Novo Paciente</Button>
+            <Button>+ Novo Paciente</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader title="+ Novo Paciente" />
@@ -119,8 +119,8 @@ export default function PatientsPage() {
                   <TD>{p.status}</TD>
                   <TD className="space-x-2">
                     <Button variant="ghost" size="sm">Ver</Button>
-                    <Button variant="secondary" size="sm">Editar</Button>
-                    <Button variant="warning" size="sm">Inativar</Button>
+                    <Button variant="outline" size="sm">Editar</Button>
+                    <Button variant="destructive" size="sm">Inativar</Button>
                   </TD>
                 </TR>
               ))}
