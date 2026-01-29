@@ -16,8 +16,14 @@ export function useServices() {
   const query = useQuery<Service[]>({
     queryKey: ["services"],
     queryFn: async () => {
-      const res = await api.get("/services")
-      return res.data?.data || []
+      try {
+        const res = await api.get("/services")
+        const data = res.data?.data
+        return Array.isArray(data) ? data : []
+      } catch (error) {
+        console.error("Erro ao buscar serviços:", error)
+        return []
+      }
     }
   })
 

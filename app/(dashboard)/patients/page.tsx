@@ -4,11 +4,11 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState } from "react"
 import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
-import { Search, Plus, FilterX, Loader2, Edit2, Trash2, User } from "lucide-react"
+import { Search, Plus, FilterX, Loader2, Edit2, Trash2 } from "lucide-react"
 
 export default function PatientsPage() {
   const [search, setSearch] = useState("")
@@ -26,6 +26,11 @@ export default function PatientsPage() {
 
   const handleEdit = (patient: any) => {
     setEditingPatient(patient)
+    setOpen(true)
+  }
+
+  const handleCreate = () => {
+    setEditingPatient(null)
     setOpen(true)
   }
 
@@ -50,13 +55,15 @@ export default function PatientsPage() {
         
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={handleCreate}>
               <Plus size={18} />
               Novo Paciente
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader title={editingPatient ? "Editar Paciente" : "Novo Paciente"} />
+            <DialogHeader>
+              <DialogTitle>{editingPatient ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
+            </DialogHeader>
             <div className="p-6 pt-0">
               <PatientForm
                 initialData={editingPatient}

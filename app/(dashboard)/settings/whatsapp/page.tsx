@@ -106,11 +106,11 @@ export default function WhatsAppSettingsPage() {
               <Button 
                 variant="outline" 
                 onClick={handleTestConnection} 
-                disabled={testWhatsApp.isPending || !isConnected}
+                disabled={true}
                 className="flex-1 h-11"
               >
                 {testWhatsApp.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-                Testar Conexão
+                Testar Conexão (Breve)
               </Button>
             </div>
           </CardContent>

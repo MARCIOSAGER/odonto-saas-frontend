@@ -30,20 +30,31 @@ export default function DashboardHome() {
   const { data: session } = useSession()
 
   // Buscar Estatísticas
-  const { data: stats, isLoading: loadingStats, isError: errorStats } = useQuery({
+  const { data: stats, isLoading: loadingStats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const res = await api.get("/clinics/my/stats")
-      return res.data?.data || {}
+      try {
+        const res = await api.get("/clinics/my/stats")
+        return res.data?.data || {}
+      } catch (error) {
+        console.error("Erro ao buscar estatísticas:", error)
+        return {}
+      }
     }
   })
 
   // Buscar Agendamentos de Hoje
-  const { data: todayAppointments, isLoading: loadingAppts, isError: errorAppts } = useQuery({
+  const { data: todayAppointments, isLoading: loadingAppts } = useQuery({
     queryKey: ["appointments-today"],
     queryFn: async () => {
-      const res = await api.get("/appointments", { params: { date: new Date().toISOString().split('T')[0] } })
-      return res.data?.data || []
+      try {
+        const res = await api.get("/appointments", { params: { date: new Date().toISOString().split('T')[0] } })
+        const data = res.data?.data
+        return Array.isArray(data) ? data : []
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos de hoje:", error)
+        return []
+      }
     }
   })
 
@@ -55,18 +66,7 @@ export default function DashboardHome() {
     )
   }
 
-  if (errorStats || errorAppts) {
-    return (
-      <div className="flex h-[60vh] flex-col items-center justify-center gap-4 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive" />
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold">Erro ao carregar Dashboard</h2>
-          <p className="text-muted-foreground text-sm">Não foi possível conectar com a API. Verifique sua conexão.</p>
-        </div>
-        <Button onClick={() => window.location.reload()}>Tentar novamente</Button>
-      </div>
-    )
-  }
+  const appointmentsList = Array.isArray(todayAppointments) ? todayAppointments : []
 
   const chartData = [
     { name: 'Seg', valor: 12 },

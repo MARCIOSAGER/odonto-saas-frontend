@@ -1,40 +1,23 @@
 "use client"
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/lib/api"
+import { useConversations, useMessages } from "@/hooks/useConversations"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Send, User, MessageSquare, Loader2, Calendar } from "lucide-react"
+import { Search, Send, MessageSquare, Loader2, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
 
 export default function ConversationsPage() {
   const [search, setSearch] = useState("")
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null)
 
-  // Buscar lista de conversas (agrupadas por telefone)
-  const { data: conversations, isLoading } = useQuery({
-    queryKey: ["conversations", search],
-    queryFn: async () => {
-      const res = await api.get("/conversations", { params: { q: search } })
-      return res.data?.data || []
-    }
-  })
+  const { conversations, isLoading: loadingConversations } = useConversations(search)
+  const { messages, isLoading: loadingChat } = useMessages(selectedPhone)
 
-  // Buscar histórico de mensagens do telefone selecionado
-  const { data: messages, isLoading: loadingChat } = useQuery({
-    queryKey: ["messages", selectedPhone],
-    queryFn: async () => {
-      if (!selectedPhone) return []
-      const res = await api.get(`/conversations/${selectedPhone}`)
-      return res.data?.data || []
-    },
-    enabled: !!selectedPhone
-  })
-
-  const selectedConversation = conversations?.find((c: any) => c.phone === selectedPhone)
+  const selectedConversation = Array.isArray(conversations) 
+    ? conversations.find((c: any) => c.phone === selectedPhone)
+    : null
 
   return (
     <div className="flex h-[calc(100vh-120px)] gap-6 overflow-hidden">
@@ -52,7 +35,7 @@ export default function ConversationsPage() {
 
         <Card className="flex-1 border-border bg-card shadow-sm overflow-hidden">
           <CardContent className="p-0 h-full overflow-y-auto">
-            {isLoading ? (
+            {loadingConversations ? (
               <div className="flex p-8 justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : (
               <div className="divide-y divide-border">
@@ -102,10 +85,10 @@ export default function ConversationsPage() {
             <div className="p-4 border-b border-border bg-muted/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {selectedConversation?.name.charAt(0)}
+                  {selectedConversation?.name?.charAt(0) || "?"}
                 </div>
                 <div>
-                  <h3 className="font-bold text-foreground">{selectedConversation?.name}</h3>
+                  <h3 className="font-bold text-foreground">{selectedConversation?.name || "Paciente"}</h3>
                   <p className="text-xs text-success flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                     Atendimento via IA

@@ -1,10 +1,19 @@
 "use client"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Configurações</h2>
