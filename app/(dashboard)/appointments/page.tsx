@@ -54,8 +54,8 @@ export default function AppointmentsPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Agendamentos</h2>
         <div className="space-x-2">
-          <Button variant={view === "lista" ? "primary" : "ghost"} onClick={() => setView("lista")}>Lista</Button>
-          <Button variant={view === "calendario" ? "primary" : "ghost"} onClick={() => setView("calendario")}>Calendário</Button>
+          <Button variant={view === "lista" ? "default" : "ghost"} onClick={() => setView("lista")}>Lista</Button>
+          <Button variant={view === "calendario" ? "default" : "ghost"} onClick={() => setView("calendario")}>Calendário</Button>
         </div>
       </div>
       <Card>
