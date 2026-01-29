@@ -96,19 +96,19 @@ export default function ServicesPage() {
                             <div className="h-8 w-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-600">
                               <Settings2 size={16} />
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{s.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{s.name || s.nome}</span>
                           </div>
                         </TD>
                         <TD className="text-center">
                           <div className="flex items-center justify-center gap-1.5 text-gray-700 dark:text-gray-300 text-sm">
                             <Clock size={14} />
-                            {s.duracao} min
+                            {s.duration || s.duracao} min
                           </div>
                         </TD>
                         <TD className="text-right">
                           <div className="flex items-center justify-end gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
                             <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">R$</span>
-                            {(s.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            {(s.price || s.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </div>
                         </TD>
                         <TD className="text-right">

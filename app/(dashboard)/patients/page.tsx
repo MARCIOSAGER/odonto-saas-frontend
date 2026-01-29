@@ -163,12 +163,12 @@ export default function PatientsPage() {
                         <TD>
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                              {p.nome.charAt(0)}
+                              {(p.name || p.nome || "P").charAt(0)}
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{p.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{p.name || p.nome}</span>
                           </div>
                         </TD>
-                        <TD className="text-gray-700 dark:text-gray-300">{p.telefone}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300">{p.phone || p.telefone}</TD>
                         <TD className="text-gray-700 dark:text-gray-300">{p.cpf || "---"}</TD>
                         <TD>
                           <Badge variant={p.status === "Ativo" ? "green" : "gray"}>

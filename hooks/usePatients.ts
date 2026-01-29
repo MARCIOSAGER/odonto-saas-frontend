@@ -4,10 +4,12 @@ import { useToast } from "@/components/ui/toast"
 
 export type Patient = {
   id: string
-  nome: string
-  telefone: string
+  name: string
+  phone: string
   cpf?: string
   email?: string
+  birth_date?: string
+  address?: string
   status: "Ativo" | "Inativo"
 }
 

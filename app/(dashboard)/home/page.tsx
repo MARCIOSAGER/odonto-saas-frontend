@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { format } from "date-fns"
 import { 
   AreaChart,
   Area,
@@ -180,15 +181,17 @@ export default function DashboardHome() {
                   <div key={a.id} className="flex items-center justify-between group">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs text-accent-foreground">
-                        {a.paciente?.charAt(0) || "P"}
+                        {(a.patient_name || a.paciente || "P").charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">{a.paciente}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{a.servico}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">{a.patient_name || a.paciente}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{a.service_name || a.servico}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{a.hora}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {a.date_time ? format(new Date(a.date_time), 'HH:mm') : a.hora}
+                      </p>
                       <Badge 
                         variant={a.status === "Confirmado" ? "green" : "yellow"}
                         className="text-[10px] py-0 h-4 px-1.5"

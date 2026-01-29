@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge"
 
 export default function ClinicsPage() {
   const clinics = [
-    { id: "1", nome: "Clínica Central", cnpj: "12.345.678/0001-99", telefone: "11 4002-8922", plano: "Pro", status: "Ativa" },
-    { id: "2", nome: "Sorriso Feliz", cnpj: "98.765.432/0001-11", telefone: "11 3333-4444", plano: "Basic", status: "Ativa" }
+    { id: "1", name: "Clínica Central", cnpj: "12.345.678/0001-99", phone: "11 4002-8922", plano: "Pro", status: "Ativa" },
+    { id: "2", name: "Sorriso Feliz", cnpj: "98.765.432/0001-11", phone: "11 3333-4444", plano: "Basic", status: "Ativa" }
   ]
   return (
     <div className="space-y-4">
@@ -15,13 +15,13 @@ export default function ClinicsPage() {
           <Card key={c.id}>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div className="font-semibold">{c.nome}</div>
+                <div className="font-semibold">{c.name}</div>
                 <Badge variant="blue">{c.plano}</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
               <div><span className="text-gray-600">CNPJ:</span> {c.cnpj}</div>
-              <div><span className="text-gray-600">Telefone:</span> {c.telefone}</div>
+              <div><span className="text-gray-600">Telefone:</span> {c.phone}</div>
               <Badge variant={c.status === "Ativa" ? "green" : "red"}>{c.status}</Badge>
             </CardContent>
           </Card>

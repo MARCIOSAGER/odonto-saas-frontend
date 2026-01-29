@@ -4,9 +4,10 @@ import { useToast } from "@/components/ui/toast"
 
 export type Service = {
   id: string
-  nome: string
-  preco: number
-  duracao: number
+  name: string
+  price: number
+  duration: number
+  description?: string
 }
 
 export function useServices() {

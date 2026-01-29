@@ -54,12 +54,12 @@ export default function AppointmentsPage() {
     () =>
       Array.isArray(appointments) 
         ? appointments.map((a: any) => {
-            const start = new Date(`${a.data}T${a.hora}:00`)
+            const start = new Date(a.date_time || `${a.date}T${a.hora}:00`)
             const end = new Date(start)
             end.setHours(start.getHours() + 1)
             return { 
               id: a.id, 
-              title: `${a.paciente} • ${a.servico}`, 
+              title: `${a.patient_name || a.paciente} • ${a.service_name || a.servico}`, 
               start, 
               end, 
               resource: a 
@@ -154,13 +154,17 @@ export default function AppointmentsPage() {
                       <TR key={a.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex flex-col">
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{format(new Date(a.data), 'dd/MM/yyyy')}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{a.hora}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              {format(new Date(a.date_time || a.data), 'dd/MM/yyyy')}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {a.date_time ? format(new Date(a.date_time), 'HH:mm') : a.hora}
+                            </span>
                           </div>
                         </TD>
-                        <TD className="font-semibold text-gray-900 dark:text-gray-100">{a.paciente}</TD>
-                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.dentista}</TD>
-                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.servico}</TD>
+                        <TD className="font-semibold text-gray-900 dark:text-gray-100">{a.patient_name || a.paciente}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.dentist_name || a.dentista}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.service_name || a.servico}</TD>
                         <TD>
                           <Badge variant={
                             a.status === "Confirmado" ? "green" : 
