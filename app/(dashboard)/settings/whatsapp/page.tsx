@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Wifi, WifiOff } from "lucide-react"
+import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 
 export default function WhatsAppSettingsPage() {
   const { clinic, isLoading, updateClinic, testWhatsApp } = useClinic()
@@ -20,9 +21,22 @@ export default function WhatsAppSettingsPage() {
     }
   }, [clinic])
 
+  const handleSave = async () => {
+    try {
+      await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token })
+      toast.success("Configurações do WhatsApp salvas!")
+    } catch (error) {
+      toast.error("Erro ao salvar configurações")
+    }
+  }
+
   const handleTestConnection = async () => {
-    // Agora o useClinic já lida com o mock/simulação do teste
-    testWhatsApp.mutate()
+    try {
+      await testWhatsApp.mutateAsync()
+      toast.success("Conexão testada com sucesso!")
+    } catch (error) {
+      toast.error("Funcionalidade em desenvolvimento")
+    }
   }
 
   if (isLoading) {
@@ -49,7 +63,7 @@ export default function WhatsAppSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                  {isConnected ? <Wifi size={24} /> : <WifiOff size={24} />}
+                  {isConnected ? <Smartphone size={24} /> : <AlertCircle size={24} />}
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">Status da Conexão</h3>
@@ -96,7 +110,7 @@ export default function WhatsAppSettingsPage() {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
               <Button 
-                onClick={() => updateClinic.mutate({ z_api_instance: instanceId, z_api_token: token })} 
+                onClick={handleSave} 
                 disabled={updateClinic.isPending}
                 className="flex-1 h-11"
               >
@@ -106,11 +120,11 @@ export default function WhatsAppSettingsPage() {
               <Button 
                 variant="outline" 
                 onClick={handleTestConnection} 
-                disabled={true}
+                disabled={testWhatsApp.isPending}
                 className="flex-1 h-11"
               >
                 {testWhatsApp.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-                Testar Conexão (Breve)
+                Testar Conexão
               </Button>
             </div>
           </CardContent>

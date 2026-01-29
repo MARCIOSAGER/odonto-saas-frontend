@@ -9,6 +9,7 @@ import { useState } from "react"
 import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
 import { Search, Plus, FilterX, Loader2, Edit2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function PatientsPage() {
   const [search, setSearch] = useState("")
@@ -36,13 +37,33 @@ export default function PatientsPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja remover este paciente?")) {
-      await deletePatient.mutateAsync(id)
+      try {
+        await deletePatient.mutateAsync(id)
+        toast.success("Paciente removido com sucesso!")
+      } catch (error) {
+        toast.error("Erro ao remover paciente")
+      }
     }
   }
 
   const handleClose = () => {
     setOpen(false)
     setEditingPatient(null)
+  }
+
+  const handleSubmit = async (v: any) => {
+    try {
+      if (editingPatient) {
+        await updatePatient.mutateAsync({ id: editingPatient.id, ...v })
+        toast.success("Paciente atualizado com sucesso!")
+      } else {
+        await createPatient.mutateAsync(v)
+        toast.success("Paciente criado com sucesso!")
+      }
+      handleClose()
+    } catch (error) {
+      toast.error("Erro ao salvar paciente")
+    }
   }
 
   return (
@@ -67,14 +88,7 @@ export default function PatientsPage() {
             <div className="p-6 pt-0">
               <PatientForm
                 initialData={editingPatient}
-                onSubmit={(v) => {
-                  if (editingPatient) {
-                    updatePatient.mutate({ id: editingPatient.id, ...v })
-                  } else {
-                    createPatient.mutate(v)
-                  }
-                  handleClose()
-                }}
+                onSubmit={handleSubmit}
                 onCancel={handleClose}
                 loading={createPatient.isPending || updatePatient.isPending}
               />

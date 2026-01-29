@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Save, Palette, Building2, Upload } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
-  const { success, error: toastError } = useToast()
   const [isUploading, setIsLoading] = useState(false)
 
   const { register, handleSubmit, reset, setValue, watch } = useForm({
@@ -73,31 +72,36 @@ export default function ClinicSettingsPage() {
       const newLogoUrl = res.data?.data?.url
       if (newLogoUrl) {
         setValue("logo_url", newLogoUrl)
-        success("Logo atualizada com sucesso!")
+        toast.success("Logo atualizada com sucesso!")
       }
     } catch (error) {
-      toastError("Erro ao fazer upload da logo")
+      toast.error("Erro ao fazer upload da logo")
     } finally {
       setIsLoading(false)
     }
   }
 
-  const onSubmit = (data: any) => {
-    // Apenas campos válidos para o backend
-    const payload = {
-      name: data.name,
-      cnpj: data.cnpj,
-      phone: data.phone,
-      email: data.email,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zip_code: data.zip_code,
-      primary_color: data.primary_color,
-      secondary_color: data.secondary_color,
-      logo_url: data.logo_url
+  const onSubmit = async (data: any) => {
+    try {
+      // Apenas campos válidos para o backend
+      const payload = {
+        name: data.name,
+        cnpj: data.cnpj,
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zip_code: data.zip_code,
+        primary_color: data.primary_color,
+        secondary_color: data.secondary_color,
+        logo_url: data.logo_url
+      }
+      await updateClinic.mutateAsync(payload)
+      toast.success("Configurações salvas!")
+    } catch (error) {
+      toast.error("Erro ao salvar configurações")
     }
-    updateClinic.mutate(payload)
   }
 
   if (isLoading) {

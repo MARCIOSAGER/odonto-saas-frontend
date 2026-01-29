@@ -6,10 +6,32 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { useServices } from "@/hooks/useServices"
 import { Plus, Loader2, Trash2, Clock, Settings2 } from "lucide-react"
+import { ServiceForm } from "@/components/forms/service-form"
+import { toast } from "sonner"
 
 export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { services, isLoading, deleteService } = useServices()
+  const { services, isLoading, createService, deleteService } = useServices()
+
+  const handleCreateService = async (data: any) => {
+    try {
+      await createService.mutateAsync(data)
+      setIsModalOpen(false)
+      toast.success("Serviço criado com sucesso!")
+    } catch (error) {
+      toast.error("Erro ao criar serviço")
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Deseja realmente remover este serviço?")) return
+    try {
+      await deleteService.mutateAsync(id)
+      toast.success("Serviço removido!")
+    } catch (error) {
+      toast.error("Erro ao remover serviço")
+    }
+  }
 
   return (
     <div className="space-y-6 pb-12">
@@ -25,12 +47,16 @@ export default function ServicesPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Novo Serviço</DialogTitle>
           </DialogHeader>
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground">Formulário de serviço em breve...</p>
+          <div className="p-6 pt-0">
+            <ServiceForm 
+              onSubmit={handleCreateService}
+              onCancel={() => setIsModalOpen(false)}
+              loading={createService.isPending}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -87,11 +113,10 @@ export default function ServicesPage() {
                             variant="ghost" 
                             size="icon" 
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => {
-                              if (confirm("Remover este serviço?")) deleteService.mutate(s.id)
-                            }}
+                            onClick={() => handleDelete(s.id)}
+                            disabled={deleteService.isPending}
                           >
-                            <Trash2 size={14} />
+                            {deleteService.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                           </Button>
                         </TD>
                       </TR>

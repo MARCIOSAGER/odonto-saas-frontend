@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
-import { Loader2, Bot, Sparkles, Save, Info } from "lucide-react"
+import { Loader2, Save, Bot, Sparkles, MessageSquare, ShieldCheck, Zap, Info } from "lucide-react"
+import { toast } from "sonner"
 
 export default function AISettingsPage() {
   const { aiSettings, isLoadingAI, updateAISettings } = useClinic()
@@ -29,6 +30,15 @@ export default function AISettingsPage() {
       setSettings(prev => ({ ...prev, ...aiSettings }))
     }
   }, [aiSettings])
+
+  const handleSave = async () => {
+    try {
+      await updateAISettings.mutateAsync(settings)
+      toast.success("Configurações de IA salvas!")
+    } catch (error) {
+      toast.error("Erro ao salvar configurações de IA")
+    }
+  }
 
   if (isLoadingAI) {
     return (
@@ -175,7 +185,7 @@ export default function AISettingsPage() {
           <Button 
             size="lg" 
             className="w-full sm:w-auto px-12 gap-2"
-            onClick={() => updateAISettings.mutate(settings)}
+            onClick={handleSave}
             disabled={updateAISettings.isPending}
           >
             {updateAISettings.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}

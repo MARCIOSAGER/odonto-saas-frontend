@@ -10,6 +10,8 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle } from "lucide-react"
+import { AppointmentForm } from "@/components/forms/appointment-form"
+import { toast } from "sonner"
 
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -17,7 +19,36 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 export default function AppointmentsPage() {
   const [view, setView] = useState<"lista" | "calendario">("lista")
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { appointments, isLoading, confirmAppointment, cancelAppointment } = useAppointments()
+  const { appointments, isLoading, createAppointment, confirmAppointment, cancelAppointment } = useAppointments()
+
+  const handleCreateAppointment = async (data: any) => {
+    try {
+      await createAppointment.mutateAsync(data)
+      setIsModalOpen(false)
+      toast.success("Agendamento criado com sucesso!")
+    } catch (error) {
+      toast.error("Erro ao criar agendamento")
+    }
+  }
+
+  const handleConfirm = async (id: string) => {
+    try {
+      await confirmAppointment.mutateAsync(id)
+      toast.success("Agendamento confirmado!")
+    } catch (error) {
+      toast.error("Erro ao confirmar agendamento")
+    }
+  }
+
+  const handleCancel = async (id: string) => {
+    if (!confirm("Deseja realmente cancelar este agendamento?")) return
+    try {
+      await cancelAppointment.mutateAsync(id)
+      toast.success("Agendamento cancelado!")
+    } catch (error) {
+      toast.error("Erro ao cancelar agendamento")
+    }
+  }
 
   const events = useMemo(
     () =>
@@ -75,12 +106,16 @@ export default function AppointmentsPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Novo Agendamento</DialogTitle>
           </DialogHeader>
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground">Formulário de agendamento em breve...</p>
+          <div className="p-6 pt-0">
+            <AppointmentForm 
+              onSubmit={handleCreateAppointment}
+              onCancel={() => setIsModalOpen(false)}
+              loading={createAppointment.isPending}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -138,22 +173,22 @@ export default function AppointmentsPage() {
                                 variant="ghost" 
                                 size="icon" 
                                 className="h-8 w-8 text-success hover:bg-success/10"
-                                onClick={() => confirmAppointment.mutate(a.id)}
+                                onClick={() => handleConfirm(a.id)}
                                 title="Confirmar"
+                                disabled={confirmAppointment.isPending}
                               >
-                                <CheckCircle size={14} />
+                                {confirmAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                               </Button>
                             )}
                             <Button 
                               variant="ghost" 
                               size="icon" 
                               className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                              onClick={() => {
-                                if (confirm("Cancelar este agendamento?")) cancelAppointment.mutate(a.id)
-                              }}
+                              onClick={() => handleCancel(a.id)}
                               title="Cancelar"
+                              disabled={cancelAppointment.isPending}
                             >
-                              <XCircle size={14} />
+                              {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                             </Button>
                           </div>
                         </TD>

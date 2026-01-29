@@ -6,10 +6,32 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { useDentists } from "@/hooks/useDentists"
 import { Plus, Loader2, Trash2, UserCheck, IdCard, Stethoscope } from "lucide-react"
+import { DentistForm } from "@/components/forms/dentist-form"
+import { toast } from "sonner"
 
 export default function DentistsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { dentists, isLoading, deleteDentist } = useDentists()
+  const { dentists, isLoading, createDentist, deleteDentist } = useDentists()
+
+  const handleCreateDentist = async (data: any) => {
+    try {
+      await createDentist.mutateAsync(data)
+      setIsModalOpen(false)
+      toast.success("Dentista cadastrado com sucesso!")
+    } catch (error) {
+      toast.error("Erro ao cadastrar dentista")
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Remover este profissional?")) return
+    try {
+      await deleteDentist.mutateAsync(id)
+      toast.success("Profissional removido!")
+    } catch (error) {
+      toast.error("Erro ao remover profissional")
+    }
+  }
 
   return (
     <div className="space-y-6 pb-12">
@@ -25,12 +47,16 @@ export default function DentistsPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Novo Dentista</DialogTitle>
           </DialogHeader>
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground">Formulário de dentista em breve...</p>
+          <div className="p-6 pt-0">
+            <DentistForm 
+              onSubmit={handleCreateDentist}
+              onCancel={() => setIsModalOpen(false)}
+              loading={createDentist.isPending}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -87,11 +113,10 @@ export default function DentistsPage() {
                             variant="ghost" 
                             size="icon" 
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            onClick={() => {
-                              if (confirm("Remover este profissional?")) deleteDentist.mutate(d.id)
-                            }}
+                            onClick={() => handleDelete(d.id)}
+                            disabled={deleteDentist.isPending}
                           >
-                            <Trash2 size={14} />
+                            {deleteDentist.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                           </Button>
                         </TD>
                       </TR>
