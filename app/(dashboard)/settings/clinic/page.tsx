@@ -8,6 +8,7 @@ import { Loader2, Save, Palette, Building2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { hexToHsl } from "@/lib/colors"
 
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
@@ -51,14 +52,25 @@ export default function ClinicSettingsPage() {
         setLogoPreview(clinic.logo)
       }
       // Aplicar cores iniciais
-      document.documentElement.style.setProperty('--primary', clinic.primary_color || "#0EA5E9")
-      document.documentElement.style.setProperty('--secondary', clinic.secondary_color || "#64748B")
+      try {
+        const primaryHsl = hexToHsl(clinic.primary_color || "#0EA5E9")
+        const secondaryHsl = hexToHsl(clinic.secondary_color || "#64748B")
+        document.documentElement.style.setProperty('--primary', primaryHsl)
+        document.documentElement.style.setProperty('--secondary', secondaryHsl)
+      } catch (e) {
+        console.error("Erro ao aplicar cores iniciais:", e)
+      }
     }
   }, [clinic, reset])
 
   const handleColorChange = (type: 'primary' | 'secondary', color: string) => {
     setValue(type === 'primary' ? 'primary_color' : 'secondary_color', color)
-    document.documentElement.style.setProperty(`--${type}`, color)
+    try {
+      const hsl = hexToHsl(color)
+      document.documentElement.style.setProperty(`--${type}`, hsl)
+    } catch (e) {
+      console.error(`Erro ao converter cor ${type}:`, e)
+    }
   }
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
