@@ -1,18 +1,13 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2, Save, Palette, Building2, Share2, Clock, Upload, Globe, Instagram, Facebook } from "lucide-react"
 
 export default function ClinicSettingsPage() {
-  const { data: session } = useSession()
-  const { success, error: toastError } = useToast()
-  const queryClient = useQueryClient()
+  const { clinic, isLoading, updateClinic } = useClinic()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -33,16 +28,6 @@ export default function ClinicSettingsPage() {
       sat: { start: "08:00", end: "12:00", closed: false },
       sun: { start: "00:00", end: "00:00", closed: true }
     }
-  })
-
-  // Buscar dados da clínica
-  const { data: clinic, isLoading } = useQuery({
-    queryKey: ["clinic-branding", (session?.user as any)?.clinic_id],
-    queryFn: async () => {
-      const res = await api.get(`/auth/me`)
-      return res.data?.data
-    },
-    enabled: !!session
   })
 
   useEffect(() => {
@@ -74,19 +59,6 @@ export default function ClinicSettingsPage() {
     setFormData(prev => ({ ...prev, [`${type}_color`]: color }))
     document.documentElement.style.setProperty(`--${type}`, color)
   }
-
-  const updateMutation = useMutation({
-    mutationFn: async (data: any) => {
-      await api.put(`/clinics/${(session as any)?.user?.clinic_id}`, data)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clinic-branding"] })
-      success("Configurações da clínica salvas com sucesso!")
-      // Aplicar cores dinamicamente (simulação imediata)
-      document.documentElement.style.setProperty('--primary', formData.primary_color)
-    },
-    onError: () => toastError("Erro ao salvar configurações")
-  })
 
   if (isLoading) {
     return (
@@ -304,10 +276,10 @@ export default function ClinicSettingsPage() {
           <Button 
             size="lg" 
             className="w-full sm:w-auto px-12 gap-2 shadow-lg shadow-primary/20"
-            onClick={() => updateMutation.mutate(formData)}
-            disabled={updateMutation.isPending}
+            onClick={() => updateClinic.mutate(formData)}
+            disabled={updateClinic.isPending}
           >
-            {updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}
+            {updateClinic.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}
             Salvar Configurações
           </Button>
         </div>

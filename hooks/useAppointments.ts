@@ -15,15 +15,21 @@ export type Appointment = {
   status: "Confirmado" | "Pendente" | "Cancelado"
 }
 
-export function useAppointments(filters?: { date?: string; range?: number; status?: string }) {
+export function useAppointments(filters?: { date?: string; range?: number; status?: string; page?: number; limit?: number }) {
   const queryClient = useQueryClient()
   const { success, error: toastError } = useToast()
 
-  const query = useQuery<Appointment[]>({
+  const query = useQuery({
     queryKey: ["appointments", filters],
     queryFn: async () => {
-      const res = await api.get("/appointments", { params: filters })
-      return res.data?.data || []
+      const res = await api.get("/appointments", { 
+        params: {
+          ...filters,
+          page: filters?.page || 1,
+          limit: filters?.limit || 10
+        }
+      })
+      return res.data
     }
   })
 
@@ -69,7 +75,8 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
   })
 
   return {
-    appointments: query.data || [],
+    appointments: query.data?.data || [],
+    meta: query.data?.meta,
     isLoading: query.isLoading,
     isError: query.isError,
     createAppointment: createMutation,

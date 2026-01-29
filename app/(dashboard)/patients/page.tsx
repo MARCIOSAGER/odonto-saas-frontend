@@ -134,7 +134,7 @@ export default function PatientsPage() {
                       </TD>
                     </TR>
                   ) : (
-                    patients.map((p) => (
+                    patients.map((p: any) => (
                       <TR key={p.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">

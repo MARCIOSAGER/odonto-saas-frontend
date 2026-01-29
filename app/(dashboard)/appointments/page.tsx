@@ -19,7 +19,7 @@ export default function AppointmentsPage() {
 
   const events = useMemo(
     () =>
-      appointments.map((a) => {
+      appointments.map((a: any) => {
         const start = new Date(`${a.data}T${a.hora}:00`)
         const end = new Date(start)
         end.setHours(start.getHours() + 1)
@@ -97,7 +97,7 @@ export default function AppointmentsPage() {
                       </TD>
                     </TR>
                   ) : (
-                    appointments.map((a) => (
+                    appointments.map((a: any) => (
                       <TR key={a.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex flex-col">
