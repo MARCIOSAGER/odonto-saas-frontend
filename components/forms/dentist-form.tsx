@@ -21,44 +21,44 @@ export function DentistForm({ initialData, onSubmit, onCancel, loading }: Dentis
   } = useForm<DentistInput>({
     resolver: zodResolver(dentistSchema),
     defaultValues: initialData || {
-      nome: "",
+      name: "",
       cro: "",
-      especialidade: "",
-      telefone: "",
+      specialty: "",
+      phone: "",
       email: ""
     }
   })
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome Completo</label>
-          <Input {...register("nome")} placeholder="Dr. Exemplo" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
-          {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
-        </div>
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome Completo</label>
+        <Input {...register("name")} placeholder="Dr. Exemplo" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CRO</label>
-            <Input {...register("cro")} placeholder="12345-UF" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
-            {errors.cro && <p className="text-xs text-destructive">{errors.cro.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Especialidade</label>
-            <Input {...register("especialidade")} placeholder="Ex: Ortodontia" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
-            {errors.especialidade && <p className="text-xs text-destructive">{errors.especialidade.message}</p>}
-          </div>
-        </div>
-
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Telefone</label>
-          <Input {...register("telefone")} placeholder="(11) 99999-9999" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CRO</label>
+          <Input {...register("cro")} placeholder="12345-UF" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.cro && <p className="text-xs text-destructive">{errors.cro.message}</p>}
         </div>
-
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">E-mail</label>
-          <Input type="email" {...register("email")} placeholder="dr@exemplo.com" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Especialidade</label>
+          <Input {...register("specialty")} placeholder="Ex: Ortodontia" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.specialty && <p className="text-xs text-destructive">{errors.specialty.message}</p>}
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Telefone</label>
+        <Input {...register("phone")} placeholder="(11) 99999-9999" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">E-mail</label>
+        <Input type="email" {...register("email")} placeholder="dr@exemplo.com" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+      </div>
 
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">

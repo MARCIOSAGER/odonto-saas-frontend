@@ -4,9 +4,11 @@ import { useToast } from "@/components/ui/toast"
 
 export type Dentist = {
   id: string
-  nome: string
+  name: string
   cro: string
-  especialidade: string
+  specialty: string
+  phone?: string
+  email?: string
 }
 
 export function useDentists() {

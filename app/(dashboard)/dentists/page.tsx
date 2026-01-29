@@ -96,7 +96,7 @@ export default function DentistsPage() {
                             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                               <UserCheck size={18} />
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{d.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{d.name || d.nome}</span>
                           </div>
                         </TD>
                         <TD>
@@ -108,7 +108,7 @@ export default function DentistsPage() {
                         <TD>
                           <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 text-sm">
                             <Stethoscope size={14} />
-                            {d.especialidade}
+                            {d.specialty || d.especialidade}
                           </div>
                         </TD>
                         <TD className="text-right">

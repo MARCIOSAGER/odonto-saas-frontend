@@ -52,16 +52,16 @@ export default function ConversationsPage() {
                       )}
                     >
                       <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs shrink-0">
-                        {c.name?.charAt(0) || "?"}
+                        {(c.name || c.nome || "?").charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-0.5">
-                          <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name || "Paciente"}</span>
+                          <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name || c.nome || "Paciente"}</span>
                           <span className="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
                             {c.time ? format(new Date(c.time), 'HH:mm') : ""}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.lastMessage}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.lastMessage || c.last_message}</p>
                       </div>
                       {c.unread > 0 && (
                         <div className="h-4 w-4 rounded-full bg-primary text-[10px] text-white flex items-center justify-center font-bold">

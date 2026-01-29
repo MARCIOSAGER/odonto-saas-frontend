@@ -4,14 +4,14 @@ import { useToast } from "@/components/ui/toast"
 
 export type Appointment = {
   id: string
-  data: string
-  hora: string
-  paciente_id: string
-  dentista_id: string
-  servico_id: string
-  paciente?: string
-  dentista?: string
-  servico?: string
+  date_time: string
+  patient_id: string
+  dentist_id: string
+  service_id: string
+  patient_name?: string
+  dentist_name?: string
+  service_name?: string
+  notes?: string
   status: "Confirmado" | "Pendente" | "Cancelado"
 }
 

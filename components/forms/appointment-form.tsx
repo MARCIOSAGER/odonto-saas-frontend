@@ -55,6 +55,19 @@ export function AppointmentForm({ onSubmit, onCancel, loading }: AppointmentForm
     fetchData()
   }, [])
 
+  const handleFormSubmit = (data: AppointmentInput) => {
+    // Combinar data e hora para o formato que o backend espera
+    const formattedData = {
+      patient_id: data.patient_id,
+      dentist_id: data.dentist_id,
+      service_id: data.service_id,
+      date_time: `${data.date}T${data.time}:00`,
+      notes: data.notes,
+      status: "Pendente"
+    }
+    onSubmit(formattedData)
+  }
+
   if (loadingData) {
     return (
       <div className="flex h-40 items-center justify-center">
@@ -64,66 +77,66 @@ export function AppointmentForm({ onSubmit, onCancel, loading }: AppointmentForm
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Paciente</label>
-          <select
-            {...register("pacienteId")}
-            className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="">Selecione um paciente</option>
-            {patients.map((p: any) => (
-              <option key={p.id} value={p.id}>{p.nome}</option>
-            ))}
-          </select>
-          {errors.pacienteId && <p className="text-xs text-destructive">{errors.pacienteId.message}</p>}
-        </div>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Paciente</label>
+        <select
+          {...register("patient_id")}
+          className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">Selecione um paciente</option>
+          {patients.map((p: any) => (
+            <option key={p.id} value={p.id}>{p.name || p.nome}</option>
+          ))}
+        </select>
+        {errors.patient_id && <p className="text-xs text-destructive">{errors.patient_id.message}</p>}
+      </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Dentista</label>
-          <select
-            {...register("dentistaId")}
-            className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="">Selecione um dentista</option>
-            {dentists.map((d: any) => (
-              <option key={d.id} value={d.id}>{d.nome}</option>
-            ))}
-          </select>
-          {errors.dentistaId && <p className="text-xs text-destructive">{errors.dentistaId.message}</p>}
-        </div>
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Dentista</label>
+        <select
+          {...register("dentist_id")}
+          className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">Selecione um dentista</option>
+          {dentists.map((d: any) => (
+            <option key={d.id} value={d.id}>{d.name || d.nome}</option>
+          ))}
+        </select>
+        {errors.dentist_id && <p className="text-xs text-destructive">{errors.dentist_id.message}</p>}
+      </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Serviço</label>
-          <select
-            {...register("servicoId")}
-            className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="">Selecione um serviço</option>
-            {services.map((s: any) => (
-              <option key={s.id} value={s.id}>{s.nome} - R$ {s.preco}</option>
-            ))}
-          </select>
-          {errors.servicoId && <p className="text-xs text-destructive">{errors.servicoId.message}</p>}
-        </div>
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Serviço</label>
+        <select
+          {...register("service_id")}
+          className="w-full h-10 rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="">Selecione um serviço</option>
+          {services.map((s: any) => (
+            <option key={s.id} value={s.id}>{s.name || s.nome} - R$ {s.price || s.preco}</option>
+          ))}
+        </select>
+        {errors.service_id && <p className="text-xs text-destructive">{errors.service_id.message}</p>}
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Data</label>
-            <Input type="date" {...register("data")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
-            {errors.data && <p className="text-xs text-destructive">{errors.data.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Hora</label>
-            <Input type="time" {...register("hora")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
-            {errors.hora && <p className="text-xs text-destructive">{errors.hora.message}</p>}
-          </div>
-        </div>
-
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Observações</label>
-          <Textarea {...register("observacoes")} placeholder="Alguma observação importante..." className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Data</label>
+          <Input type="date" {...register("date")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
         </div>
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Hora</label>
+          <Input type="time" {...register("time")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.time && <p className="text-xs text-destructive">{errors.time.message}</p>}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Observações</label>
+        <Textarea {...register("notes")} placeholder="Alguma observação importante..." className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+      </div>
 
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">
