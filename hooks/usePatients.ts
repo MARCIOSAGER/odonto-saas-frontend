@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 export type Patient = {
   id: string
@@ -15,7 +15,6 @@ export type Patient = {
 
 export function usePatients(search?: string, status?: string, page = 1, limit = 10) {
   const queryClient = useQueryClient()
-  const { success, error: toastError } = useToast()
 
   const query = useQuery({
     queryKey: ["patients", search, status, page, limit],
@@ -51,10 +50,10 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] })
-      success("Paciente criado com sucesso")
+      toast.success("Paciente criado com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao criar paciente")
+      toast.error(err.response?.data?.message || "Erro ao criar paciente")
     }
   })
 
@@ -65,10 +64,10 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] })
-      success("Paciente atualizado com sucesso")
+      toast.success("Paciente atualizado com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao atualizar paciente")
+      toast.error(err.response?.data?.message || "Erro ao atualizar paciente")
     }
   })
 
@@ -78,10 +77,10 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] })
-      success("Paciente removido com sucesso")
+      toast.success("Paciente removido com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao remover paciente")
+      toast.error(err.response?.data?.message || "Erro ao remover paciente")
     }
   })
 

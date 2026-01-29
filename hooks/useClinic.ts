@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query" 
 import { api } from "@/lib/api" 
-import { useToast } from "@/components/ui/toast" 
+import { toast } from "sonner" 
 
 export function useClinic() { 
   const queryClient = useQueryClient() 
-  const { success, error: toastError } = useToast() 
 
   const query = useQuery({ 
     queryKey: ["clinic", "my-profile"], 
@@ -26,10 +25,10 @@ export function useClinic() {
     }, 
     onSuccess: () => { 
       queryClient.invalidateQueries({ queryKey: ["clinic"] }) 
-      success("Clínica atualizada com sucesso") 
+      toast.success("Clínica atualizada com sucesso") 
     }, 
     onError: (err: any) => { 
-      toastError(err.response?.data?.message || "Erro ao atualizar") 
+      toast.error(err.response?.data?.message || "Erro ao atualizar") 
     } 
   }) 
 
@@ -53,10 +52,10 @@ export function useClinic() {
     }, 
     onSuccess: () => { 
       queryClient.invalidateQueries({ queryKey: ["clinic", "ai-settings"] }) 
-      success("Configurações de IA atualizadas") 
+      toast.success("Configurações de IA atualizadas") 
     }, 
     onError: (err: any) => { 
-      toastError(err.response?.data?.message || "Erro ao atualizar") 
+      toast.error(err.response?.data?.message || "Erro ao atualizar") 
     } 
   }) 
 
@@ -73,10 +72,10 @@ export function useClinic() {
       }
     },
     onSuccess: () => {
-      success("Teste de WhatsApp simulado com sucesso")
+      toast.success("Teste de WhatsApp simulado com sucesso")
     },
     onError: () => {
-      toastError("Funcionalidade em desenvolvimento")
+      toast.error("Funcionalidade em desenvolvimento")
     }
   }) 
 

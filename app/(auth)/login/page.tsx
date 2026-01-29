@@ -8,11 +8,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { loginSchema, LoginInput } from "@/lib/validations"
 import { signIn } from "next-auth/react"
 import { useState } from "react"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react"
 
 export default function LoginPage() {
-  const { success, error } = useToast()
   const [showPassword, setShowPassword] = useState(false)
   const {
     register,
@@ -29,13 +28,13 @@ export default function LoginPage() {
       redirect: false
     })
     if (res?.ok) {
-      success("Login realizado com sucesso")
+      toast.success("Login realizado com sucesso")
       setTimeout(() => {
         window.location.href = "/home"
       }, 300)
     } else {
       setApiError("E-mail ou senha inválidos")
-      error("Falha na autenticação")
+      toast.error("Falha na autenticação")
     }
   }
 
