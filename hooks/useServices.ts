@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 export type Service = {
   id: string
@@ -12,7 +12,6 @@ export type Service = {
 
 export function useServices() {
   const queryClient = useQueryClient()
-  const { success, error: toastError } = useToast()
 
   const query = useQuery<Service[]>({
     queryKey: ["services"],
@@ -35,10 +34,10 @@ export function useServices() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] })
-      success("Serviço criado com sucesso")
+      toast.success("Serviço criado com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao criar serviço")
+      toast.error(err.response?.data?.message || "Erro ao criar serviço")
     }
   })
 
@@ -48,10 +47,10 @@ export function useServices() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] })
-      success("Serviço removido com sucesso")
+      toast.success("Serviço removido com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao remover serviço")
+      toast.error(err.response?.data?.message || "Erro ao remover serviço")
     }
   })
 

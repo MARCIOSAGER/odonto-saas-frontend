@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 export type Dentist = {
   id: string
@@ -13,7 +13,6 @@ export type Dentist = {
 
 export function useDentists() {
   const queryClient = useQueryClient()
-  const { success, error: toastError } = useToast()
 
   const query = useQuery<Dentist[]>({
     queryKey: ["dentists"],
@@ -36,10 +35,10 @@ export function useDentists() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dentists"] })
-      success("Dentista criado com sucesso")
+      toast.success("Dentista criado com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao criar dentista")
+      toast.error(err.response?.data?.message || "Erro ao criar dentista")
     }
   })
 
@@ -49,10 +48,10 @@ export function useDentists() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dentists"] })
-      success("Dentista removido com sucesso")
+      toast.success("Dentista removido com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao remover dentista")
+      toast.error(err.response?.data?.message || "Erro ao remover dentista")
     }
   })
 

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
-import { useToast } from "@/components/ui/toast"
+import { toast } from "sonner"
 
 export type Appointment = {
   id: string
@@ -17,7 +17,6 @@ export type Appointment = {
 
 export function useAppointments(filters?: { date?: string; range?: number; status?: string; page?: number; limit?: number }) {
   const queryClient = useQueryClient()
-  const { success, error: toastError } = useToast()
 
   const query = useQuery({
     queryKey: ["appointments", filters],
@@ -52,10 +51,10 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
-      success("Agendamento criado com sucesso")
+      toast.success("Agendamento criado com sucesso")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao criar agendamento")
+      toast.error(err.response?.data?.message || "Erro ao criar agendamento")
     }
   })
 
@@ -66,10 +65,10 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
-      success("Agendamento confirmado")
+      toast.success("Agendamento confirmado")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao confirmar agendamento")
+      toast.error(err.response?.data?.message || "Erro ao confirmar agendamento")
     }
   })
 
@@ -79,10 +78,10 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["appointments"] })
-      success("Agendamento cancelado")
+      toast.success("Agendamento cancelado")
     },
     onError: (err: any) => {
-      toastError(err.response?.data?.message || "Erro ao cancelar agendamento")
+      toast.error(err.response?.data?.message || "Erro ao cancelar agendamento")
     }
   })
 
