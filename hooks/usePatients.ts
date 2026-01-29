@@ -18,18 +18,26 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
   const query = useQuery({
     queryKey: ["patients", search, status, page, limit],
     queryFn: async () => {
-      const res = await api.get("/patients", {
-        params: { 
-          q: search, 
-          status: status === "Todos" ? undefined : status,
-          page,
-          limit
+      try {
+        const res = await api.get("/patients", {
+          params: { 
+            q: search, 
+            status: status === "Todos" ? undefined : status,
+            page,
+            limit
+          }
+        })
+        const data = res.data?.data
+        return {
+          data: Array.isArray(data) ? data : [],
+          meta: res.data?.meta || { total: 0, pages: 0 }
         }
-      })
-      // O backend retorna { success: true, data: [...], meta: { total, pages, ... } }
-      return {
-        data: res.data?.data || [],
-        meta: res.data?.meta || { total: 0, pages: 0 }
+      } catch (error) {
+        console.error("Erro ao buscar pacientes:", error)
+        return {
+          data: [],
+          meta: { total: 0, pages: 0 }
+        }
       }
     }
   })

@@ -1,11 +1,14 @@
 "use client"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { useServices } from "@/hooks/useServices"
-import { Plus, Loader2, Trash2, DollarSign, Clock, Settings2 } from "lucide-react"
+import { Plus, Loader2, Trash2, Clock, Settings2 } from "lucide-react"
 
 export default function ServicesPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { services, isLoading, deleteService } = useServices()
 
   return (
@@ -15,11 +18,22 @@ export default function ServicesPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Serviços</h1>
           <p className="text-sm text-muted-foreground">Configure os procedimentos e valores da clínica.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
           Novo Serviço
         </Button>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Serviço</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground">Formulário de serviço em breve...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
@@ -39,14 +53,14 @@ export default function ServicesPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {services.length === 0 ? (
+                  {!Array.isArray(services) || services.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-muted-foreground">
                         Nenhum serviço cadastrado.
                       </TD>
                     </TR>
                   ) : (
-                    services.map((s) => (
+                    services.map((s: any) => (
                       <TR key={s.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">
@@ -65,7 +79,7 @@ export default function ServicesPage() {
                         <TD className="text-right">
                           <div className="flex items-center justify-end gap-1.5 font-semibold text-foreground">
                             <span className="text-xs text-muted-foreground font-normal">R$</span>
-                            {s.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            {(s.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </div>
                         </TD>
                         <TD className="text-right">

@@ -1,4 +1,6 @@
 "use client"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
@@ -6,6 +8,7 @@ import { useDentists } from "@/hooks/useDentists"
 import { Plus, Loader2, Trash2, UserCheck, IdCard, Stethoscope } from "lucide-react"
 
 export default function DentistsPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { dentists, isLoading, deleteDentist } = useDentists()
 
   return (
@@ -15,11 +18,22 @@ export default function DentistsPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Dentistas</h1>
           <p className="text-sm text-muted-foreground">Corpo clínico e profissionais da clínica.</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
           Novo Dentista
         </Button>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Dentista</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground">Formulário de dentista em breve...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
@@ -39,14 +53,14 @@ export default function DentistsPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {dentists.length === 0 ? (
+                  {!Array.isArray(dentists) || dentists.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-muted-foreground">
                         Nenhum dentista cadastrado.
                       </TD>
                     </TR>
                   ) : (
-                    dentists.map((d) => (
+                    dentists.map((d: any) => (
                       <TR key={d.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">

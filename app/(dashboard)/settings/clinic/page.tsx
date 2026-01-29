@@ -4,60 +4,100 @@ import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, Save, Palette, Building2, Share2, Clock, Upload, Globe, Instagram, Facebook } from "lucide-react"
+import { Loader2, Save, Palette, Building2, Upload } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { api } from "@/lib/api"
+import { useToast } from "@/components/ui/toast"
 
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
+  const { success, error: toastError } = useToast()
+  const [isUploading, setIsLoading] = useState(false)
 
-  const [formData, setFormData] = useState({
-    name: "",
-    tagline: "",
-    cnpj: "",
-    phone: "",
-    email: "",
-    address: "",
-    primary_color: "#0EA5E9",
-    secondary_color: "#64748B",
-    logo_url: "",
-    favicon_url: "",
-    instagram: "",
-    facebook: "",
-    website: "",
-    working_hours: {
-      mon_fri: { start: "08:00", end: "18:00", closed: false },
-      sat: { start: "08:00", end: "12:00", closed: false },
-      sun: { start: "00:00", end: "00:00", closed: true }
+  const { register, handleSubmit, reset, setValue, watch } = useForm({
+    defaultValues: {
+      name: "",
+      cnpj: "",
+      phone: "",
+      email: "",
+      address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      primary_color: "#0EA5E9",
+      secondary_color: "#64748B",
+      logo_url: ""
     }
   })
 
+  const primaryColor = watch("primary_color")
+  const secondaryColor = watch("secondary_color")
+  const logoUrl = watch("logo_url")
+
   useEffect(() => {
     if (clinic) {
-      const data = {
+      reset({
         name: clinic.name || "",
-        tagline: clinic.tagline || "",
         cnpj: clinic.cnpj || "",
         phone: clinic.phone || "",
         email: clinic.email || "",
         address: clinic.address || "",
+        city: clinic.city || "",
+        state: clinic.state || "",
+        zip_code: clinic.zip_code || "",
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
-        logo_url: clinic.logo_url || "",
-        favicon_url: clinic.favicon_url || "",
-        instagram: clinic.instagram || "",
-        facebook: clinic.facebook || "",
-        website: clinic.website || "",
-        working_hours: clinic.working_hours || formData.working_hours
-      }
-      setFormData(data)
+        logo_url: clinic.logo_url || ""
+      })
       // Aplicar cores iniciais
-      document.documentElement.style.setProperty('--primary', data.primary_color)
-      document.documentElement.style.setProperty('--secondary', data.secondary_color)
+      document.documentElement.style.setProperty('--primary', clinic.primary_color || "#0EA5E9")
+      document.documentElement.style.setProperty('--secondary', clinic.secondary_color || "#64748B")
     }
-  }, [clinic])
+  }, [clinic, reset])
 
   const handleColorChange = (type: 'primary' | 'secondary', color: string) => {
-    setFormData(prev => ({ ...prev, [`${type}_color`]: color }))
+    setValue(type === 'primary' ? 'primary_color' : 'secondary_color', color)
     document.documentElement.style.setProperty(`--${type}`, color)
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    setIsLoading(true)
+    try {
+      const res = await api.post("/clinics/my/upload-logo", formData)
+      const newLogoUrl = res.data?.data?.url
+      if (newLogoUrl) {
+        setValue("logo_url", newLogoUrl)
+        success("Logo atualizada com sucesso!")
+      }
+    } catch (error) {
+      toastError("Erro ao fazer upload da logo")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const onSubmit = (data: any) => {
+    // Apenas campos válidos para o backend
+    const payload = {
+      name: data.name,
+      cnpj: data.cnpj,
+      phone: data.phone,
+      email: data.email,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zip_code: data.zip_code,
+      primary_color: data.primary_color,
+      secondary_color: data.secondary_color,
+      logo_url: data.logo_url
+    }
+    updateClinic.mutate(payload)
   }
 
   if (isLoading) {
@@ -75,7 +115,7 @@ export default function ClinicSettingsPage() {
         <p className="text-sm text-muted-foreground">Personalize a identidade e informações públicas do seu consultório.</p>
       </div>
 
-      <div className="grid gap-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8">
         {/* Identidade Visual */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
@@ -93,12 +133,12 @@ export default function ClinicSettingsPage() {
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
-                      value={formData.primary_color}
+                      value={primaryColor}
                       onChange={(e) => handleColorChange('primary', e.target.value)}
                       className="h-10 w-20 rounded border border-border cursor-pointer"
                     />
                     <Input 
-                      value={formData.primary_color}
+                      {...register("primary_color")}
                       onChange={(e) => handleColorChange('primary', e.target.value)}
                       className="flex-1 bg-muted/30 border-none uppercase"
                     />
@@ -109,12 +149,12 @@ export default function ClinicSettingsPage() {
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
-                      value={formData.secondary_color}
+                      value={secondaryColor}
                       onChange={(e) => handleColorChange('secondary', e.target.value)}
                       className="h-10 w-20 rounded border border-border cursor-pointer"
                     />
                     <Input 
-                      value={formData.secondary_color}
+                      {...register("secondary_color")}
                       onChange={(e) => handleColorChange('secondary', e.target.value)}
                       className="flex-1 bg-muted/30 border-none uppercase"
                     />
@@ -126,14 +166,25 @@ export default function ClinicSettingsPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-foreground">Logo da Clínica</label>
                   <div className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 bg-muted/10 gap-2">
-                    {formData.logo_url ? (
-                      <img src={formData.logo_url} alt="Logo" className="h-16 object-contain" />
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="h-16 object-contain" />
                     ) : (
                       <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
-                        <Upload size={24} className="text-muted-foreground" />
+                        {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-primary" /> : <Upload size={24} className="text-muted-foreground" />}
                       </div>
                     )}
-                    <Button variant="outline" size="sm" className="mt-2 h-8 text-xs">Alterar Logo</Button>
+                    <div className="relative">
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                        onChange={handleLogoUpload}
+                        disabled={isUploading}
+                      />
+                      <Button variant="outline" size="sm" className="mt-2 h-8 text-xs" type="button" disabled={isUploading}>
+                        Alterar Logo
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,7 +192,7 @@ export default function ClinicSettingsPage() {
 
             <div className="p-4 rounded-xl bg-muted/20 border border-border">
               <p className="text-sm font-semibold mb-3">Preview do Botão Principal</p>
-              <Button className="bg-primary hover:opacity-90 transition-opacity">
+              <Button type="button" className="bg-primary hover:opacity-90 transition-opacity">
                 Botão de Exemplo
               </Button>
             </div>
@@ -160,172 +211,68 @@ export default function ClinicSettingsPage() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Nome da Clínica</label>
               <Input 
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-muted/30 border-none h-11"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Slogan / Tagline</label>
-              <Input 
-                value={formData.tagline}
-                onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                {...register("name")}
                 className="bg-muted/30 border-none h-11"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">CNPJ</label>
               <Input 
-                value={formData.cnpj}
-                onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+                {...register("cnpj")}
                 className="bg-muted/30 border-none h-11"
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground">Telefone de Contato</label>
               <Input 
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                {...register("phone")}
+                className="bg-muted/30 border-none h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Email</label>
+              <Input 
+                {...register("email")}
                 className="bg-muted/30 border-none h-11"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-semibold text-foreground">Endereço Completo</label>
               <Input 
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                {...register("address")}
                 className="bg-muted/30 border-none h-11"
               />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Redes Sociais */}
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Share2 size={20} className="text-primary" />
-              Redes Sociais
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Instagram size={14} /> Instagram
-              </label>
-              <Input 
-                value={formData.instagram}
-                onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                placeholder="@clinica.exemplo"
-                className="bg-muted/30 border-none h-10"
-              />
+            <div className="grid grid-cols-3 gap-4 sm:col-span-2">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Cidade</label>
+                <Input {...register("city")} className="bg-muted/30 border-none h-11" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Estado</label>
+                <Input {...register("state")} className="bg-muted/30 border-none h-11" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">CEP</label>
+                <Input {...register("zip_code")} className="bg-muted/30 border-none h-11" />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Facebook size={14} /> Facebook
-              </label>
-              <Input 
-                value={formData.facebook}
-                onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
-                placeholder="facebook.com/clinica"
-                className="bg-muted/30 border-none h-10"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Globe size={14} /> Website
-              </label>
-              <Input 
-                value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                placeholder="www.clinica.com.br"
-                className="bg-muted/30 border-none h-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Horários */}
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Clock size={20} className="text-primary" />
-              Horário de Funcionamento
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <WorkingHourRow 
-              label="Segunda a Sexta" 
-              hours={formData.working_hours.mon_fri} 
-              onChange={(h) => setFormData({ ...formData, working_hours: { ...formData.working_hours, mon_fri: h } })}
-            />
-            <WorkingHourRow 
-              label="Sábado" 
-              hours={formData.working_hours.sat} 
-              onChange={(h) => setFormData({ ...formData, working_hours: { ...formData.working_hours, sat: h } })}
-            />
-            <WorkingHourRow 
-              label="Domingo" 
-              hours={formData.working_hours.sun} 
-              onChange={(h) => setFormData({ ...formData, working_hours: { ...formData.working_hours, sun: h } })}
-            />
           </CardContent>
         </Card>
 
         <div className="flex justify-end pt-4">
           <Button 
             size="lg" 
+            type="submit"
             className="w-full sm:w-auto px-12 gap-2 shadow-lg shadow-primary/20"
-            onClick={() => updateClinic.mutate(formData)}
             disabled={updateClinic.isPending}
           >
             {updateClinic.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}
             Salvar Configurações
           </Button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
 
-function WorkingHourRow({ label, hours, onChange }: { label: string; hours: any; onChange: (h: any) => void }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/10 border border-border">
-      <div className="min-w-[150px]">
-        <p className="text-sm font-semibold text-foreground">{label}</p>
-        <p className="text-[11px] text-muted-foreground">{hours.closed ? "Fechado" : "Aberto para atendimento"}</p>
-      </div>
-      <div className="flex items-center gap-3">
-        {!hours.closed ? (
-          <>
-            <Input 
-              type="time" 
-              value={hours.start} 
-              onChange={(e) => onChange({ ...hours, start: e.target.value })}
-              className="w-24 bg-white h-9"
-            />
-            <span className="text-muted-foreground text-xs">até</span>
-            <Input 
-              type="time" 
-              value={hours.end} 
-              onChange={(e) => onChange({ ...hours, end: e.target.value })}
-              className="w-24 bg-white h-9"
-            />
-          </>
-        ) : (
-          <div className="h-9 flex items-center px-4 rounded bg-muted text-muted-foreground text-xs font-medium">
-            Estabelecimento Fechado
-          </div>
-        )}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className={hours.closed ? "text-primary hover:bg-primary/5" : "text-destructive hover:bg-destructive/5"}
-          onClick={() => onChange({ ...hours, closed: !hours.closed })}
-        >
-          {hours.closed ? "Abrir" : "Fechar"}
-        </Button>
-      </div>
-    </div>
-  )
-}

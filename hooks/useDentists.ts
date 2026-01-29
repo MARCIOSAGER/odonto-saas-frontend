@@ -16,8 +16,14 @@ export function useDentists() {
   const query = useQuery<Dentist[]>({
     queryKey: ["dentists"],
     queryFn: async () => {
-      const res = await api.get("/dentists")
-      return res.data?.data || []
+      try {
+        const res = await api.get("/dentists")
+        const data = res.data?.data
+        return Array.isArray(data) ? data : []
+      } catch (error) {
+        console.error("Erro ao buscar dentistas:", error)
+        return []
+      }
     }
   })
 

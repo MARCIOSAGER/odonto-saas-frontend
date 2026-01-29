@@ -22,16 +22,25 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
   const query = useQuery({
     queryKey: ["appointments", filters],
     queryFn: async () => {
-      const res = await api.get("/appointments", { 
-        params: {
-          ...filters,
-          page: filters?.page || 1,
-          limit: filters?.limit || 10
+      try {
+        const res = await api.get("/appointments", { 
+          params: {
+            ...filters,
+            page: filters?.page || 1,
+            limit: filters?.limit || 10
+          }
+        })
+        const data = res.data?.data
+        return {
+          data: Array.isArray(data) ? data : [],
+          meta: res.data?.meta || { total: 0, pages: 0 }
         }
-      })
-      return {
-        data: res.data?.data || [],
-        meta: res.data?.meta || { total: 0, pages: 0 }
+      } catch (error) {
+        console.error("Erro ao buscar agendamentos:", error)
+        return {
+          data: [],
+          meta: { total: 0, pages: 0 }
+        }
       }
     }
   })

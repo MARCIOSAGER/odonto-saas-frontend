@@ -24,12 +24,29 @@ export function DialogContent({ className, children }: { className?: string; chi
   )
 }
 
-export function DialogHeader({ title, description }: { title: string; description?: string }) {
+export function DialogHeader({ title, description, children }: { title?: string; description?: string; children?: React.ReactNode }) {
   return (
     <div className="border-b border-gray-200 p-4">
-      <h3 className="text-lg font-semibold">{title}</h3>
+      {title && <h3 className="text-lg font-semibold">{title}</h3>}
       {description && <p className="text-sm text-gray-600">{description}</p>}
+      {children}
     </div>
+  )
+}
+
+export function DialogTitle({ className, children }: { className?: string; children: React.ReactNode }) {
+  return (
+    <DialogPrimitive.Title className={cn("text-lg font-semibold", className)}>
+      {children}
+    </DialogPrimitive.Title>
+  )
+}
+
+export function DialogDescription({ className, children }: { className?: string; children: React.ReactNode }) {
+  return (
+    <DialogPrimitive.Description className={cn("text-sm text-gray-600", className)}>
+      {children}
+    </DialogPrimitive.Description>
   )
 }
 

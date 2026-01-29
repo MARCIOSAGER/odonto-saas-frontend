@@ -1,4 +1,5 @@
 "use client"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,22 +16,25 @@ const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales
 
 export default function AppointmentsPage() {
   const [view, setView] = useState<"lista" | "calendario">("lista")
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { appointments, isLoading, confirmAppointment, cancelAppointment } = useAppointments()
 
   const events = useMemo(
     () =>
-      appointments.map((a: any) => {
-        const start = new Date(`${a.data}T${a.hora}:00`)
-        const end = new Date(start)
-        end.setHours(start.getHours() + 1)
-        return { 
-          id: a.id, 
-          title: `${a.paciente} • ${a.servico}`, 
-          start, 
-          end, 
-          resource: a 
-        }
-      }),
+      Array.isArray(appointments) 
+        ? appointments.map((a: any) => {
+            const start = new Date(`${a.data}T${a.hora}:00`)
+            const end = new Date(start)
+            end.setHours(start.getHours() + 1)
+            return { 
+              id: a.id, 
+              title: `${a.paciente} • ${a.servico}`, 
+              start, 
+              end, 
+              resource: a 
+            }
+          })
+        : [],
     [appointments]
   )
 
@@ -63,12 +67,23 @@ export default function AppointmentsPage() {
               Calendário
             </Button>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <Plus size={18} />
             Novo Agendamento
           </Button>
         </div>
       </div>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Agendamento</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground">Formulário de agendamento em breve...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card className="border-border bg-card shadow-sm">
         <CardContent className="p-6">
@@ -90,7 +105,7 @@ export default function AppointmentsPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {appointments.length === 0 ? (
+                  {!Array.isArray(appointments) || appointments.length === 0 ? (
                     <TR>
                       <TD colSpan={6} className="h-32 text-center text-muted-foreground">
                         Nenhum agendamento encontrado.
