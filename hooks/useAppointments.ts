@@ -29,7 +29,10 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
           limit: filters?.limit || 10
         }
       })
-      return res.data
+      return {
+        data: res.data?.data || [],
+        meta: res.data?.meta || { total: 0, pages: 0 }
+      }
     }
   })
 

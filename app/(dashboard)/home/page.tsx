@@ -33,8 +33,8 @@ export default function DashboardHome() {
   const { data: stats, isLoading: loadingStats, isError: errorStats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const res = await api.get("/clinics/stats")
-      return res.data?.data
+      const res = await api.get("/clinics/my/stats")
+      return res.data?.data || {}
     }
   })
 
@@ -173,7 +173,7 @@ export default function DashboardHome() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {todayAppointments.length === 0 ? (
+              {!Array.isArray(todayAppointments) || todayAppointments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhum agendamento para hoje.</p>
               ) : (
                 todayAppointments.slice(0, 5).map((a: any) => (
