@@ -27,7 +27,10 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
         }
       })
       // O backend retorna { success: true, data: [...], meta: { total, pages, ... } }
-      return res.data
+      return {
+        data: res.data?.data || [],
+        meta: res.data?.meta || { total: 0, pages: 0 }
+      }
     }
   })
 

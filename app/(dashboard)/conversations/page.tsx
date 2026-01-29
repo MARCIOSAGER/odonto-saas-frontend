@@ -56,34 +56,38 @@ export default function ConversationsPage() {
               <div className="flex p-8 justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : (
               <div className="divide-y divide-border">
-                {conversations?.map((c: any) => (
-                  <button
-                    key={c.phone}
-                    onClick={() => setSelectedPhone(c.phone)}
-                    className={cn(
-                      "w-full p-4 flex gap-3 hover:bg-muted/50 transition-colors text-left",
-                      selectedPhone === c.phone && "bg-primary/5 border-l-4 border-primary"
-                    )}
-                  >
-                    <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs shrink-0">
-                      {c.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-0.5">
-                        <span className="font-semibold text-foreground truncate">{c.name}</span>
-                        <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
-                          {format(new Date(c.time), 'HH:mm')}
-                        </span>
+                {!Array.isArray(conversations) || conversations.length === 0 ? (
+                  <p className="p-8 text-center text-sm text-muted-foreground">Nenhuma conversa encontrada.</p>
+                ) : (
+                  conversations.map((c: any) => (
+                    <button
+                      key={c.phone}
+                      onClick={() => setSelectedPhone(c.phone)}
+                      className={cn(
+                        "w-full p-4 flex gap-3 hover:bg-muted/50 transition-colors text-left",
+                        selectedPhone === c.phone && "bg-primary/5 border-l-4 border-primary"
+                      )}
+                    >
+                      <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs shrink-0">
+                        {c.name?.charAt(0) || "?"}
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
-                    </div>
-                    {c.unread > 0 && (
-                      <div className="h-4 w-4 rounded-full bg-primary text-[10px] text-white flex items-center justify-center font-bold">
-                        {c.unread}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-0.5">
+                          <span className="font-semibold text-foreground truncate">{c.name || "Paciente"}</span>
+                          <span className="text-[10px] text-muted-foreground whitespace-nowrap ml-2">
+                            {c.time ? format(new Date(c.time), 'HH:mm') : ""}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{c.lastMessage}</p>
                       </div>
-                    )}
-                  </button>
-                ))}
+                      {c.unread > 0 && (
+                        <div className="h-4 w-4 rounded-full bg-primary text-[10px] text-white flex items-center justify-center font-bold">
+                          {c.unread}
+                        </div>
+                      )}
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </CardContent>
@@ -120,8 +124,10 @@ export default function ConversationsPage() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#F8FAFC]">
               {loadingChat ? (
                 <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+              ) : !Array.isArray(messages) || messages.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Nenhuma mensagem nesta conversa.</div>
               ) : (
-                messages?.map((m: any) => (
+                messages.map((m: any) => (
                   <div 
                     key={m.id} 
                     className={cn(

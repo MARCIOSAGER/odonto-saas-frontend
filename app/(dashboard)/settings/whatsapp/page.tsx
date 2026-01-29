@@ -21,6 +21,7 @@ export default function WhatsAppSettingsPage() {
   }, [clinic])
 
   const handleTestConnection = async () => {
+    // Agora o useClinic já lida com o mock/simulação do teste
     testWhatsApp.mutate()
   }
 

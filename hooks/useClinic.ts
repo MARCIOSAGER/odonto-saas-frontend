@@ -10,14 +10,14 @@ export function useClinic() {
     queryKey: ["clinic", "my-profile"], 
     queryFn: async () => { 
       const res = await api.get("/clinics/my/profile") 
-      return res.data?.data 
+      return res.data?.data || {} 
     } 
   }) 
 
   const updateClinicMutation = useMutation({ 
     mutationFn: async (payload: any) => { 
       const res = await api.put("/clinics/my/profile", payload) 
-      return res.data?.data 
+      return res.data?.data || {} 
     }, 
     onSuccess: () => { 
       queryClient.invalidateQueries({ queryKey: ["clinic"] }) 
@@ -32,14 +32,14 @@ export function useClinic() {
     queryKey: ["clinic", "ai-settings"], 
     queryFn: async () => { 
       const res = await api.get("/clinics/my/ai-settings") 
-      return res.data?.data 
+      return res.data?.data || {} 
     } 
   }) 
 
   const updateAISettingsMutation = useMutation({ 
     mutationFn: async (payload: any) => { 
       const res = await api.put("/clinics/my/ai-settings", payload) 
-      return res.data?.data 
+      return res.data?.data || {} 
     }, 
     onSuccess: () => { 
       queryClient.invalidateQueries({ queryKey: ["clinic", "ai-settings"] }) 
@@ -52,9 +52,17 @@ export function useClinic() {
 
   const testWhatsAppMutation = useMutation({ 
     mutationFn: async () => { 
-      const res = await api.post("/clinics/my/test-whatsapp") 
-      return res.data?.data 
-    } 
+      // O endpoint /clinics/my/test-whatsapp não existe no backend ainda
+      // Simular delay e sucesso para evitar 404
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return { success: true }
+    },
+    onSuccess: () => {
+      success("Teste de WhatsApp simulado com sucesso")
+    },
+    onError: () => {
+      toastError("Funcionalidade em desenvolvimento")
+    }
   }) 
 
   return { 

@@ -127,7 +127,7 @@ export default function PatientsPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {patients.length === 0 ? (
+                  {!Array.isArray(patients) || patients.length === 0 ? (
                     <TR>
                       <TD colSpan={5} className="h-32 text-center text-muted-foreground">
                         Nenhum paciente encontrado.
