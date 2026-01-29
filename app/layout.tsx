@@ -3,6 +3,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css"
 import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import { Providers } from "@/components/providers"
+import { Toaster } from "sonner"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} font-inter`}>
         <Providers>{children}</Providers>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   )

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState } from "react"
 import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
@@ -70,8 +70,8 @@ export default function PatientsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pacientes</h1>
-          <p className="text-sm text-muted-foreground">Gerencie o cadastro de pacientes da sua clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Pacientes</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie o cadastro de pacientes da sua clínica.</p>
         </div>
         
         <Dialog open={open} onOpenChange={setOpen}>
@@ -83,7 +83,10 @@ export default function PatientsPage() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>{editingPatient ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">{editingPatient ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
+              <DialogDescription className="text-gray-500 dark:text-gray-400">
+                Preencha os dados pessoais e de contato do paciente.
+              </DialogDescription>
             </DialogHeader>
             <div className="p-6 pt-0">
               <PatientForm
@@ -101,17 +104,17 @@ export default function PatientsPage() {
         <CardContent className="p-6 space-y-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
               <Input
                 placeholder="Buscar por nome, telefone ou CPF..."
-                className="pl-10 h-11 bg-muted/30 border-none"
+                className="pl-10 h-11 bg-muted/30 border-none text-gray-900 dark:text-gray-100 placeholder:text-gray-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
               <select
-                className="h-11 rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-primary/20"
+                className="h-11 rounded-md border border-input bg-background px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
               >
@@ -122,7 +125,7 @@ export default function PatientsPage() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-11 w-11 text-muted-foreground hover:text-foreground"
+                className="h-11 w-11 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                 onClick={() => { setSearch(""); setStatus("Todos") }}
                 title="Limpar filtros"
               >
@@ -140,17 +143,17 @@ export default function PatientsPage() {
               <Table>
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-semibold text-foreground">Nome</TH>
-                    <TH className="font-semibold text-foreground">Telefone</TH>
-                    <TH className="font-semibold text-foreground">CPF</TH>
-                    <TH className="font-semibold text-foreground">Status</TH>
-                    <TH className="text-right font-semibold text-foreground">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Nome</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Telefone</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">CPF</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">Status</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {!Array.isArray(patients) || patients.length === 0 ? (
                     <TR>
-                      <TD colSpan={5} className="h-32 text-center text-muted-foreground">
+                      <TD colSpan={5} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum paciente encontrado.
                       </TD>
                     </TR>
@@ -162,11 +165,11 @@ export default function PatientsPage() {
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                               {p.nome.charAt(0)}
                             </div>
-                            <span className="font-medium text-foreground">{p.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">{p.nome}</span>
                           </div>
                         </TD>
-                        <TD className="text-muted-foreground">{p.telefone}</TD>
-                        <TD className="text-muted-foreground">{p.cpf || "---"}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300">{p.telefone}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300">{p.cpf || "---"}</TD>
                         <TD>
                           <Badge variant={p.status === "Ativo" ? "green" : "gray"}>
                             {p.status}
@@ -177,7 +180,7 @@ export default function PatientsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-muted-foreground hover:text-primary"
+                              className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                               onClick={() => handleEdit(p)}
                             >
                               <Edit2 size={14} />
@@ -185,7 +188,7 @@ export default function PatientsPage() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                               onClick={() => handleDelete(p.id)}
                             >
                               <Trash2 size={14} />

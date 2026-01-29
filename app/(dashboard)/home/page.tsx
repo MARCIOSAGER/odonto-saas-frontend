@@ -80,8 +80,8 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8 pb-12">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Olá, {session?.user?.name || "Doutor"}</h1>
-        <p className="text-muted-foreground">Aqui está o que está acontecendo na sua clínica hoje.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Olá, {session?.user?.name || "Doutor"}</h1>
+        <p className="text-gray-500 dark:text-gray-400">Aqui está o que está acontecendo na sua clínica hoje.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -115,8 +115,8 @@ export default function DashboardHome() {
         <Card className="lg:col-span-4 overflow-hidden border-border bg-card shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold tracking-tight text-foreground">Fluxo de Pacientes</h3>
-              <p className="text-sm text-muted-foreground">Desempenho da clínica nesta semana.</p>
+              <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Fluxo de Pacientes</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Desempenho da clínica nesta semana.</p>
             </div>
           </CardHeader>
           <CardContent>
@@ -166,15 +166,15 @@ export default function DashboardHome() {
 
         <Card className="lg:col-span-3 border-border bg-card shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
-            <h3 className="text-lg font-semibold tracking-tight text-foreground">Próximos Hoje</h3>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+            <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Próximos Hoje</h3>
+            <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900 dark:hover:text-gray-100">
               <MoreHorizontal size={20} />
             </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               {!Array.isArray(todayAppointments) || todayAppointments.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">Nenhum agendamento para hoje.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Nenhum agendamento para hoje.</p>
               ) : (
                 todayAppointments.slice(0, 5).map((a: any) => (
                   <div key={a.id} className="flex items-center justify-between group">
@@ -183,12 +183,12 @@ export default function DashboardHome() {
                         {a.paciente?.charAt(0) || "P"}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{a.paciente}</p>
-                        <p className="text-xs text-muted-foreground">{a.servico}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors">{a.paciente}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{a.servico}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-foreground">{a.hora}</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{a.hora}</p>
                       <Badge 
                         variant={a.status === "Confirmado" ? "green" : "yellow"}
                         className="text-[10px] py-0 h-4 px-1.5"
@@ -200,7 +200,7 @@ export default function DashboardHome() {
                 ))
               )}
             </div>
-            <Button variant="outline" className="w-full mt-6 h-10 font-medium text-foreground hover:bg-accent" onClick={() => window.location.href="/appointments"}>
+            <Button variant="outline" className="w-full mt-6 h-10 font-medium text-gray-900 dark:text-gray-100 hover:bg-accent" onClick={() => window.location.href="/appointments"}>
               Ver agenda completa
             </Button>
           </CardContent>
@@ -228,8 +228,8 @@ function MetricCard({ title, value, icon, change }: { title: string; value: stri
           </div>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+          <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{value}</p>
         </div>
       </CardContent>
     </Card>

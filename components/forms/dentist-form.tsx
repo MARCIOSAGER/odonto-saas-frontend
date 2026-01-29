@@ -31,44 +31,50 @@ export function DentistForm({ initialData, onSubmit, onCancel, loading }: Dentis
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Nome Completo</label>
-        <Input {...register("nome")} placeholder="Dr. Exemplo" />
-        {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">CRO</label>
-          <Input {...register("cro")} placeholder="12345-UF" />
-          {errors.cro && <p className="text-xs text-destructive">{errors.cro.message}</p>}
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome Completo</label>
+          <Input {...register("nome")} placeholder="Dr. Exemplo" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CRO</label>
+            <Input {...register("cro")} placeholder="12345-UF" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+            {errors.cro && <p className="text-xs text-destructive">{errors.cro.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Especialidade</label>
+            <Input {...register("especialidade")} placeholder="Ex: Ortodontia" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+            {errors.especialidade && <p className="text-xs text-destructive">{errors.especialidade.message}</p>}
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <label className="text-sm font-medium">Especialidade</label>
-          <Input {...register("especialidade")} placeholder="Ex: Ortodontia" />
-          {errors.especialidade && <p className="text-xs text-destructive">{errors.especialidade.message}</p>}
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Telefone</label>
+          <Input {...register("telefone")} placeholder="(11) 99999-9999" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Telefone</label>
-        <Input {...register("telefone")} placeholder="(11) 99999-9999" />
-      </div>
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">E-mail</label>
+          <Input type="email" {...register("email")} placeholder="dr@exemplo.com" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">E-mail</label>
-        <Input type="email" {...register("email")} placeholder="dr@exemplo.com" />
-      </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {loading ? "Salvando..." : "Salvar Dentista"}
-        </Button>
-      </div>
-    </form>
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={loading} className="min-w-[120px]">
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Salvar Dentista"
+            )}
+          </Button>
+        </div>
+      </form>
   )
 }

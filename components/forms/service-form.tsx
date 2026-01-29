@@ -31,39 +31,45 @@ export function ServiceForm({ initialData, onSubmit, onCancel, loading }: Servic
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Nome do Serviço</label>
-        <Input {...register("nome")} placeholder="Ex: Limpeza, Canal, etc." />
-        {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Duração (minutos)</label>
-          <Input type="number" {...register("duracao")} />
-          {errors.duracao && <p className="text-xs text-destructive">{errors.duracao.message}</p>}
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome do Serviço</label>
+          <Input {...register("nome")} placeholder="Ex: Limpeza, Canal, etc." className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+          {errors.nome && <p className="text-xs text-destructive">{errors.nome.message}</p>}
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Duração (minutos)</label>
+            <Input type="number" {...register("duracao")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+            {errors.duracao && <p className="text-xs text-destructive">{errors.duracao.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Preço (R$)</label>
+            <Input type="number" step="0.01" {...register("preco")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
+            {errors.preco && <p className="text-xs text-destructive">{errors.preco.message}</p>}
+          </div>
+        </div>
+
         <div className="space-y-2">
-          <label className="text-sm font-medium">Preço (R$)</label>
-          <Input type="number" step="0.01" {...register("preco")} />
-          {errors.preco && <p className="text-xs text-destructive">{errors.preco.message}</p>}
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Descrição</label>
+          <Textarea {...register("descricao")} placeholder="Breve descrição do procedimento..." className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Descrição</label>
-        <Textarea {...register("descricao")} placeholder="Breve descrição do procedimento..." />
-      </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {loading ? "Salvando..." : "Salvar Serviço"}
-        </Button>
-      </div>
-    </form>
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="text-gray-700 dark:text-gray-300">
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={loading} className="min-w-[120px]">
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              "Salvar Serviço"
+            )}
+          </Button>
+        </div>
+      </form>
   )
 }
