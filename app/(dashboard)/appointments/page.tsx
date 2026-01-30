@@ -365,16 +365,36 @@ function AppointmentsContent() {
                     `${format(start, "dd 'de' MMMM", { locale: ptBR })} - ${format(end, "dd 'de' MMMM", { locale: ptBR })}`,
                 }}
                 className="rounded-lg"
-                eventPropGetter={() => ({
-                  style: {
-                    backgroundColor: 'hsl(var(--primary))',
-                    borderRadius: '6px',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '12px',
-                    padding: '2px 6px',
+                eventPropGetter={(event: any) => {
+                  const status = event.resource?.status?.toLowerCase() || ""
+                  let backgroundColor = 'hsl(var(--primary))'
+                  let opacity = 1
+
+                  if (status === "confirmed" || status === "confirmado") {
+                    backgroundColor = '#16a34a'
+                  } else if (status === "cancelled" || status === "cancelado") {
+                    backgroundColor = '#dc2626'
+                    opacity = 0.5
+                  } else if (status === "completed" || status === "concluido" || status === "realizado") {
+                    backgroundColor = '#6b7280'
+                  } else if (status === "no-show" || status === "faltou") {
+                    backgroundColor = '#f59e0b'
+                    opacity = 0.6
                   }
-                })}
+
+                  return {
+                    style: {
+                      backgroundColor,
+                      borderRadius: '6px',
+                      border: 'none',
+                      color: 'white',
+                      fontSize: '12px',
+                      padding: '2px 6px',
+                      opacity,
+                      textDecoration: (status === "cancelled" || status === "cancelado") ? 'line-through' : 'none',
+                    }
+                  }
+                }}
               />
             </div>
           )}
