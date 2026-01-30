@@ -1,23 +1,71 @@
 "use client"
-import { useState } from "react"
-import { useConversations, useMessages } from "@/hooks/useConversations"
+import { useState, useRef, useEffect } from "react"
+import { useConversations, useMessages, useSendMessage } from "@/hooks/useConversations"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Send, MessageSquare, Loader2, Calendar } from "lucide-react"
+import { Search, Send, MessageSquare, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 
 export default function ConversationsPage() {
   const [search, setSearch] = useState("")
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null)
+  const [messageText, setMessageText] = useState("")
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { conversations, isLoading: loadingConversations } = useConversations(search)
-  const { messages, isLoading: loadingChat } = useMessages(selectedPhone)
+  const { messages, patient, isLoading: loadingChat } = useMessages(selectedPhone)
+  const sendMessage = useSendMessage()
 
-  const selectedConversation = Array.isArray(conversations) 
+  const selectedConversation = Array.isArray(conversations)
     ? conversations.find((c: any) => c.phone === selectedPhone)
     : null
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
+  // Mark as read when selecting a conversation
+  useEffect(() => {
+    if (selectedPhone) {
+      import("@/lib/api").then(({ api }) => {
+        api.post(`/conversations/${selectedPhone}/read`).catch(() => {})
+      })
+    }
+  }, [selectedPhone])
+
+  const handleSend = () => {
+    if (!messageText.trim() || !selectedPhone) return
+    sendMessage.mutate(
+      { phone: selectedPhone, message: messageText.trim() },
+      { onSuccess: () => setMessageText("") }
+    )
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  const formatTime = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), "HH:mm")
+    } catch {
+      return ""
+    }
+  }
+
+  const formatDate = (dateStr: string) => {
+    try {
+      return format(new Date(dateStr), "dd/MM/yyyy HH:mm")
+    } catch {
+      return ""
+    }
+  }
 
   return (
     <div className="flex h-[calc(100vh-120px)] gap-6 overflow-hidden">
@@ -25,8 +73,8 @@ export default function ConversationsPage() {
       <div className="w-80 flex flex-col gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <Input 
-            placeholder="Buscar paciente..." 
+          <Input
+            placeholder="Buscar paciente..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 h-11 bg-card border-border shadow-sm text-gray-900 dark:text-gray-100"
@@ -52,20 +100,22 @@ export default function ConversationsPage() {
                       )}
                     >
                       <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center font-bold text-xs shrink-0">
-                        {(c.name || c.nome || "?").charAt(0)}
+                        {(c.patient_name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-0.5">
-                          <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">{c.name || c.nome || "Paciente"}</span>
+                          <span className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {c.patient_name || c.phone}
+                          </span>
                           <span className="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap ml-2">
-                            {c.time ? format(new Date(c.time), 'HH:mm') : ""}
+                            {c.last_message_at ? formatTime(c.last_message_at) : ""}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.lastMessage || c.last_message}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{c.last_message}</p>
                       </div>
-                      {c.unread > 0 && (
-                        <div className="h-4 w-4 rounded-full bg-primary text-[10px] text-white flex items-center justify-center font-bold">
-                          {c.unread}
+                      {c.unread_count > 0 && (
+                        <div className="h-5 min-w-[20px] px-1 rounded-full bg-primary text-[10px] text-white flex items-center justify-center font-bold">
+                          {c.unread_count}
                         </div>
                       )}
                     </button>
@@ -85,66 +135,78 @@ export default function ConversationsPage() {
             <div className="p-4 border-b border-border bg-muted/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {selectedConversation?.name?.charAt(0) || "?"}
+                  {(selectedConversation?.patient_name || patient?.name || "?").charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-gray-100">{selectedConversation?.name || "Paciente"}</h3>
-                  <p className="text-xs text-success flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-                    Atendimento via IA
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100">
+                    {selectedConversation?.patient_name || patient?.name || selectedPhone}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {selectedPhone}
+                    {patient?._count?.appointments ? ` \u00b7 ${patient._count.appointments} consulta(s)` : ""}
                   </p>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-2 h-9 text-gray-700 dark:text-gray-300">
-                  <Calendar size={14} />
-                  Ver Prontuário
-                </Button>
               </div>
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#F8FAFC] dark:bg-gray-900/50">
+            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-[#F8FAFC] dark:bg-gray-900/50">
               {loadingChat ? (
                 <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
               ) : !Array.isArray(messages) || messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400 text-sm">Nenhuma mensagem nesta conversa.</div>
               ) : (
                 messages.map((m: any) => (
-                  <div 
-                    key={m.id} 
+                  <div
+                    key={m.id}
                     className={cn(
                       "flex flex-col max-w-[70%]",
-                      m.sender === "user" ? "ml-auto items-end" : "mr-auto items-start"
+                      m.direction === "outgoing" ? "ml-auto items-end" : "mr-auto items-start"
                     )}
                   >
                     <div className={cn(
-                      "p-3 rounded-2xl text-sm shadow-sm",
-                      m.sender === "user" 
-                        ? "bg-primary text-white rounded-tr-none" 
+                      "p-3 rounded-2xl text-sm shadow-sm whitespace-pre-wrap break-words",
+                      m.direction === "outgoing"
+                        ? "bg-primary text-white rounded-tr-none"
                         : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-border rounded-tl-none"
                     )}>
-                      {m.text}
+                      {m.message}
                     </div>
-                    <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 px-1">{m.time}</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 px-1">
+                      {m.created_at ? formatTime(m.created_at) : ""}
+                    </span>
                   </div>
                 ))
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input de Mensagem */}
             <div className="p-4 border-t border-border bg-white dark:bg-gray-800">
               <div className="flex gap-3">
-                <Input 
-                  placeholder="Escreva sua mensagem..." 
+                <Input
+                  placeholder="Escreva sua mensagem..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+                  disabled={sendMessage.isPending}
                 />
-                <Button size="icon" className="h-11 w-11 shrink-0">
-                  <Send size={18} />
+                <Button
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                  onClick={handleSend}
+                  disabled={sendMessage.isPending || !messageText.trim()}
+                >
+                  {sendMessage.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send size={18} />
+                  )}
                 </Button>
               </div>
               <p className="text-[10px] text-center text-gray-500 dark:text-gray-400 mt-2">
-                Intervir no chat pausará temporariamente a automação da IA para este paciente.
+                Enviar uma mensagem manual pausa temporariamente a IA para este paciente.
               </p>
             </div>
           </>
