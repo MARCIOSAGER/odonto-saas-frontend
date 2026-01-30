@@ -5,45 +5,132 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
-import { Loader2, Save, Bot, Sparkles, MessageSquare, ShieldCheck, Zap, Info } from "lucide-react"
-import { toast } from "sonner"
+import {
+  Loader2, Save, Bot, Info, Zap, Eye, EyeOff,
+  CheckCircle, XCircle, Key, Cpu, MessageSquare, Shield
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+
+const providers = [
+  { id: "anthropic", name: "Claude", subtitle: "Anthropic", color: "bg-orange-500" },
+  { id: "openai", name: "GPT", subtitle: "OpenAI", color: "bg-green-600" },
+  { id: "google", name: "Gemini", subtitle: "Google", color: "bg-blue-500" },
+]
+
+const modelOptions: Record<string, { value: string; label: string }[]> = {
+  anthropic: [
+    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4 (Recomendado)" },
+    { value: "claude-3-5-haiku-20241022", label: "Claude Haiku 3.5 (Mais rápido)" },
+  ],
+  openai: [
+    { value: "gpt-4o-mini", label: "GPT-4o Mini (Econômico)" },
+    { value: "gpt-4o", label: "GPT-4o (Mais inteligente)" },
+  ],
+  google: [
+    { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash (Rápido)" },
+    { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Avançado)" },
+  ],
+}
 
 export default function AISettingsPage() {
-  const { aiSettings, isLoadingAI, updateAISettings } = useClinic()
+  const { aiSettings, isLoadingAI, updateAISettings, testAI } = useClinic()
 
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<any>({
     ai_enabled: true,
+    ai_provider: "anthropic",
+    ai_api_key: "",
+    ai_model: "claude-3-5-haiku-20241022",
+    ai_temperature: 0.7,
+    max_tokens: 800,
     assistant_name: "Sofia",
-    assistant_personality: "amigável",
+    assistant_personality: "Amigável, profissional e prestativa",
     welcome_message: "Olá! Eu sou a Sofia, sua assistente virtual. Como posso ajudar hoje?",
     fallback_message: "Desculpe, não entendi. Pode repetir?",
-    auto_schedule: true,
-    auto_confirm: true,
+    out_of_hours_message: "Estamos fora do horário de atendimento. Retornaremos em breve!",
+    auto_schedule: false,
+    auto_confirm: false,
     auto_cancel: false,
-    custom_instructions: "Você é uma assistente de uma clínica odontológica de alto padrão. Seja educada e prestativa.",
-    transfer_keywords: "falar com humano, atendente, ajuda",
-    blocked_topics: "política, religião, futebol"
+    notify_on_transfer: true,
+    working_hours_only: false,
+    context_messages: 10,
+    custom_instructions: "",
+    transfer_keywords: "",
+    blocked_topics: "",
   })
+
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [testStatus, setTestStatus] = useState<"idle" | "testing" | "success" | "error">("idle")
 
   useEffect(() => {
     if (aiSettings) {
-      setSettings(prev => ({ ...prev, ...aiSettings }))
+      setSettings((prev: any) => ({
+        ...prev,
+        ...aiSettings,
+        transfer_keywords: Array.isArray(aiSettings.transfer_keywords)
+          ? aiSettings.transfer_keywords.join(", ")
+          : aiSettings.transfer_keywords || "",
+        blocked_topics: Array.isArray(aiSettings.blocked_topics)
+          ? aiSettings.blocked_topics.join(", ")
+          : aiSettings.blocked_topics || "",
+        ai_api_key: "",
+      }))
     }
   }, [aiSettings])
 
+  const handleProviderChange = (providerId: string) => {
+    const models = modelOptions[providerId] || []
+    setSettings((prev: any) => ({
+      ...prev,
+      ai_provider: providerId,
+      ai_model: models[0]?.value || "",
+      ai_api_key: "",
+    }))
+    setTestStatus("idle")
+  }
+
+  const handleTestConnection = async () => {
+    setTestStatus("testing")
+    try {
+      await handleSaveInternal()
+      const result = await testAI.mutateAsync()
+      if (result?.success) {
+        setTestStatus("success")
+      } else {
+        setTestStatus("error")
+      }
+    } catch {
+      setTestStatus("error")
+    }
+  }
+
+  const handleSaveInternal = async () => {
+    const {
+      id, clinic_id, created_at, updated_at,
+      ai_api_key_masked, ai_api_key_set,
+      ...cleanSettings
+    } = settings
+
+    const payload: any = {
+      ...cleanSettings,
+      transfer_keywords: typeof cleanSettings.transfer_keywords === "string"
+        ? cleanSettings.transfer_keywords.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : cleanSettings.transfer_keywords || [],
+      blocked_topics: typeof cleanSettings.blocked_topics === "string"
+        ? cleanSettings.blocked_topics.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : cleanSettings.blocked_topics || [],
+    }
+
+    if (!payload.ai_api_key) {
+      delete payload.ai_api_key
+    }
+
+    await updateAISettings.mutateAsync(payload)
+  }
+
   const handleSave = async () => {
     try {
-      // Remover campos que o backend não aceita
-      const { 
-        id, 
-        clinic_id, 
-        created_at, 
-        updated_at, 
-        ...cleanSettings 
-      } = settings as any
-
-      await updateAISettings.mutateAsync(cleanSettings)
-    } catch (error) {
+      await handleSaveInternal()
+    } catch {
       // Erro já tratado no hook
     }
   }
@@ -56,17 +143,19 @@ export default function AISettingsPage() {
     )
   }
 
+  const currentModels = modelOptions[settings.ai_provider] || []
+
   return (
     <div className="max-w-4xl space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Assistente de IA</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Personalize como sua assistente virtual interage com os pacientes.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Configure a inteligência artificial que atende seus pacientes via WhatsApp.</p>
         </div>
         <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
-          <Switch 
-            checked={settings.ai_enabled} 
-            onCheckedChange={(v) => setSettings({ ...settings, ai_enabled: v })} 
+          <Switch
+            checked={settings.ai_enabled}
+            onCheckedChange={(v: boolean) => setSettings({ ...settings, ai_enabled: v })}
             className="scale-75"
           />
           {settings.ai_enabled ? "IA Ativa" : "IA Inativa"}
@@ -74,7 +163,153 @@ export default function AISettingsPage() {
       </div>
 
       <div className="grid gap-6">
-        {/* Identidade */}
+        {/* Provedor de IA */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Cpu size={20} className="text-primary" />
+              Provedor e Modelo
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Escolha qual provedor de IA será usado para gerar as respostas.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Seleção de provedor */}
+            <div className="grid grid-cols-3 gap-3">
+              {providers.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handleProviderChange(p.id)}
+                  className={cn(
+                    "relative p-4 rounded-xl border-2 transition-all text-left",
+                    settings.ai_provider === p.id
+                      ? "border-primary bg-primary/5 shadow-md"
+                      : "border-border hover:border-gray-300 dark:hover:border-gray-600"
+                  )}
+                >
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center text-white text-xs font-bold mb-2", p.color)}>
+                    {p.name.charAt(0)}
+                  </div>
+                  <div className="font-bold text-sm text-gray-900 dark:text-gray-100">{p.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{p.subtitle}</div>
+                  {settings.ai_provider === p.id && (
+                    <div className="absolute top-2 right-2">
+                      <CheckCircle size={16} className="text-primary" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* API Key */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Key size={14} />
+                API Key - {providers.find(p => p.id === settings.ai_provider)?.name}
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    type={showApiKey ? "text" : "password"}
+                    value={settings.ai_api_key}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, ai_api_key: e.target.value })}
+                    placeholder={
+                      aiSettings?.ai_api_key_set
+                        ? `Chave configurada (${aiSettings.ai_api_key_masked || "****"})`
+                        : "Cole sua API Key aqui..."
+                    }
+                    className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100 pr-10 font-mono text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              {aiSettings?.ai_api_key_set && !settings.ai_api_key && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <CheckCircle size={12} />
+                  Chave API configurada. Deixe em branco para manter a atual.
+                </p>
+              )}
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {settings.ai_provider === "anthropic" && "Obtenha sua chave em console.anthropic.com"}
+                {settings.ai_provider === "openai" && "Obtenha sua chave em platform.openai.com"}
+                {settings.ai_provider === "google" && "Obtenha sua chave em aistudio.google.com"}
+              </p>
+            </div>
+
+            {/* Modelo */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Modelo</label>
+                <select
+                  className="w-full h-11 rounded-md border-none bg-muted/30 px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
+                  value={settings.ai_model}
+                  onChange={(e) => setSettings({ ...settings, ai_model: e.target.value })}
+                >
+                  {currentModels.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Temperatura ({settings.ai_temperature})
+                </label>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  value={settings.ai_temperature}
+                  onChange={(e) => setSettings({ ...settings, ai_temperature: parseFloat(e.target.value) })}
+                  className="w-full h-11 accent-primary"
+                />
+                <div className="flex justify-between text-[10px] text-gray-400">
+                  <span>Preciso</span>
+                  <span>Criativo</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Testar conexão */}
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={handleTestConnection}
+                disabled={testAI.isPending}
+              >
+                {testAI.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Zap size={14} />
+                )}
+                Testar Conexão
+              </Button>
+              {testStatus === "success" && (
+                <span className="text-sm text-green-600 flex items-center gap-1">
+                  <CheckCircle size={14} />
+                  Conexão funcionando!
+                </span>
+              )}
+              {testStatus === "error" && (
+                <span className="text-sm text-red-600 flex items-center gap-1">
+                  <XCircle size={14} />
+                  Falha na conexão. Verifique a API Key.
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Identidade e Personalidade */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
@@ -86,112 +321,163 @@ export default function AISettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Assistente</label>
-                <Input 
+                <Input
                   value={settings.assistant_name}
-                  onChange={(e) => setSettings({ ...settings, assistant_name: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, assistant_name: e.target.value })}
                   placeholder="Ex: Sofia"
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Personalidade</label>
-                <select 
-                  className="w-full h-11 rounded-md border-none bg-muted/30 px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
-                  value={settings.assistant_personality}
-                  onChange={(e) => setSettings({ ...settings, assistant_personality: e.target.value })}
-                >
-                  <option value="formal">Formal e Profissional</option>
-                  <option value="amigável">Amigável e Acolhedora</option>
-                  <option value="casual">Casual e Direta</option>
-                </select>
+                <Input
+                  value={settings.assistant_personality || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, assistant_personality: e.target.value })}
+                  placeholder="Amigável, profissional e prestativa"
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+                />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem de Boas-vindas</label>
-              <textarea 
-                className="flex min-h-[100px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={settings.welcome_message}
+              <textarea
+                className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                value={settings.welcome_message || ""}
                 onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
-                placeholder="Mensagem que a IA envia no início da conversa..."
+                placeholder="Mensagem enviada quando o paciente inicia uma conversa..."
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem de Fallback</label>
+                <Input
+                  value={settings.fallback_message || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, fallback_message: e.target.value })}
+                  placeholder="Quando a IA não entende..."
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Fora do Horário</label>
+                <Input
+                  value={settings.out_of_hours_message || ""}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, out_of_hours_message: e.target.value })}
+                  placeholder="Mensagem fora do expediente..."
+                  className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Capacidades e Permissões */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Shield size={20} className="text-primary" />
+              Capacidades e Permissões
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">Defina o que a IA tem autonomia para fazer no sistema.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <PermissionToggle
+              label="Agendar Consultas"
+              description="Permitir que a IA crie novos agendamentos."
+              checked={settings.auto_schedule}
+              onChange={(v) => setSettings({ ...settings, auto_schedule: v })}
+            />
+            <PermissionToggle
+              label="Confirmar Consultas"
+              description="A IA pode confirmar agendamentos automaticamente."
+              checked={settings.auto_confirm}
+              onChange={(v) => setSettings({ ...settings, auto_confirm: v })}
+            />
+            <PermissionToggle
+              label="Cancelar Consultas"
+              description="Permitir cancelamentos via chat."
+              checked={settings.auto_cancel}
+              onChange={(v) => setSettings({ ...settings, auto_cancel: v })}
+            />
+            <PermissionToggle
+              label="Notificar Transferência"
+              description="Avisar quando transferir para humano."
+              checked={settings.notify_on_transfer}
+              onChange={(v) => setSettings({ ...settings, notify_on_transfer: v })}
+            />
+            <PermissionToggle
+              label="Só Horário Comercial"
+              description="A IA só responde durante o horário de funcionamento."
+              checked={settings.working_hours_only}
+              onChange={(v) => setSettings({ ...settings, working_hours_only: v })}
+            />
+            <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-border bg-muted/10">
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Mensagens de Contexto</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">Quantas mensagens anteriores enviar para a IA.</p>
+              </div>
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={settings.context_messages}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, context_messages: parseInt(e.target.value) || 10 })}
+                className="w-20 h-9 bg-muted/30 border-none text-center text-gray-900 dark:text-gray-100"
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Permissões */}
+        {/* Instruções Avançadas */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Capacidades e Permissões</CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Defina o que a IA tem autonomia para fazer no sistema.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6 sm:grid-cols-2">
-            <PermissionToggle 
-              label="Agendar Consultas" 
-              description="Permitir que a IA crie novos agendamentos."
-              checked={settings.auto_schedule}
-              onChange={(v) => setSettings({ ...settings, auto_schedule: v })}
-            />
-            <PermissionToggle 
-              label="Confirmar Consultas" 
-              description="A IA pode confirmar agendamentos automaticamente."
-              checked={settings.auto_confirm}
-              onChange={(v) => setSettings({ ...settings, auto_confirm: v })}
-            />
-            <PermissionToggle 
-              label="Cancelar Consultas" 
-              description="Permitir cancelamentos via chat."
-              checked={settings.auto_cancel}
-              onChange={(v) => setSettings({ ...settings, auto_cancel: v })}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Instruções Customizadas */}
-        <Card className="border-border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Instruções Avançadas</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <MessageSquare size={20} className="text-primary" />
+              Instruções Avançadas
+            </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">Dê diretrizes específicas sobre o atendimento da sua clínica.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instruções Customizadas</label>
-              <textarea 
+              <textarea
                 className="flex min-h-[120px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                value={settings.custom_instructions}
+                value={settings.custom_instructions || ""}
                 onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
                 placeholder="Ex: 'Sempre mencione que temos estacionamento gratuito.' ou 'Priorize agendamentos para o período da manhã.'"
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Palavras-chave de Transferência</label>
-                <Input 
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Palavras de Transferência</label>
+                <Input
                   value={settings.transfer_keywords}
-                  onChange={(e) => setSettings({ ...settings, transfer_keywords: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, transfer_keywords: e.target.value })}
                   placeholder="humano, atendente, ajuda"
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
+                <p className="text-[10px] text-gray-400">Separadas por vírgula</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tópicos Bloqueados</label>
-                <Input 
+                <Input
                   value={settings.blocked_topics}
-                  onChange={(e) => setSettings({ ...settings, blocked_topics: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, blocked_topics: e.target.value })}
                   placeholder="política, religião"
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
+                <p className="text-[10px] text-gray-400">Separados por vírgula</p>
               </div>
             </div>
-            <div className="mt-4 flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 bg-muted/20 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 bg-muted/20 p-3 rounded-lg">
               <Info size={14} className="shrink-0 mt-0.5" />
-              <p>Essas instruções ajudam a IA a entender o contexto específico do seu consultório e agir de acordo com seus processos internos.</p>
+              <p>Todas as configurações acima são usadas pela IA ao responder mensagens dos pacientes via WhatsApp. A IA utiliza o provedor, modelo e personalidade configurados aqui.</p>
             </div>
           </CardContent>
         </Card>
 
         <div className="flex justify-end pt-4 border-t border-border">
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="w-full sm:w-auto px-12 gap-2 shadow-lg shadow-primary/20"
             onClick={handleSave}
             disabled={updateAISettings.isPending}

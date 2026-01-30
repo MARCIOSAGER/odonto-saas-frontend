@@ -154,6 +154,23 @@ export function useClinic() {
     }
   })
 
+  const testAIMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/test-ai")
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "Conexão com IA funcionando!")
+      } else {
+        toast.error(data?.message || "Falha na conexão com IA")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao testar conexão com IA")
+    }
+  })
+
   return {
     clinic: query.data,
     isLoading: query.isLoading,
@@ -166,6 +183,7 @@ export function useClinic() {
     sendTestMessage: sendTestMessageMutation,
     disconnectWhatsApp: disconnectWhatsAppMutation,
     restartWhatsApp: restartWhatsAppMutation,
-    restoreWhatsApp: restoreWhatsAppMutation
+    restoreWhatsApp: restoreWhatsAppMutation,
+    testAI: testAIMutation
   }
 } 
