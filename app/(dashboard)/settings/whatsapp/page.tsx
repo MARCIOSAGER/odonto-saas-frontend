@@ -310,7 +310,7 @@ export default function WhatsAppSettingsPage() {
           <CardContent className="space-y-4">
             <div className="flex gap-3">
               <Input
-                placeholder="Ex: 11999999999"
+                placeholder="Ex: 5521999999999"
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
                 className="flex-1 bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -328,7 +328,7 @@ export default function WhatsAppSettingsPage() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Insira o número com DDD (sem o +55). Exemplo: 11999999999
+              Informe o número completo com código do país + DDD + número. Brasil: 5521999999999. Números brasileiros (só DDD) são aceitos também.
             </p>
           </CardContent>
         </Card>

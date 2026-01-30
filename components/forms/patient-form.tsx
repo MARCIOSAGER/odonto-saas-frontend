@@ -51,7 +51,7 @@ export function PatientForm({
       phone: cleanPhone,
       cpf: cleanCpf || undefined,
       email: data.email || undefined,
-      birth_date: data.birth_date ? `${data.birth_date}T00:00:00.000Z` : undefined,
+      birth_date: data.birth_date || undefined,
       address: data.address || undefined,
     }
 
