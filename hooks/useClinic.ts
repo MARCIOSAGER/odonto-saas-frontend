@@ -62,7 +62,6 @@ export function useClinic() {
   const testWhatsAppMutation = useMutation({
     mutationFn: async () => {
       const res = await api.post("/clinics/my/test-whatsapp")
-      // Unwrap TransformInterceptor: { success, data: { connected, message }, timestamp }
       return res.data?.data || res.data
     },
     onSuccess: (data) => {
@@ -75,15 +74,44 @@ export function useClinic() {
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Erro ao testar conexão")
     }
-  }) 
+  })
 
-  return { 
-    clinic: query.data, 
-    isLoading: query.isLoading, 
-    updateClinic: updateClinicMutation, 
-    aiSettings: aiSettingsQuery.data, 
-    isLoadingAI: aiSettingsQuery.isLoading, 
-    updateAISettings: updateAISettingsMutation, 
-    testWhatsApp: testWhatsAppMutation 
-  } 
+  const getQrCodeMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.get("/clinics/my/whatsapp-qrcode")
+      return res.data?.data || res.data
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao gerar QR Code")
+    }
+  })
+
+  const sendTestMessageMutation = useMutation({
+    mutationFn: async (phone: string) => {
+      const res = await api.post("/clinics/my/send-test-whatsapp", { phone })
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "Mensagem de teste enviada!")
+      } else {
+        toast.error(data?.message || "Erro ao enviar mensagem de teste")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao enviar mensagem de teste")
+    }
+  })
+
+  return {
+    clinic: query.data,
+    isLoading: query.isLoading,
+    updateClinic: updateClinicMutation,
+    aiSettings: aiSettingsQuery.data,
+    isLoadingAI: aiSettingsQuery.isLoading,
+    updateAISettings: updateAISettingsMutation,
+    testWhatsApp: testWhatsAppMutation,
+    getQrCode: getQrCodeMutation,
+    sendTestMessage: sendTestMessageMutation
+  }
 } 
