@@ -36,3 +36,17 @@ export type ApiError = {
   message?: string
   status?: number
 }
+
+/**
+ * Converte URLs relativas de uploads (/uploads/...) para URL completa do backend.
+ * Necessário porque frontend e backend estão em domínios diferentes.
+ */
+export function getUploadUrl(path: string | null | undefined): string {
+  if (!path) return ''
+  if (path.startsWith('http') || path.startsWith('data:')) return path
+  // NEXT_PUBLIC_API_URL = "https://api-odonto.marciosager.com/api/v1"
+  // Precisamos de: "https://api-odonto.marciosager.com"
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  const backendBase = apiUrl.replace(/\/api.*$/, '')
+  return `${backendBase}${path}`
+}

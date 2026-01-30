@@ -41,13 +41,17 @@ export function PatientForm({
   }, [initialData, reset])
 
   const handleFormSubmit = (data: PatientInput) => {
+    // Formatar telefone e CPF: remover caracteres não numéricos
+    const cleanPhone = data.phone.replace(/\D/g, '')
+    const cleanCpf = data.cpf ? data.cpf.replace(/\D/g, '') : undefined
+
     // Montar objeto de saída
     const patientData: any = {
       name: data.name,
-      phone: data.phone,
-      cpf: data.cpf || undefined,
+      phone: cleanPhone,
+      cpf: cleanCpf || undefined,
       email: data.email || undefined,
-      birth_date: data.birth_date || undefined,
+      birth_date: data.birth_date ? `${data.birth_date}T00:00:00.000Z` : undefined,
       address: data.address || undefined,
     }
 

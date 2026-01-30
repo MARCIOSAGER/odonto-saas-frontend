@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/header"
 import { useEffect } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { hexToHsl } from "@/lib/colors"
+import { getUploadUrl } from "@/lib/api"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { clinic } = useClinic()
@@ -28,8 +29,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       // Favicon dinâmico
-      if (clinic.favicon || clinic.logo) {
-        const faviconUrl = clinic.favicon || clinic.logo
+      if (clinic.favicon_url || clinic.logo_url) {
+        const faviconUrl = getUploadUrl(clinic.favicon_url || clinic.logo_url)
         const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement
         if (link) {
           link.href = faviconUrl

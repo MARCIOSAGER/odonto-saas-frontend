@@ -62,13 +62,20 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
     const fetchData = async () => {
       try {
         const [patientsRes, dentistsRes, servicesRes] = await Promise.all([
-          api.get("/patients"),
-          api.get("/dentists"),
+          api.get("/patients", { params: { limit: 1000 } }),
+          api.get("/dentists", { params: { limit: 1000 } }),
           api.get("/services")
         ])
-        setPatients(patientsRes.data?.data || [])
-        setDentists(dentistsRes.data?.data || [])
-        setServices(servicesRes.data?.data || [])
+        // Unwrap TransformInterceptor + pagination: { success, data: { data: [...], meta }, timestamp }
+        const extractArray = (res: any) => {
+          const payload = res.data?.data || res.data
+          if (Array.isArray(payload)) return payload
+          if (Array.isArray(payload?.data)) return payload.data
+          return []
+        }
+        setPatients(extractArray(patientsRes))
+        setDentists(extractArray(dentistsRes))
+        setServices(extractArray(servicesRes))
       } catch (error) {
         console.error("Erro ao carregar dados:", error)
         toast.error("Erro ao carregar dados do formulário")

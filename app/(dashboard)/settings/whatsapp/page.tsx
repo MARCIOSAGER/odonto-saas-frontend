@@ -1,21 +1,31 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle } from "lucide-react"
+import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle, QrCode, Send } from "lucide-react"
 import { toast } from "sonner"
 
 export default function WhatsAppSettingsPage() {
-  const { clinic, isLoading, updateClinic, testWhatsApp } = useClinic()
-  
+  const { clinic, isLoading, updateClinic, testWhatsApp, getQrCode, sendTestMessage } = useClinic()
+
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
   const [clientToken, setClientToken] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('disconnected')
   const [isTesting, setIsTesting] = useState(false)
+
+  // QR Code state
+  const [qrCodeData, setQrCodeData] = useState<string | null>(null)
+  const [isLoadingQr, setIsLoadingQr] = useState(false)
+  const qrIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const qrAttemptsRef = useRef(0)
+
+  // Test message state
+  const [testPhone, setTestPhone] = useState("")
+  const [isSendingTest, setIsSendingTest] = useState(false)
 
   const handleTestConnection = async () => {
     setIsTesting(true)
@@ -43,6 +53,15 @@ export default function WhatsAppSettingsPage() {
     }
   }, [clinic])
 
+  // Limpar intervalo do QR Code ao desmontar
+  useEffect(() => {
+    return () => {
+      if (qrIntervalRef.current) {
+        clearInterval(qrIntervalRef.current)
+      }
+    }
+  }, [])
+
   const handleSave = async () => {
     try {
       await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token, z_api_client_token: clientToken })
@@ -50,6 +69,79 @@ export default function WhatsAppSettingsPage() {
       handleTestConnection()
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erro ao salvar")
+    }
+  }
+
+  const fetchQrCode = useCallback(async () => {
+    try {
+      const res = await getQrCode.mutateAsync()
+      if (res?.success && res?.qrcode) {
+        // O qrcode pode ser base64 ou uma URL
+        const qrValue = typeof res.qrcode === 'string' ? res.qrcode : res.qrcode?.value || ''
+        if (qrValue) {
+          // Se é base64 puro (sem prefixo data:), adicionar prefixo
+          const imgSrc = qrValue.startsWith('data:') || qrValue.startsWith('http')
+            ? qrValue
+            : `data:image/png;base64,${qrValue}`
+          setQrCodeData(imgSrc)
+          qrAttemptsRef.current = 0
+        }
+      } else {
+        qrAttemptsRef.current++
+        if (qrAttemptsRef.current >= 3) {
+          stopQrPolling()
+          toast.error("Falha ao gerar QR Code. Verifique suas credenciais.")
+        }
+      }
+    } catch (error) {
+      qrAttemptsRef.current++
+      if (qrAttemptsRef.current >= 3) {
+        stopQrPolling()
+      }
+    }
+  }, [getQrCode])
+
+  const startQrPolling = () => {
+    setIsLoadingQr(true)
+    qrAttemptsRef.current = 0
+    fetchQrCode()
+    // QR Code expira a cada 20s, buscar a cada 15s
+    qrIntervalRef.current = setInterval(async () => {
+      // Verificar se conectou
+      try {
+        const status = await testWhatsApp.mutateAsync()
+        if (status?.connected) {
+          stopQrPolling()
+          setConnectionStatus('connected')
+          toast.success("WhatsApp conectado com sucesso!")
+          return
+        }
+      } catch {}
+      fetchQrCode()
+    }, 15000)
+  }
+
+  const stopQrPolling = () => {
+    if (qrIntervalRef.current) {
+      clearInterval(qrIntervalRef.current)
+      qrIntervalRef.current = null
+    }
+    setIsLoadingQr(false)
+    setQrCodeData(null)
+  }
+
+  const handleSendTestMessage = async () => {
+    if (!testPhone.trim()) {
+      toast.error("Informe o número de telefone")
+      return
+    }
+    setIsSendingTest(true)
+    try {
+      await sendTestMessage.mutateAsync(testPhone)
+    } catch (error) {
+      // Error handled by mutation
+    } finally {
+      setIsSendingTest(false)
     }
   }
 
@@ -75,7 +167,7 @@ export default function WhatsAppSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                  connectionStatus === 'connected' ? 'bg-success/10 text-success' : 
+                  connectionStatus === 'connected' ? 'bg-success/10 text-success' :
                   connectionStatus === 'checking' ? 'bg-yellow-100 text-yellow-600' : 'bg-muted text-muted-foreground'
                 }`}>
                   {connectionStatus === 'connected' ? <Smartphone size={24} /> : <AlertCircle size={24} />}
@@ -83,16 +175,16 @@ export default function WhatsAppSettingsPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">Status da Conexão</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {connectionStatus === 'connected' ? 'Sua instância do WhatsApp está ativa e conectada.' : 
+                    {connectionStatus === 'connected' ? 'Sua instância do WhatsApp está ativa e conectada.' :
                      connectionStatus === 'checking' ? 'Verificando conexão...' : 'WhatsApp não configurado ou desconectado.'}
                   </p>
                 </div>
               </div>
-              <Badge 
-                variant={connectionStatus === 'connected' ? "green" : connectionStatus === 'checking' ? "yellow" : "gray"} 
+              <Badge
+                variant={connectionStatus === 'connected' ? "green" : connectionStatus === 'checking' ? "yellow" : "gray"}
                 className="px-3 py-1"
               >
-                {connectionStatus === 'connected' ? 'Conectado' : 
+                {connectionStatus === 'connected' ? 'Conectado' :
                  connectionStatus === 'checking' ? 'Verificando...' : 'Desconectado'}
               </Badge>
             </div>
@@ -139,17 +231,17 @@ export default function WhatsAppSettingsPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 disabled={updateClinic.isPending}
                 className="flex-1 h-11"
               >
                 {updateClinic.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                 Salvar Configuração
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleTestConnection} 
+              <Button
+                variant="outline"
+                onClick={handleTestConnection}
                 disabled={isTesting}
                 className="flex-1 h-11 text-gray-700 dark:text-gray-300"
               >
@@ -160,13 +252,94 @@ export default function WhatsAppSettingsPage() {
           </CardContent>
         </Card>
 
+        {/* QR Code Card */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <QrCode size={20} className="text-primary" />
+              Conectar via QR Code
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Escaneie o QR Code com seu WhatsApp para conectar a instância. O código atualiza automaticamente a cada 15 segundos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {qrCodeData ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-white p-4 rounded-xl shadow-inner border">
+                  <img src={qrCodeData} alt="WhatsApp QR Code" className="w-64 h-64 object-contain" />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Abra o WhatsApp no celular &gt; Menu &gt; Aparelhos conectados &gt; Conectar um aparelho
+                </p>
+                <Button variant="outline" onClick={stopQrPolling} className="text-gray-700 dark:text-gray-300">
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={startQrPolling}
+                disabled={isLoadingQr || !instanceId || !token}
+                variant="outline"
+                className="w-full h-11 text-gray-700 dark:text-gray-300"
+              >
+                {isLoadingQr ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando QR Code...</>
+                ) : (
+                  <><QrCode className="mr-2 h-4 w-4" /> Gerar QR Code</>
+                )}
+              </Button>
+            )}
+            {!instanceId && (
+              <p className="text-xs text-muted-foreground">Salve as credenciais Z-API primeiro para gerar o QR Code.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Test Message Card */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Send size={20} className="text-primary" />
+              Enviar Mensagem de Teste
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Envie uma mensagem de teste para verificar se a integração está funcionando corretamente.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-3">
+              <Input
+                placeholder="Ex: 11999999999"
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                className="flex-1 bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+              />
+              <Button
+                onClick={handleSendTestMessage}
+                disabled={isSendingTest || !testPhone.trim()}
+                className="h-11 px-6"
+              >
+                {isSendingTest ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</>
+                ) : (
+                  <><Send className="mr-2 h-4 w-4" /> Enviar</>
+                )}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Insira o número com DDD (sem o +55). Exemplo: 11999999999
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Info Card */}
         <div className="rounded-lg bg-sky-500/5 border border-sky-500/10 p-4">
           <div className="flex gap-3">
             <MessageSquare className="h-5 w-5 text-sky-600 shrink-0" />
-            <div className="text-sm text-sky-900/80">
+            <div className="text-sm text-sky-900/80 dark:text-sky-300/80">
               <p className="font-semibold mb-1">Como obter essas credenciais?</p>
-              <p>Acesse o painel do <a href="https://z-api.io" target="_blank" className="underline font-medium">Z-API</a>, crie uma instância e copie o Instance ID e o Token gerados para vincular sua conta do WhatsApp Business.</p>
+              <p>Acesse o painel do <a href="https://z-api.io" target="_blank" className="underline font-medium">Z-API</a>, crie uma instância e copie o Instance ID, Token e Client-Token gerados para vincular sua conta do WhatsApp Business.</p>
             </div>
           </div>
         </div>

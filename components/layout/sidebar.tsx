@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
+import { getUploadUrl } from "@/lib/api"
 
 const mainItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
@@ -64,8 +65,8 @@ export function Sidebar() {
       {/* Logo Section */}
       <div className="flex h-16 items-center px-4 border-b border-border">
         <Link href="/home" className="flex items-center gap-3 group">
-          {clinic?.logo ? (
-            <img src={clinic.logo} alt={clinic.name} className="h-8 object-contain transition-transform group-hover:scale-105" />
+          {clinic?.logo_url ? (
+            <img src={getUploadUrl(clinic.logo_url)} alt={clinic.name} className="h-8 object-contain transition-transform group-hover:scale-105" />
           ) : (
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

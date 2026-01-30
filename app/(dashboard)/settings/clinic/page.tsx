@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { hexToHsl } from "@/lib/colors"
+import { getUploadUrl } from "@/lib/api"
 
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
@@ -48,8 +49,8 @@ export default function ClinicSettingsPage() {
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
       })
-      if (clinic.logo) {
-        setLogoPreview(clinic.logo)
+      if (clinic.logo_url) {
+        setLogoPreview(getUploadUrl(clinic.logo_url))
       }
       // Aplicar cores iniciais
       try {
@@ -113,18 +114,17 @@ export default function ClinicSettingsPage() {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
-      if (response.data?.success) {
-        toast.success("Logo e favicon atualizados com sucesso!")
-        if (response.data?.data?.logo) {
-          const newLogo = response.data.data.logo
-          setLogoPreview(newLogo)
-          // Atualizar favicon na página atual
-          updateFavicon(response.data?.data?.favicon || newLogo)
-        }
+      // TransformInterceptor wraps: { success, data: { logo_url: "..." }, timestamp }
+      const logoData = response.data?.data || response.data
+      const newLogoUrl = logoData?.logo_url
+      toast.success("Logo e favicon atualizados com sucesso!")
+      if (newLogoUrl) {
+        setLogoPreview(newLogoUrl)
+        updateFavicon(newLogoUrl)
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erro ao enviar logo")
-      setLogoPreview(clinic?.logo || null)
+      setLogoPreview(clinic?.logo_url || null)
     } finally {
       setUploading(false)
     }
