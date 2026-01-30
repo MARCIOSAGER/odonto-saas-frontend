@@ -76,7 +76,7 @@ export function Header() {
             <DropdownMenuItem onClick={() => router.push("/settings")}>
               ⚙️ Configurações
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push("/docs")}>
               📖 Documentação
             </DropdownMenuItem>
             <DropdownMenuItem>
