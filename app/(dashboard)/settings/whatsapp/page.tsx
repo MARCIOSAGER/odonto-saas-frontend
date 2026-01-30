@@ -21,7 +21,7 @@ export default function WhatsAppSettingsPage() {
     setConnectionStatus('checking')
     try {
       const res = await testWhatsApp.mutateAsync()
-      if (res?.success) {
+      if (res?.connected) {
         setConnectionStatus('connected')
       } else {
         setConnectionStatus('disconnected')

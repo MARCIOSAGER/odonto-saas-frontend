@@ -31,7 +31,8 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
           }
         })
         console.log('useAppointments API Raw Response:', res.data)
-        return res.data
+        // Unwrap TransformInterceptor: { success, data: actualPayload, timestamp }
+        return res.data?.data || res.data
       } catch (error) {
         console.error("Erro ao buscar agendamentos:", error)
         throw error
