@@ -17,19 +17,48 @@ const providers = [
   { id: "google", name: "Gemini", subtitle: "Google", color: "bg-blue-500" },
 ]
 
-const modelOptions: Record<string, { value: string; label: string }[]> = {
+interface ModelOption {
+  value: string
+  label: string
+  pricing: string
+  badge?: "economico" | "recomendado" | "premium" | "gratis"
+}
+
+const modelOptions: Record<string, ModelOption[]> = {
   anthropic: [
-    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4 (Recomendado)" },
-    { value: "claude-3-5-haiku-20241022", label: "Claude Haiku 3.5 (Mais rápido)" },
+    { value: "claude-3-5-haiku-20241022", label: "Claude Haiku 3.5", pricing: "$0.25 / $1.25 por 1M tokens", badge: "economico" },
+    { value: "claude-haiku-4-5-20251101", label: "Claude Haiku 4.5", pricing: "$1.00 / $5.00 por 1M tokens" },
+    { value: "claude-sonnet-4-20250514", label: "Claude Sonnet 4", pricing: "$3.00 / $15.00 por 1M tokens", badge: "recomendado" },
+    { value: "claude-sonnet-4-5-20251101", label: "Claude Sonnet 4.5", pricing: "$3.00 / $15.00 por 1M tokens" },
+    { value: "claude-opus-4-5-20251101", label: "Claude Opus 4.5", pricing: "$5.00 / $25.00 por 1M tokens", badge: "premium" },
   ],
   openai: [
-    { value: "gpt-4o-mini", label: "GPT-4o Mini (Econômico)" },
-    { value: "gpt-4o", label: "GPT-4o (Mais inteligente)" },
+    { value: "gpt-4o-mini", label: "GPT-4o Mini", pricing: "$0.15 / $0.60 por 1M tokens", badge: "economico" },
+    { value: "gpt-4.1-mini", label: "GPT-4.1 Mini", pricing: "$0.40 / $1.60 por 1M tokens" },
+    { value: "gpt-4o", label: "GPT-4o", pricing: "$2.50 / $10.00 por 1M tokens", badge: "recomendado" },
+    { value: "gpt-4.1", label: "GPT-4.1", pricing: "$2.00 / $8.00 por 1M tokens" },
+    { value: "gpt-4-turbo", label: "GPT-4 Turbo", pricing: "$10.00 / $30.00 por 1M tokens", badge: "premium" },
   ],
   google: [
-    { value: "gemini-1.5-flash", label: "Gemini 1.5 Flash (Rápido)" },
-    { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro (Avançado)" },
+    { value: "gemini-2.0-flash-lite", label: "Gemini 2.0 Flash-Lite", pricing: "$0.075 / $0.30 por 1M tokens", badge: "economico" },
+    { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash", pricing: "$0.10 / $0.40 por 1M tokens" },
+    { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash", pricing: "$0.15 / $0.60 por 1M tokens", badge: "recomendado" },
+    { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro", pricing: "$1.25 / $5.00 por 1M tokens" },
+    { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro", pricing: "$1.25 / $10.00 por 1M tokens", badge: "premium" },
   ],
+}
+
+const badgeStyles: Record<string, { label: string; className: string }> = {
+  economico: { label: "Econômico", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  recomendado: { label: "Recomendado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  premium: { label: "Premium", className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+  gratis: { label: "Grátis", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
+}
+
+const providerInfo: Record<string, string> = {
+  anthropic: "Excelente compreensão de contexto e tom profissional. Ideal para atendimento ao paciente.",
+  openai: "Grande variedade de modelos. GPT-4o Mini é a opção mais econômica do mercado.",
+  google: "Modelos Flash são muito rápidos e econômicos. Gemini 2.5 Flash tem tier gratuito generoso.",
 }
 
 export default function AISettingsPage() {
@@ -201,6 +230,9 @@ export default function AISettingsPage() {
                 </button>
               ))}
             </div>
+            {providerInfo[settings.ai_provider] && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 italic">{providerInfo[settings.ai_provider]}</p>
+            )}
 
             {/* API Key */}
             <div className="space-y-2">
@@ -244,19 +276,48 @@ export default function AISettingsPage() {
             </div>
 
             {/* Modelo */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Modelo</label>
-                <select
-                  className="w-full h-11 rounded-md border-none bg-muted/30 px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
-                  value={settings.ai_model}
-                  onChange={(e) => setSettings({ ...settings, ai_model: e.target.value })}
-                >
-                  {currentModels.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Modelo</label>
+              <div className="grid gap-2">
+                {currentModels.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setSettings({ ...settings, ai_model: m.value })}
+                    className={cn(
+                      "flex items-center justify-between p-3 rounded-lg border transition-all text-left",
+                      settings.ai_model === m.value
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border hover:border-gray-300 dark:hover:border-gray-600 bg-muted/10"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "h-4 w-4 rounded-full border-2 flex items-center justify-center",
+                        settings.ai_model === m.value ? "border-primary" : "border-gray-300 dark:border-gray-600"
+                      )}>
+                        {settings.ai_model === m.value && (
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{m.label}</span>
+                          {m.badge && badgeStyles[m.badge] && (
+                            <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", badgeStyles[m.badge].className)}>
+                              {badgeStyles[m.badge].label}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400">{m.pricing}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
+              <p className="text-[10px] text-gray-400">Preços: entrada / saída por 1 milhão de tokens. Uma conversa típica consome ~500-2000 tokens.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Temperatura ({settings.ai_temperature})
