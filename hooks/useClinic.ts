@@ -61,21 +61,18 @@ export function useClinic() {
 
   const testWhatsAppMutation = useMutation({ 
     mutationFn: async () => { 
-      try {
-        // O endpoint /clinics/my/test-whatsapp não existe no backend ainda
-        // Simular delay e sucesso para evitar 404
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        return { success: true }
-      } catch (error) {
-        console.error("Erro ao testar WhatsApp:", error)
-        throw error
+      const res = await api.post("/clinics/my/test-whatsapp") 
+      return res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success("WhatsApp conectado com sucesso!")
+      } else {
+        toast.error("WhatsApp desconectado")
       }
     },
-    onSuccess: () => {
-      toast.success("Teste de WhatsApp simulado com sucesso")
-    },
-    onError: () => {
-      toast.error("Funcionalidade em desenvolvimento")
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao testar conexão")
     }
   }) 
 

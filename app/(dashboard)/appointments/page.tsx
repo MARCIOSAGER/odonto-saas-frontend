@@ -33,10 +33,14 @@ function AppointmentsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { appointments = [], isLoading, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
+  const { appointments, isLoading, isError, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
 
-  // Garantir que appointments é sempre um array
-  const safeAppointments = useMemo(() => Array.isArray(appointments) ? appointments : [], [appointments])
+  // Garantir que appointments é sempre um array (Segurança Extra)
+  const safeAppointments = useMemo(() => {
+    if (!appointments) return []
+    if (Array.isArray(appointments)) return appointments
+    return []
+  }, [appointments])
 
   useEffect(() => {
     if (searchParams.get("new") === "true") {
@@ -105,6 +109,25 @@ function AppointmentsContent() {
       }),
     [safeAppointments]
   )
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-destructive font-medium">Erro ao carregar agendamentos</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Tentar novamente
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 pb-12">

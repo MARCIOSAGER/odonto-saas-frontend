@@ -13,7 +13,7 @@ export function PatientForm({
   loading,
   initialData 
 }: { 
-  onSubmit: (values: PatientInput) => void; 
+  onSubmit: (values: any) => void; 
   onCancel?: () => void; 
   loading?: boolean;
   initialData?: any;
@@ -32,7 +32,7 @@ export function PatientForm({
         phone: initialData.phone || initialData.telefone,
         cpf: initialData.cpf,
         email: initialData.email,
-        birth_date: initialData.birth_date || initialData.dataNascimento,
+        birth_date: initialData.birth_date ? initialData.birth_date.split('T')[0] : "",
         address: initialData.address || initialData.endereco,
         status: initialData.status
       }
@@ -40,8 +40,27 @@ export function PatientForm({
     }
   }, [initialData, reset])
 
+  const handleFormSubmit = (data: PatientInput) => {
+    // Montar objeto de saída
+    const patientData: any = {
+      name: data.name,
+      phone: data.phone,
+      cpf: data.cpf || undefined,
+      email: data.email || undefined,
+      birth_date: data.birth_date || undefined,
+      address: data.address || undefined,
+    }
+
+    // Status só no PUT (edição), não no POST (criação)
+    if (isEditing) {
+      patientData.status = data.status
+    }
+
+    onSubmit(patientData)
+  }
+
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} aria-label="Formulário de paciente">
+    <form className="space-y-4" onSubmit={handleSubmit(handleFormSubmit)} aria-label="Formulário de paciente">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1.5">
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome completo *</label>
@@ -65,13 +84,15 @@ export function PatientForm({
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Data nascimento</label>
           <Input type="date" {...register("birth_date")} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" />
         </div>
-        <div className="space-y-1.5">
-          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Status</label>
-          <select className="h-10 w-full rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" {...register("status")}>
-            <option value="Ativo">Ativo</option>
-            <option value="Inativo">Inativo</option>
-          </select>
-        </div>
+        {isEditing && (
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Status</label>
+            <select className="h-10 w-full rounded-md border border-input bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" {...register("status")}>
+              <option value="Ativo">Ativo</option>
+              <option value="Inativo">Inativo</option>
+            </select>
+          </div>
+        )}
         <div className="md:col-span-2 space-y-1.5">
           <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Endereço</label>
           <textarea 

@@ -23,10 +23,14 @@ export default function DentistsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { dentists = [], isLoading, createDentist, deleteDentist, updateDentist } = useDentists()
+  const { dentists, isLoading, isError, createDentist, deleteDentist, updateDentist } = useDentists()
 
   // Garantir que dentists é sempre um array
-  const safeDentists = useMemo(() => Array.isArray(dentists) ? dentists : [], [dentists])
+  const safeDentists = useMemo(() => {
+    if (!dentists) return []
+    if (Array.isArray(dentists)) return dentists
+    return []
+  }, [dentists])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -55,12 +59,34 @@ export default function DentistsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
+      console.log('Deletando dentista:', deleteId)
       await deleteDentist.mutateAsync(deleteId)
-    } catch (error) {
-      // Erro já tratado no hook
+      toast.success("Dentista excluído com sucesso!")
+    } catch (error: any) {
+      console.error('Erro ao excluir dentista:', error)
+      toast.error(error.response?.data?.message || "Erro ao excluir dentista")
     } finally {
       setDeleteId(null)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-destructive font-medium">Erro ao carregar dentistas</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Tentar novamente
+        </Button>
+      </div>
+    )
   }
 
   return (
