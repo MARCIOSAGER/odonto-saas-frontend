@@ -52,7 +52,9 @@ export default function DashboardHome() {
     queryFn: async () => {
       try {
         const res = await api.get("/appointments", { params: { date: new Date().toISOString().split('T')[0] } })
-        const data = res.data?.data
+        // Unwrap TransformInterceptor: { success, data: { data: [...], meta }, timestamp }
+        const payload = res.data?.data || res.data
+        const data = payload?.data || payload
         return Array.isArray(data) ? data : []
       } catch (error) {
         console.error("Erro ao buscar agendamentos de hoje:", error)
@@ -76,7 +78,9 @@ export default function DashboardHome() {
           } 
         })
         
-        const appointments = res.data?.data || []
+        // Unwrap TransformInterceptor: { success, data: { data: [...], meta }, timestamp }
+        const payload = res.data?.data || res.data
+        const appointments = Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : [])
         const days = eachDayOfInterval({ start, end })
         
         return days.map(day => {

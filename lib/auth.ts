@@ -2,7 +2,7 @@ import type { NextAuthOptions } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import axios from "axios"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api-odonto.marciosager.com/api/v1"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,

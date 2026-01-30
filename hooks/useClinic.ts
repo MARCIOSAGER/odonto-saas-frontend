@@ -59,16 +59,17 @@ export function useClinic() {
     } 
   }) 
 
-  const testWhatsAppMutation = useMutation({ 
-    mutationFn: async () => { 
-      const res = await api.post("/clinics/my/test-whatsapp") 
-      return res.data
+  const testWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/test-whatsapp")
+      // Unwrap TransformInterceptor: { success, data: { connected, message }, timestamp }
+      return res.data?.data || res.data
     },
     onSuccess: (data) => {
-      if (data?.success) {
-        toast.success("WhatsApp conectado com sucesso!")
+      if (data?.connected) {
+        toast.success(data?.message || "WhatsApp conectado com sucesso!")
       } else {
-        toast.error("WhatsApp desconectado")
+        toast.error(data?.message || "WhatsApp desconectado")
       }
     },
     onError: (err: any) => {
