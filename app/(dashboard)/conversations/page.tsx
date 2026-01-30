@@ -1,12 +1,15 @@
 "use client"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { useConversations, useMessages, useSendMessage } from "@/hooks/useConversations"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Search, Send, MessageSquare, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog"
+import { Search, Send, MessageSquare, Loader2, Plus, User, Phone } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { api } from "@/lib/api"
+import { toast } from "sonner"
 
 export default function ConversationsPage() {
   const [search, setSearch] = useState("")
@@ -14,7 +17,14 @@ export default function ConversationsPage() {
   const [messageText, setMessageText] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { conversations, isLoading: loadingConversations } = useConversations(search)
+  // Nova conversa
+  const [showNewChat, setShowNewChat] = useState(false)
+  const [newChatSearch, setNewChatSearch] = useState("")
+  const [newChatPhone, setNewChatPhone] = useState("")
+  const [patients, setPatients] = useState<any[]>([])
+  const [loadingPatients, setLoadingPatients] = useState(false)
+
+  const { conversations, isLoading: loadingConversations, refetch: refetchConversations } = useConversations(search)
   const { messages, patient, isLoading: loadingChat } = useMessages(selectedPhone)
   const sendMessage = useSendMessage()
 
@@ -30,11 +40,29 @@ export default function ConversationsPage() {
   // Mark as read when selecting a conversation
   useEffect(() => {
     if (selectedPhone) {
-      import("@/lib/api").then(({ api }) => {
-        api.post(`/conversations/${selectedPhone}/read`).catch(() => {})
-      })
+      api.post(`/conversations/${selectedPhone}/read`).catch(() => {})
     }
   }, [selectedPhone])
+
+  // Buscar pacientes para nova conversa
+  useEffect(() => {
+    if (!showNewChat) return
+    setLoadingPatients(true)
+    api.get("/patients", { params: { q: newChatSearch, limit: 50 } })
+      .then((res) => {
+        const data = res.data?.data
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : [])
+        setPatients(arr)
+      })
+      .catch(() => setPatients([]))
+      .finally(() => setLoadingPatients(false))
+  }, [showNewChat, newChatSearch])
+
+  // Filtrar pacientes que tem telefone
+  const patientsWithPhone = useMemo(() =>
+    patients.filter((p: any) => p.phone),
+    [patients]
+  )
 
   const handleSend = () => {
     if (!messageText.trim() || !selectedPhone) return
@@ -51,17 +79,21 @@ export default function ConversationsPage() {
     }
   }
 
+  const handleStartChat = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, "")
+    if (!cleaned) {
+      toast.error("Informe um número de telefone válido")
+      return
+    }
+    setSelectedPhone(cleaned)
+    setShowNewChat(false)
+    setNewChatSearch("")
+    setNewChatPhone("")
+  }
+
   const formatTime = (dateStr: string) => {
     try {
       return format(new Date(dateStr), "HH:mm")
-    } catch {
-      return ""
-    }
-  }
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "dd/MM/yyyy HH:mm")
     } catch {
       return ""
     }
@@ -71,14 +103,24 @@ export default function ConversationsPage() {
     <div className="flex h-[calc(100vh-120px)] gap-6 overflow-hidden">
       {/* Lista de Conversas */}
       <div className="w-80 flex flex-col gap-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-          <Input
-            placeholder="Buscar paciente..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 h-11 bg-card border-border shadow-sm text-gray-900 dark:text-gray-100"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <Input
+              placeholder="Buscar paciente..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 h-11 bg-card border-border shadow-sm text-gray-900 dark:text-gray-100"
+            />
+          </div>
+          <Button
+            size="icon"
+            className="h-11 w-11 shrink-0"
+            onClick={() => setShowNewChat(true)}
+            title="Nova conversa"
+          >
+            <Plus size={18} />
+          </Button>
         </div>
 
         <Card className="flex-1 border-border bg-card shadow-sm overflow-hidden">
@@ -88,7 +130,13 @@ export default function ConversationsPage() {
             ) : (
               <div className="divide-y divide-border">
                 {!Array.isArray(conversations) || conversations.length === 0 ? (
-                  <p className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">Nenhuma conversa encontrada.</p>
+                  <div className="p-8 text-center space-y-3">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma conversa encontrada.</p>
+                    <Button variant="outline" size="sm" onClick={() => setShowNewChat(true)} className="gap-2">
+                      <Plus size={14} />
+                      Iniciar conversa
+                    </Button>
+                  </div>
                 ) : (
                   conversations.map((c: any) => (
                     <button
@@ -154,7 +202,9 @@ export default function ConversationsPage() {
               {loadingChat ? (
                 <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
               ) : !Array.isArray(messages) || messages.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400 text-sm">Nenhuma mensagem nesta conversa.</div>
+                <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
+                  Nenhuma mensagem nesta conversa. Envie a primeira mensagem abaixo.
+                </div>
               ) : (
                 messages.map((m: any) => (
                   <div
@@ -218,12 +268,98 @@ export default function ConversationsPage() {
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Suas Conversas</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                Selecione uma conversa ao lado para visualizar o histórico e interagir com o paciente.
+                Selecione uma conversa ao lado ou inicie uma nova para interagir com o paciente.
               </p>
             </div>
+            <Button onClick={() => setShowNewChat(true)} className="gap-2">
+              <Plus size={16} />
+              Nova Conversa
+            </Button>
           </div>
         )}
       </Card>
+
+      {/* Dialog Nova Conversa */}
+      <Dialog open={showNewChat} onOpenChange={setShowNewChat}>
+        <DialogContent className="dark:bg-gray-900">
+          <DialogHeader title="Nova Conversa" description="Selecione um paciente ou digite um número de telefone." />
+          <div className="p-4 space-y-4">
+            {/* Opção 1: Digitar número */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Phone size={14} />
+                Enviar para um número
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Ex: 5521999999999"
+                  value={newChatPhone}
+                  onChange={(e) => setNewChatPhone(e.target.value)}
+                  className="flex-1 bg-muted/30 border-none h-10 text-gray-900 dark:text-gray-100"
+                />
+                <Button
+                  size="sm"
+                  className="h-10 px-4"
+                  disabled={!newChatPhone.replace(/\D/g, "")}
+                  onClick={() => handleStartChat(newChatPhone)}
+                >
+                  Iniciar
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Informe o número com DDI + DDD + número (ex: 5521999999999).
+              </p>
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">ou selecione um paciente</span>
+              </div>
+            </div>
+
+            {/* Opção 2: Selecionar paciente */}
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Buscar paciente por nome..."
+                  value={newChatSearch}
+                  onChange={(e) => setNewChatSearch(e.target.value)}
+                  className="pl-10 bg-muted/30 border-none h-10 text-gray-900 dark:text-gray-100"
+                />
+              </div>
+              <div className="max-h-48 overflow-y-auto rounded-md border border-border">
+                {loadingPatients ? (
+                  <div className="flex p-4 justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+                ) : patientsWithPhone.length === 0 ? (
+                  <p className="p-4 text-center text-sm text-muted-foreground">
+                    {patients.length > 0 ? "Nenhum paciente com telefone cadastrado." : "Nenhum paciente encontrado."}
+                  </p>
+                ) : (
+                  patientsWithPhone.map((p: any) => (
+                    <button
+                      key={p.id}
+                      onClick={() => handleStartChat(p.phone)}
+                      className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left border-b border-border last:border-b-0"
+                    >
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                        {(p.name || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate block">{p.name}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{p.phone}</span>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
