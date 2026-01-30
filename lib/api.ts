@@ -44,11 +44,15 @@ export type ApiError = {
 export function getUploadUrl(path: string | null | undefined): string {
   if (!path) return ''
   if (path.startsWith('http') || path.startsWith('data:')) return path
-  // NEXT_PUBLIC_API_URL = "https://api-odonto.marciosager.com/api/v1"
-  // Precisamos de: "https://api-odonto.marciosager.com"
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-  const backendBase = apiUrl.replace(/\/api.*$/, '')
-  // Garantir que o path comece com /
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  return `${backendBase}${normalizedPath}`
+  try {
+    const url = new URL(apiUrl)
+    const backendBase = url.origin // "https://api-odonto.marciosager.com"
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`
+    return `${backendBase}${normalizedPath}`
+  } catch {
+    // Fallback caso a URL seja inválida
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`
+    return `${apiUrl}${normalizedPath}`
+  }
 }
