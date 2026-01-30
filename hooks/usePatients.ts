@@ -85,8 +85,8 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
   })
 
   return {
-    patients: query.data?.data || [],
-    meta: query.data?.meta,
+    patients: Array.isArray(query.data?.data) ? query.data.data : (Array.isArray(query.data) ? query.data : []),
+    meta: query.data?.meta || { total: 0, pages: 0 },
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

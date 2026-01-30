@@ -33,7 +33,10 @@ function AppointmentsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { appointments, isLoading, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
+  const { appointments = [], isLoading, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
+
+  // Garantir que appointments é sempre um array
+  const safeAppointments = useMemo(() => Array.isArray(appointments) ? appointments : [], [appointments])
 
   useEffect(() => {
     if (searchParams.get("new") === "true") {
@@ -88,21 +91,19 @@ function AppointmentsContent() {
 
   const events = useMemo(
     () =>
-      Array.isArray(appointments) 
-        ? appointments.map((a: any) => {
-            const start = new Date(a.date_time || `${a.date}T${a.hora}:00`)
-            const end = new Date(start)
-            end.setHours(start.getHours() + 1)
-            return { 
-              id: a.id, 
-              title: `${a.patient_name || a.paciente} • ${a.service_name || a.servico}`, 
-              start, 
-              end, 
-              resource: a 
-            }
-          })
-        : [],
-    [appointments]
+      safeAppointments.map((a: any) => {
+        const start = new Date(a.date_time || `${a.date}T${a.hora}:00`)
+        const end = new Date(start)
+        end.setHours(start.getHours() + 1)
+        return { 
+          id: a.id, 
+          title: `${a.patient_name || a.paciente} • ${a.service_name || a.servico}`, 
+          start, 
+          end, 
+          resource: a 
+        }
+      }),
+    [safeAppointments]
   )
 
   return (
@@ -201,14 +202,14 @@ function AppointmentsContent() {
                   </TR>
                 </THead>
                 <TBody>
-                  {!Array.isArray(appointments) || appointments.length === 0 ? (
+                  {safeAppointments.length === 0 ? (
                     <TR>
                       <TD colSpan={6} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum agendamento encontrado.
                       </TD>
                     </TR>
                   ) : (
-                    appointments.map((a: any) => (
+                    safeAppointments.map((a: any) => (
                       <TR key={a.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex flex-col">

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
 import { Search, Plus, FilterX, Loader2, Edit2, Trash2 } from "lucide-react"
@@ -29,12 +29,15 @@ export default function PatientsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { 
-    patients, 
+    patients = [], 
     isLoading, 
     createPatient, 
     updatePatient, 
     deletePatient 
   } = usePatients(search, status)
+
+  // Garantir que patients é sempre um array
+  const safePatients = useMemo(() => Array.isArray(patients) ? patients : [], [patients])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -179,14 +182,14 @@ export default function PatientsPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {!Array.isArray(patients) || patients.length === 0 ? (
+                  {safePatients.length === 0 ? (
                     <TR>
                       <TD colSpan={5} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum paciente encontrado.
                       </TD>
                     </TR>
                   ) : (
-                    patients.map((p: any) => (
+                    safePatients.map((p: any) => (
                       <TR key={p.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">

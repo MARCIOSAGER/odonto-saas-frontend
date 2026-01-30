@@ -1,6 +1,6 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
@@ -23,7 +23,10 @@ export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { services, isLoading, createService, deleteService, updateService } = useServices()
+  const { services = [], isLoading, createService, deleteService, updateService } = useServices()
+
+  // Garantir que services é sempre um array
+  const safeServices = useMemo(() => Array.isArray(services) ? services : [], [services])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -131,14 +134,14 @@ export default function ServicesPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {!Array.isArray(services) || services.length === 0 ? (
+                  {safeServices.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum serviço cadastrado.
                       </TD>
                     </TR>
                   ) : (
-                    services.map((s: any) => (
+                    safeServices.map((s: any) => (
                       <TR key={s.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">

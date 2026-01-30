@@ -100,8 +100,8 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
   })
 
   return {
-    appointments: query.data?.data || [],
-    meta: query.data?.meta,
+    appointments: Array.isArray(query.data?.data) ? query.data.data : (Array.isArray(query.data) ? query.data : []),
+    meta: query.data?.meta || { total: 0, pages: 0 },
     isLoading: query.isLoading,
     isError: query.isError,
     createAppointment: createMutation,
