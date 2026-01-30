@@ -29,15 +29,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
 
       // Favicon dinâmico da clínica (sobrescreve o favicon padrão da plataforma)
-      if (clinic.favicon_url || clinic.logo_url) {
-        const faviconUrl = getUploadUrl(clinic.favicon_url || clinic.logo_url)
-        if (faviconUrl) {
-          document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(el => el.remove())
-          const newLink = document.createElement('link')
-          newLink.rel = 'icon'
-          newLink.href = `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
-          document.head.appendChild(newLink)
+      try {
+        if (clinic.favicon_url || clinic.logo_url) {
+          const faviconUrl = getUploadUrl(clinic.favicon_url || clinic.logo_url)
+          if (faviconUrl && faviconUrl.startsWith('http')) {
+            const existing = document.querySelector("link[rel='icon']") as HTMLLinkElement
+            if (existing) {
+              existing.href = faviconUrl
+            } else {
+              const newLink = document.createElement('link')
+              newLink.rel = 'icon'
+              newLink.href = faviconUrl
+              document.head.appendChild(newLink)
+            }
+          }
         }
+      } catch (e) {
+        console.error("Erro ao atualizar favicon:", e)
       }
     }
   }, [clinic])
