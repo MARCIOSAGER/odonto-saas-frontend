@@ -38,16 +38,20 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
     }
   })
 
-  // Extrair patients com segurança máxima
+  // Extrair patients: desempacotar TransformInterceptor + paginação
+  // API retorna: { success, data: { data: [...], meta: {...} }, timestamp }
   const patients = useMemo(() => {
     const data = query.data
     if (!data) return []
     if (Array.isArray(data)) return data
-    if (Array.isArray(data.data)) return data.data
+    // TransformInterceptor: data.data = { data: [...], meta }
+    const payload = data.data
+    if (Array.isArray(payload)) return payload
+    if (payload && Array.isArray(payload.data)) return payload.data
     return []
   }, [query.data])
 
-  const meta = query.data?.meta || { total: 0, pages: 0 }
+  const meta = query.data?.data?.meta || query.data?.meta || { total: 0, pages: 0 }
 
   useEffect(() => {
     if (query.data) {

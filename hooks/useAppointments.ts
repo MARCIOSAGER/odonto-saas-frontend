@@ -40,17 +40,19 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     }
   })
 
-  // Extrair appointments com segurança máxima
+  // Extrair appointments: desempacotar TransformInterceptor + paginação
+  // queryFn já faz res.data?.data, então query.data = { data: [...], meta } ou [...]
   const appointments = useMemo(() => {
     const data = query.data
     if (!data) return []
     if (Array.isArray(data)) return data
     if (Array.isArray(data.data)) return data.data
-    if (data.appointments && Array.isArray(data.appointments)) return data.appointments
+    // Caso TransformInterceptor não tenha sido desempacotado
+    if (data.data && Array.isArray(data.data.data)) return data.data.data
     return []
   }, [query.data])
 
-  const meta = query.data?.meta || { total: 0, pages: 0 }
+  const meta = query.data?.meta || query.data?.data?.meta || { total: 0, pages: 0 }
 
   useEffect(() => {
     if (query.data) {
