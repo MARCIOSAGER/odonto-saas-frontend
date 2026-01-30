@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle, QrCode, Send } from "lucide-react"
+import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle, QrCode, Send, Power, RotateCcw, Unplug } from "lucide-react"
 import { toast } from "sonner"
+import { api } from "@/lib/api"
 
 export default function WhatsAppSettingsPage() {
-  const { clinic, isLoading, updateClinic, testWhatsApp, getQrCode, sendTestMessage } = useClinic()
+  const { clinic, isLoading, updateClinic, testWhatsApp, getQrCode, sendTestMessage, disconnectWhatsApp, restartWhatsApp, restoreWhatsApp } = useClinic()
 
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
   const [clientToken, setClientToken] = useState("")
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('disconnected')
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
   const [isTesting, setIsTesting] = useState(false)
 
   // QR Code state
@@ -27,6 +28,24 @@ export default function WhatsAppSettingsPage() {
   const [testPhone, setTestPhone] = useState("")
   const [isSendingTest, setIsSendingTest] = useState(false)
 
+  const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Verificar status silenciosamente - chama API direta, sem toast
+  const checkStatusSilently = useCallback(async () => {
+    try {
+      const res = await api.post("/clinics/my/test-whatsapp")
+      const data = res.data?.data || res.data
+      if (data?.connected) {
+        setConnectionStatus('connected')
+      } else {
+        setConnectionStatus('disconnected')
+      }
+    } catch {
+      setConnectionStatus('disconnected')
+    }
+  }, [])
+
+  // Teste manual com feedback (toast)
   const handleTestConnection = async () => {
     setIsTesting(true)
     setConnectionStatus('checking')
@@ -44,22 +63,6 @@ export default function WhatsAppSettingsPage() {
     }
   }
 
-  const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Verificar status silenciosamente (sem alterar isTesting)
-  const checkStatusSilently = useCallback(async () => {
-    try {
-      const res = await testWhatsApp.mutateAsync()
-      if (res?.connected) {
-        setConnectionStatus('connected')
-      } else {
-        setConnectionStatus('disconnected')
-      }
-    } catch {
-      setConnectionStatus('disconnected')
-    }
-  }, [testWhatsApp])
-
   // Carregar credenciais + verificar status automaticamente
   useEffect(() => {
     if (clinic) {
@@ -67,13 +70,13 @@ export default function WhatsAppSettingsPage() {
       setToken(clinic.z_api_token || "")
       setClientToken(clinic.z_api_client_token || "")
 
-      // Auto-check se credenciais existem
       if (clinic.z_api_instance && clinic.z_api_token) {
-        setConnectionStatus('checking')
         checkStatusSilently()
+      } else {
+        setConnectionStatus('disconnected')
       }
     }
-  }, [clinic])
+  }, [clinic, checkStatusSilently])
 
   // Polling de status a cada 30 segundos
   useEffect(() => {
@@ -88,17 +91,13 @@ export default function WhatsAppSettingsPage() {
         clearInterval(statusIntervalRef.current)
       }
     }
-  }, [clinic?.z_api_instance, clinic?.z_api_token])
+  }, [clinic?.z_api_instance, clinic?.z_api_token, checkStatusSilently])
 
   // Limpar intervalos ao desmontar
   useEffect(() => {
     return () => {
-      if (qrIntervalRef.current) {
-        clearInterval(qrIntervalRef.current)
-      }
-      if (statusIntervalRef.current) {
-        clearInterval(statusIntervalRef.current)
-      }
+      if (qrIntervalRef.current) clearInterval(qrIntervalRef.current)
+      if (statusIntervalRef.current) clearInterval(statusIntervalRef.current)
     }
   }, [])
 
@@ -116,10 +115,8 @@ export default function WhatsAppSettingsPage() {
     try {
       const res = await getQrCode.mutateAsync()
       if (res?.success && res?.qrcode) {
-        // O qrcode pode ser base64 ou uma URL
         const qrValue = typeof res.qrcode === 'string' ? res.qrcode : res.qrcode?.value || ''
         if (qrValue) {
-          // Se é base64 puro (sem prefixo data:), adicionar prefixo
           const imgSrc = qrValue.startsWith('data:') || qrValue.startsWith('http')
             ? qrValue
             : `data:image/png;base64,${qrValue}`
@@ -145,12 +142,12 @@ export default function WhatsAppSettingsPage() {
     setIsLoadingQr(true)
     qrAttemptsRef.current = 0
     fetchQrCode()
-    // QR Code expira a cada 20s, buscar a cada 15s
     qrIntervalRef.current = setInterval(async () => {
       // Verificar se conectou
       try {
-        const status = await testWhatsApp.mutateAsync()
-        if (status?.connected) {
+        const res = await api.post("/clinics/my/test-whatsapp")
+        const data = res.data?.data || res.data
+        if (data?.connected) {
           stopQrPolling()
           setConnectionStatus('connected')
           toast.success("WhatsApp conectado com sucesso!")
@@ -185,6 +182,34 @@ export default function WhatsAppSettingsPage() {
     }
   }
 
+  const handleDisconnect = async () => {
+    try {
+      await disconnectWhatsApp.mutateAsync()
+      setConnectionStatus('disconnected')
+    } catch {}
+  }
+
+  const handleRestart = async () => {
+    setConnectionStatus('checking')
+    try {
+      await restartWhatsApp.mutateAsync()
+      // Aguardar um pouco e re-checar
+      setTimeout(() => checkStatusSilently(), 3000)
+    } catch {
+      setConnectionStatus('disconnected')
+    }
+  }
+
+  const handleRestore = async () => {
+    setConnectionStatus('checking')
+    try {
+      await restoreWhatsApp.mutateAsync()
+      setTimeout(() => checkStatusSilently(), 3000)
+    } catch {
+      setConnectionStatus('disconnected')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -210,7 +235,8 @@ export default function WhatsAppSettingsPage() {
                   connectionStatus === 'connected' ? 'bg-success/10 text-success' :
                   connectionStatus === 'checking' ? 'bg-yellow-100 text-yellow-600' : 'bg-muted text-muted-foreground'
                 }`}>
-                  {connectionStatus === 'connected' ? <Smartphone size={24} /> : <AlertCircle size={24} />}
+                  {connectionStatus === 'connected' ? <Smartphone size={24} /> :
+                   connectionStatus === 'checking' ? <Loader2 size={24} className="animate-spin" /> : <AlertCircle size={24} />}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">Status da Conexão</h3>
@@ -228,6 +254,52 @@ export default function WhatsAppSettingsPage() {
                  connectionStatus === 'checking' ? 'Verificando...' : 'Desconectado'}
               </Badge>
             </div>
+
+            {/* Ações de gerenciamento */}
+            {instanceId && token && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestConnection}
+                  disabled={isTesting}
+                  className="gap-2 text-gray-700 dark:text-gray-300"
+                >
+                  {isTesting ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCcw size={14} />}
+                  Testar Conexão
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRestart}
+                  disabled={restartWhatsApp.isPending}
+                  className="gap-2 text-gray-700 dark:text-gray-300"
+                >
+                  {restartWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw size={14} />}
+                  Reiniciar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRestore}
+                  disabled={restoreWhatsApp.isPending}
+                  className="gap-2 text-gray-700 dark:text-gray-300"
+                >
+                  {restoreWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Power size={14} />}
+                  Restaurar Sessão
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDisconnect}
+                  disabled={disconnectWhatsApp.isPending || connectionStatus !== 'connected'}
+                  className="gap-2 text-destructive hover:text-destructive"
+                >
+                  {disconnectWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Unplug size={14} />}
+                  Desconectar
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -270,23 +342,14 @@ export default function WhatsAppSettingsPage() {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+            <div className="pt-4 border-t border-border">
               <Button
                 onClick={handleSave}
                 disabled={updateClinic.isPending}
-                className="flex-1 h-11"
+                className="w-full sm:w-auto h-11 px-8"
               >
                 {updateClinic.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                 Salvar Configuração
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleTestConnection}
-                disabled={isTesting}
-                className="flex-1 h-11 text-gray-700 dark:text-gray-300"
-              >
-                {isTesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
-                Testar Conexão
               </Button>
             </div>
           </CardContent>

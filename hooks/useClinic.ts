@@ -103,6 +103,57 @@ export function useClinic() {
     }
   })
 
+  const disconnectWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/whatsapp-disconnect")
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "WhatsApp desconectado")
+      } else {
+        toast.error(data?.message || "Erro ao desconectar")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao desconectar WhatsApp")
+    }
+  })
+
+  const restartWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/whatsapp-restart")
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "Instância reiniciada")
+      } else {
+        toast.error(data?.message || "Erro ao reiniciar")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao reiniciar instância")
+    }
+  })
+
+  const restoreWhatsAppMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/whatsapp-restore")
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "Sessão restaurada")
+      } else {
+        toast.error(data?.message || "Erro ao restaurar sessão")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao restaurar sessão")
+    }
+  })
+
   return {
     clinic: query.data,
     isLoading: query.isLoading,
@@ -112,6 +163,9 @@ export function useClinic() {
     updateAISettings: updateAISettingsMutation,
     testWhatsApp: testWhatsAppMutation,
     getQrCode: getQrCodeMutation,
-    sendTestMessage: sendTestMessageMutation
+    sendTestMessage: sendTestMessageMutation,
+    disconnectWhatsApp: disconnectWhatsAppMutation,
+    restartWhatsApp: restartWhatsAppMutation,
+    restoreWhatsApp: restoreWhatsAppMutation
   }
 } 
