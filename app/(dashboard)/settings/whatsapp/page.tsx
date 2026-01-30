@@ -13,6 +13,7 @@ export default function WhatsAppSettingsPage() {
   
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
+  const [clientToken, setClientToken] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('disconnected')
   const [isTesting, setIsTesting] = useState(false)
 
@@ -38,12 +39,13 @@ export default function WhatsAppSettingsPage() {
     if (clinic) {
       setInstanceId(clinic.z_api_instance || "")
       setToken(clinic.z_api_token || "")
+      setClientToken(clinic.z_api_client_token || "")
     }
   }, [clinic])
 
   const handleSave = async () => {
     try {
-      await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token })
+      await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token, z_api_client_token: clientToken })
       toast.success("Credenciais salvas!")
       handleTestConnection()
     } catch (error: any) {
@@ -107,23 +109,33 @@ export default function WhatsAppSettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instance ID</label>
-                <Input 
-                  placeholder="Ex: 3B8C..." 
+                <Input
+                  placeholder="Ex: 3B8C..."
                   value={instanceId}
                   onChange={(e) => setInstanceId(e.target.value)}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Token</label>
-                <Input 
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Token da Instância</label>
+                <Input
                   type="password"
-                  placeholder="Seu token de segurança" 
+                  placeholder="Token da instância Z-API"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Client-Token (Token de segurança da conta)</label>
+              <Input
+                type="password"
+                placeholder="Token de segurança da sua conta Z-API"
+                value={clientToken}
+                onChange={(e) => setClientToken(e.target.value)}
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
