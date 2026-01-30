@@ -39,15 +39,13 @@ export default function ServicesPage() {
     try {
       if (editingItem) {
         await updateService.mutateAsync({ id: editingItem.id, ...data })
-        toast.success("Serviço atualizado com sucesso!")
       } else {
         await createService.mutateAsync(data)
-        toast.success("Serviço criado com sucesso!")
       }
       setIsModalOpen(false)
       setEditingItem(null)
     } catch (error) {
-      toast.error(editingItem ? "Erro ao atualizar serviço" : "Erro ao criar serviço")
+      // Erro já tratado no hook
     }
   }
 
@@ -55,9 +53,8 @@ export default function ServicesPage() {
     if (!deleteId) return
     try {
       await deleteService.mutateAsync(deleteId)
-      toast.success("Serviço removido!")
     } catch (error) {
-      toast.error("Erro ao remover serviço")
+      // Erro já tratado no hook
     } finally {
       setDeleteId(null)
     }

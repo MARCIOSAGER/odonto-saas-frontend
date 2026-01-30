@@ -22,6 +22,7 @@ import {
   UserCircle
 } from "lucide-react"
 import { useState } from "react"
+import { useClinic } from "@/hooks/useClinic"
 
 const mainItems = [
   { href: "/home", label: "Dashboard", icon: LayoutDashboard },
@@ -46,6 +47,7 @@ const settingsSubmenu = [
 export function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const { clinic } = useClinic()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(pathname.includes("/settings"))
   
@@ -62,14 +64,18 @@ export function Sidebar() {
       {/* Logo Section */}
       <div className="flex h-16 items-center px-4 border-b border-border">
         <Link href="/home" className="flex items-center gap-3 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="currentColor"/>
-            </svg>
-          </div>
+          {clinic?.logo ? (
+            <img src={clinic.logo} alt={clinic.name} className="h-8 object-contain transition-transform group-hover:scale-105" />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="currentColor"/>
+              </svg>
+            </div>
+          )}
           {!isCollapsed && (
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              Odonto SaaS
+            <span className="text-lg font-bold tracking-tight text-foreground truncate max-w-[150px]">
+              {clinic?.name || "Odonto SaaS"}
             </span>
           )}
         </Link>

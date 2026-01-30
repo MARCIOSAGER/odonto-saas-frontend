@@ -33,10 +33,18 @@ export default function AISettingsPage() {
 
   const handleSave = async () => {
     try {
-      await updateAISettings.mutateAsync(settings)
-      toast.success("Configurações de IA salvas!")
+      // Remover campos que o backend não aceita
+      const { 
+        id, 
+        clinic_id, 
+        created_at, 
+        updated_at, 
+        ...cleanSettings 
+      } = settings as any
+
+      await updateAISettings.mutateAsync(cleanSettings)
     } catch (error) {
-      toast.error("Erro ao salvar configurações de IA")
+      // Erro já tratado no hook
     }
   }
 

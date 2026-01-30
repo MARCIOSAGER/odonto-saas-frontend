@@ -47,24 +47,21 @@ export default function AppointmentsPage() {
     try {
       if (editingItem) {
         await updateAppointment.mutateAsync({ id: editingItem.id, ...data })
-        toast.success("Agendamento atualizado com sucesso!")
       } else {
         await createAppointment.mutateAsync(data)
-        toast.success("Agendamento criado com sucesso!")
       }
       setIsModalOpen(false)
       setEditingItem(null)
     } catch (error) {
-      toast.error(editingItem ? "Erro ao atualizar agendamento" : "Erro ao criar agendamento")
+      // Erro já tratado no hook
     }
   }
 
   const handleConfirm = async (id: string) => {
     try {
       await confirmAppointment.mutateAsync(id)
-      toast.success("Agendamento confirmado!")
     } catch (error) {
-      toast.error("Erro ao confirmar agendamento")
+      // Erro já tratado no hook
     }
   }
 
@@ -72,9 +69,8 @@ export default function AppointmentsPage() {
     if (!deleteId) return
     try {
       await cancelAppointment.mutateAsync(deleteId)
-      toast.success("Agendamento cancelado!")
     } catch (error) {
-      toast.error("Erro ao cancelar agendamento")
+      // Erro já tratado no hook
     } finally {
       setDeleteId(null)
     }
