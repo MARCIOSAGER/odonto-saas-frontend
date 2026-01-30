@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,10 +13,10 @@ export default function WhatsAppSettingsPage() {
   
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('disconnected')
   const [isTesting, setIsTesting] = useState(false)
 
-  const handleTestConnection = useCallback(async () => {
+  const handleTestConnection = async () => {
     setIsTesting(true)
     setConnectionStatus('checking')
     try {
@@ -31,20 +31,15 @@ export default function WhatsAppSettingsPage() {
     } finally {
       setIsTesting(false)
     }
-  }, [testWhatsApp])
+  }
 
+  // Carregar credenciais da clínica - SEM testar automaticamente
   useEffect(() => {
     if (clinic) {
       setInstanceId(clinic.z_api_instance || "")
       setToken(clinic.z_api_token || "")
-      
-      if (clinic.z_api_instance && clinic.z_api_token) {
-        handleTestConnection()
-      } else {
-        setConnectionStatus('disconnected')
-      }
     }
-  }, [clinic, handleTestConnection])
+  }, [clinic])
 
   const handleSave = async () => {
     try {
