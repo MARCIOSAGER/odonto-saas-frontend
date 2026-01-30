@@ -65,29 +65,38 @@ export function Sidebar() {
       {/* Logo Section */}
       <div className="flex h-16 items-center px-4 border-b border-border">
         <Link href="/home" className="flex items-center gap-3 group overflow-hidden">
-          {clinic?.logo_url ? (
-            <img
-              src={getUploadUrl(clinic.logo_url)}
-              alt={clinic.name || "Logo"}
-              className={cn(
-                "object-contain transition-transform group-hover:scale-105",
-                isCollapsed ? "h-8 w-8" : "h-8 max-w-[200px]"
-              )}
-            />
-          ) : (
-            <>
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="currentColor"/>
-                </svg>
-              </div>
-              {!isCollapsed && (
-                <span className="text-lg font-bold tracking-tight text-foreground truncate">
-                  {clinic?.name || "Odonto SaaS"}
-                </span>
-              )}
-            </>
-          )}
+          {(() => {
+            const mode = clinic?.logo_display_mode || "logo_name"
+            const hasLogo = !!clinic?.logo_url
+            const showLogo = hasLogo && (mode === "logo_name" || mode === "logo_only")
+            const showName = mode === "logo_name" || mode === "name_only"
+
+            return (
+              <>
+                {showLogo ? (
+                  <img
+                    src={getUploadUrl(clinic.logo_url)}
+                    alt={clinic.name || "Logo"}
+                    className={cn(
+                      "object-contain transition-transform group-hover:scale-105",
+                      isCollapsed ? "h-8 w-8" : "h-8 max-w-[200px]"
+                    )}
+                  />
+                ) : !showLogo && (
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                )}
+                {!isCollapsed && showName && (
+                  <span className="text-lg font-bold tracking-tight text-foreground truncate">
+                    {clinic?.name || "Odonto SaaS"}
+                  </span>
+                )}
+              </>
+            )
+          })()}
         </Link>
       </div>
 
