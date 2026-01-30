@@ -239,7 +239,7 @@ function DashboardSection() {
         <ul className="text-sm space-y-2 list-disc list-inside">
           <li><strong>Total de Pacientes</strong> - Quantidade de pacientes ativos cadastrados.</li>
           <li><strong>Consultas Hoje</strong> - Numero de agendamentos para o dia atual.</li>
-          <li><strong>Consultas Pendentes</strong> - Agendamentos com status "agendado" que ainda nao foram confirmados.</li>
+          <li><strong>Consultas Pendentes</strong> - Agendamentos com status &quot;agendado&quot; que ainda nao foram confirmados.</li>
           <li><strong>Receita do Mes</strong> - Soma dos valores dos servicos das consultas concluidas no mes.</li>
         </ul>
         <Tip>
@@ -259,7 +259,7 @@ function PacientesSection() {
         </p>
         <h4 className="font-semibold text-sm mt-4 mb-2">Cadastrar Paciente</h4>
         <p className="text-sm mb-2">
-          Clique em <strong>"Novo Paciente"</strong> e preencha: nome completo, telefone (com DDD), email e data de nascimento.
+          Clique em <strong>&quot;Novo Paciente&quot;</strong> e preencha: nome completo, telefone (com DDD), email e data de nascimento.
         </p>
         <h4 className="font-semibold text-sm mt-4 mb-2">Ficha do Paciente</h4>
         <p className="text-sm mb-2">
@@ -287,7 +287,7 @@ function AgendamentosSection() {
         </p>
         <h4 className="font-semibold text-sm mt-4 mb-2">Criar Agendamento Manual</h4>
         <ol className="text-sm space-y-1 list-decimal list-inside mb-3">
-          <li>Clique em <strong>"Novo Agendamento"</strong> (botao no header ou na pagina)</li>
+          <li>Clique em <strong>&quot;Novo Agendamento&quot;</strong> (botao no header ou na pagina)</li>
           <li>Selecione o paciente, dentista, servico, data e horario</li>
           <li>Adicione observacoes se necessario</li>
           <li>Clique em <strong>Salvar</strong></li>
@@ -301,7 +301,7 @@ function AgendamentosSection() {
         </ul>
         <h4 className="font-semibold text-sm mt-4 mb-2">Agendamento pela IA</h4>
         <p className="text-sm">
-          Se a permissao <strong>"Agendar Consultas"</strong> estiver ativa nas configuracoes de IA, a assistente virtual consegue criar agendamentos diretamente pelo WhatsApp, verificando horarios disponiveis automaticamente.
+          Se a permissao <strong>&quot;Agendar Consultas&quot;</strong> estiver ativa nas configuracoes de IA, a assistente virtual consegue criar agendamentos diretamente pelo WhatsApp, verificando horarios disponiveis automaticamente.
         </p>
         <Tip>
           <p>A IA tambem pode <strong>confirmar</strong> e <strong>cancelar</strong> consultas se as permissoes estiverem ativas. O dentista recebe notificacao no WhatsApp quando uma consulta e criada ou confirmada.</p>
@@ -357,7 +357,7 @@ function DentistasSection() {
           <li><strong>Email</strong> - Email profissional</li>
         </ul>
         <Tip>
-          <p><strong>Importante:</strong> O numero de telefone do dentista e usado para identifica-lo quando ele envia mensagens pelo WhatsApp (funcionalidade "Dentista via WhatsApp"). Certifique-se de cadastrar o numero correto com DDD.</p>
+          <p><strong>Importante:</strong> O numero de telefone do dentista e usado para identifica-lo quando ele envia mensagens pelo WhatsApp (funcionalidade &quot;Dentista via WhatsApp&quot;). Certifique-se de cadastrar o numero correto com DDD.</p>
         </Tip>
       </DocCard>
     </>
@@ -380,7 +380,7 @@ function ServicosSection() {
           <li><strong>Categoria</strong> - Ex: Estetica, Preventivo, Restauracao</li>
         </ul>
         <Tip>
-          <p>A IA tem acesso automatico a todos os servicos e precos cadastrados. Quando um paciente perguntar "quanto custa uma limpeza?", a IA responde com o valor correto.</p>
+          <p>A IA tem acesso automatico a todos os servicos e precos cadastrados. Quando um paciente perguntar &quot;quanto custa uma limpeza?&quot;, a IA responde com o valor correto.</p>
         </Tip>
       </DocCard>
     </>
@@ -442,13 +442,13 @@ function WhatsAppSection() {
           <p>Va em <strong>Configuracoes &gt; WhatsApp</strong> e cole as tres credenciais nos campos correspondentes. Salve.</p>
         </Step>
         <Step number={4} title="Conecte o WhatsApp">
-          <p>Clique em <strong>"Testar Conexao"</strong>. Se aparecer "desconectado", clique em <strong>"Gerar QR Code"</strong> e escaneie com seu WhatsApp.</p>
+          <p>Clique em <strong>&quot;Testar Conexao&quot;</strong>. Se aparecer &quot;desconectado&quot;, clique em <strong>&quot;Gerar QR Code&quot;</strong> e escaneie com seu WhatsApp.</p>
         </Step>
         <Step number={5} title="Configure o Webhook">
-          <p>Clique em <strong>"Configurar Webhook Automaticamente"</strong>. Isso faz a Z-API enviar as mensagens recebidas para o seu sistema.</p>
+          <p>Clique em <strong>&quot;Configurar Webhook Automaticamente&quot;</strong>. Isso faz a Z-API enviar as mensagens recebidas para o seu sistema.</p>
         </Step>
         <Tip>
-          <p><strong>Dica:</strong> Se a conexao cair, use o botao <strong>"Reiniciar Instancia"</strong> antes de gerar novo QR Code. Normalmente a reconexao e automatica.</p>
+          <p><strong>Dica:</strong> Se a conexao cair, use o botao <strong>&quot;Reiniciar Instancia&quot;</strong> antes de gerar novo QR Code. Normalmente a reconexao e automatica.</p>
         </Tip>
       </DocCard>
     </>
@@ -474,8 +474,8 @@ function IASection() {
         </p>
         <h4 className="font-semibold text-sm mt-4 mb-2">Identidade da Assistente</h4>
         <ul className="text-sm space-y-1 list-disc list-inside mb-3">
-          <li><strong>Nome</strong> - O nome que a IA usa (ex: "Sofia")</li>
-          <li><strong>Personalidade</strong> - Descricao do comportamento (ex: "Amigavel, profissional e prestativa")</li>
+          <li><strong>Nome</strong> - O nome que a IA usa (ex: &quot;Sofia&quot;)</li>
+          <li><strong>Personalidade</strong> - Descricao do comportamento (ex: &quot;Amigavel, profissional e prestativa&quot;)</li>
           <li><strong>Mensagem de Boas-vindas</strong> - Primeira mensagem ao paciente</li>
           <li><strong>Mensagem de Fallback</strong> - Quando a IA nao entende</li>
           <li><strong>Fora do Horario</strong> - Mensagem quando a clinica esta fechada</li>
@@ -491,9 +491,9 @@ function IASection() {
         </ul>
         <h4 className="font-semibold text-sm mt-4 mb-2">Instrucoes Avancadas</h4>
         <ul className="text-sm space-y-1 list-disc list-inside">
-          <li><strong>Instrucoes Customizadas</strong> - Regras especificas da clinica (ex: "Temos estacionamento gratuito", "Aceitamos cartao em 12x")</li>
-          <li><strong>Palavras de Transferencia</strong> - Palavras que fazem a IA transferir para humano (ex: "reclamacao, gerente")</li>
-          <li><strong>Topicos Bloqueados</strong> - Assuntos que a IA nao deve abordar (ex: "politica, religiao")</li>
+          <li><strong>Instrucoes Customizadas</strong> - Regras especificas da clinica (ex: &quot;Temos estacionamento gratuito&quot;, &quot;Aceitamos cartao em 12x&quot;)</li>
+          <li><strong>Palavras de Transferencia</strong> - Palavras que fazem a IA transferir para humano (ex: &quot;reclamacao, gerente&quot;)</li>
+          <li><strong>Topicos Bloqueados</strong> - Assuntos que a IA nao deve abordar (ex: &quot;politica, religiao&quot;)</li>
         </ul>
         <Tip>
           <p>A IA ja tem acesso automatico aos servicos, precos, dentistas e horarios disponiveis. Voce nao precisa repetir essas informacoes nas instrucoes customizadas.</p>
@@ -513,7 +513,7 @@ function InterativasSection() {
         <h4 className="font-semibold text-sm mt-4 mb-2">Tipos Disponiveis</h4>
         <ul className="text-sm space-y-2 list-disc list-inside mb-3">
           <li>
-            <strong>Menu de Boas-vindas</strong> - Quando o paciente manda "oi" ou "ola", a IA envia uma lista clicavel com opcoes: Agendar, Ver precos, Remarcar, Cancelar, Duvidas.
+            <strong>Menu de Boas-vindas</strong> - Quando o paciente manda &quot;oi&quot; ou &quot;ola&quot;, a IA envia uma lista clicavel com opcoes: Agendar, Ver precos, Remarcar, Cancelar, Duvidas.
           </li>
           <li>
             <strong>Botoes de Confirmacao</strong> - Para confirmar consultas, envia botoes: Confirmar, Remarcar, Cancelar.
@@ -578,7 +578,7 @@ function LembretesSection() {
           <li><code className="bg-muted px-1 rounded text-xs">{"{clinicName}"}</code> - Nome da clinica</li>
         </ul>
         <Tip>
-          <p><strong>Exemplo:</strong> "Ola {"{patientName}"}! Lembramos da sua consulta de {"{service}"} amanha as {"{time}"} com {"{dentist}"}. Confirme respondendo SIM."</p>
+          <p><strong>Exemplo:</strong> &quot;Ola {"{patientName}"}! Lembramos da sua consulta de {"{service}"} amanha as {"{time}"} com {"{dentist}"}. Confirme respondendo SIM.&quot;</p>
         </Tip>
       </DocCard>
     </>
@@ -614,7 +614,7 @@ function DentistaWhatsAppSection() {
           </div>
           <div className="flex items-start gap-3 p-2 rounded-lg bg-muted/20 border border-border">
             <code className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-mono shrink-0">cancelar [nome]</code>
-            <span className="text-sm">Cancelar consulta de um paciente (ex: "cancelar Maria")</span>
+            <span className="text-sm">Cancelar consulta de um paciente (ex: &quot;cancelar Maria&quot;)</span>
           </div>
           <div className="flex items-start gap-3 p-2 rounded-lg bg-muted/20 border border-border">
             <code className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-mono shrink-0">reagendar</code>
