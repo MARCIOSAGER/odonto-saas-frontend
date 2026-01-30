@@ -443,34 +443,35 @@ export default function AISettingsPage() {
                 className="flex min-h-[120px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={settings.custom_instructions || ""}
                 onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
-                placeholder="Ex: 'Sempre mencione que temos estacionamento gratuito.' ou 'Priorize agendamentos para o período da manhã.'"
+                placeholder={"Exemplos:\n- Sempre mencione que temos estacionamento gratuito\n- Aceitamos cartão de crédito em até 12x\n- Priorize agendamentos para o período da manhã\n- Ofereça 10% de desconto para pacientes novos\n- Nosso diferencial é o atendimento humanizado"}
               />
+              <p className="text-[10px] text-gray-400">Máximo 2000 caracteres. Use para regras específicas do seu atendimento.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Palavras de Transferência</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transferência para Humano</label>
                 <Input
                   value={settings.transfer_keywords}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, transfer_keywords: e.target.value })}
-                  placeholder="humano, atendente, ajuda"
+                  placeholder="reclamação, humano, atendente, gerente, insatisfeito"
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
-                <p className="text-[10px] text-gray-400">Separadas por vírgula</p>
+                <p className="text-[10px] text-gray-400">Separadas por vírgula. Quando o paciente usar essas palavras, a IA encerra e transfere para atendente humano.</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tópicos Bloqueados</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tópicos que a IA não deve abordar</label>
                 <Input
                   value={settings.blocked_topics}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, blocked_topics: e.target.value })}
-                  placeholder="política, religião"
+                  placeholder="política, religião, concorrentes, diagnóstico"
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
-                <p className="text-[10px] text-gray-400">Separados por vírgula</p>
+                <p className="text-[10px] text-gray-400">Separados por vírgula. A IA recusará educadamente falar sobre esses assuntos.</p>
               </div>
             </div>
-            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400 bg-muted/20 p-3 rounded-lg">
-              <Info size={14} className="shrink-0 mt-0.5" />
-              <p>Todas as configurações acima são usadas pela IA ao responder mensagens dos pacientes via WhatsApp. A IA utiliza o provedor, modelo e personalidade configurados aqui.</p>
+            <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+              <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
+              <p><strong>Dica:</strong> A IA já tem acesso automático aos seus serviços, preços, dentistas e horários disponíveis. Você não precisa repetir essas informações nas instruções customizadas. Use este campo apenas para regras específicas da sua clínica.</p>
             </div>
           </CardContent>
         </Card>
