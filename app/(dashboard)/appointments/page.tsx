@@ -1,6 +1,7 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
@@ -26,12 +27,21 @@ import {
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
-export default function AppointmentsPage() {
+function AppointmentsContent() {
+  const searchParams = useSearchParams()
   const [view, setView] = useState<"lista" | "calendario">("lista")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const { appointments, isLoading, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
+
+  useEffect(() => {
+    if (searchParams.get("new") === "true") {
+      setIsModalOpen(true)
+      // Limpar o param da URL sem recarregar a página
+      window.history.replaceState({}, "", "/appointments")
+    }
+  }, [searchParams])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -285,5 +295,17 @@ export default function AppointmentsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function AppointmentsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <AppointmentsContent />
+    </Suspense>
   )
 }
