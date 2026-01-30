@@ -1,6 +1,6 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
@@ -23,7 +23,10 @@ export default function DentistsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { dentists, isLoading, createDentist, deleteDentist, updateDentist } = useDentists()
+  const { dentists = [], isLoading, createDentist, deleteDentist, updateDentist } = useDentists()
+
+  // Garantir que dentists é sempre um array
+  const safeDentists = useMemo(() => Array.isArray(dentists) ? dentists : [], [dentists])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -131,14 +134,14 @@ export default function DentistsPage() {
                   </TR>
                 </THead>
                 <TBody>
-                  {!Array.isArray(dentists) || dentists.length === 0 ? (
+                  {safeDentists.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
                         Nenhum dentista cadastrado.
                       </TD>
                     </TR>
                   ) : (
-                    dentists.map((d: any) => (
+                    safeDentists.map((d: any) => (
                       <TR key={d.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div className="flex items-center gap-3">

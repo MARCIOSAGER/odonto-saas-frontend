@@ -69,7 +69,7 @@ export function useServices() {
   })
 
   return {
-    services: query.data || [],
+    services: Array.isArray(query.data) ? query.data : ((query.data as any)?.data || []),
     isLoading: query.isLoading,
     createService: createMutation,
     deleteService: deleteMutation,

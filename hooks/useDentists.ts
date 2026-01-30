@@ -70,7 +70,7 @@ export function useDentists() {
   })
 
   return {
-    dentists: query.data || [],
+    dentists: Array.isArray(query.data) ? query.data : ((query.data as any)?.data || []),
     isLoading: query.isLoading,
     createDentist: createMutation,
     deleteDentist: deleteMutation,
