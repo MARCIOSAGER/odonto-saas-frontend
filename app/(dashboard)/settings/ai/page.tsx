@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import {
   Loader2, Save, Bot, Info, Zap, Eye, EyeOff,
-  CheckCircle, XCircle, Key, Cpu, MessageSquare, Shield
+  CheckCircle, XCircle, Key, Cpu, MessageSquare, Shield,
+  MousePointer, Stethoscope, MapPin
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -85,6 +86,12 @@ export default function AISettingsPage() {
     custom_instructions: "",
     transfer_keywords: "",
     blocked_topics: "",
+    use_welcome_menu: false,
+    use_confirmation_buttons: false,
+    use_timeslot_list: false,
+    use_satisfaction_poll: false,
+    use_send_location: false,
+    dentist_ai_enabled: false,
   })
 
   const [showApiKey, setShowApiKey] = useState(false)
@@ -534,6 +541,95 @@ export default function AISettingsPage() {
               <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
               <p><strong>Dica:</strong> A IA já tem acesso automático aos seus serviços, preços, dentistas e horários disponíveis. Você não precisa repetir essas informações nas instruções customizadas. Use este campo apenas para regras específicas da sua clínica.</p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Mensagens Interativas */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <MousePointer size={20} className="text-primary" />
+              Mensagens Interativas
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Configure menus, botões e pesquisas interativas no WhatsApp para uma experiência mais rica.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <PermissionToggle
+              label="Menu de Boas-vindas"
+              description="Lista de opções quando o paciente inicia conversa."
+              checked={settings.use_welcome_menu}
+              onChange={(v) => setSettings({ ...settings, use_welcome_menu: v })}
+            />
+            <PermissionToggle
+              label="Botões de Confirmação"
+              description="Botões interativos para confirmar/remarcar/cancelar."
+              checked={settings.use_confirmation_buttons}
+              onChange={(v) => setSettings({ ...settings, use_confirmation_buttons: v })}
+            />
+            <PermissionToggle
+              label="Lista de Horários"
+              description="Horários disponíveis em lista selecionável."
+              checked={settings.use_timeslot_list}
+              onChange={(v) => setSettings({ ...settings, use_timeslot_list: v })}
+            />
+            <PermissionToggle
+              label="Pesquisa de Satisfação"
+              description="Enquete automática após consulta realizada."
+              checked={settings.use_satisfaction_poll}
+              onChange={(v) => setSettings({ ...settings, use_satisfaction_poll: v })}
+            />
+            <PermissionToggle
+              label="Enviar Localização"
+              description="Enviar mapa da clínica quando perguntarem o endereço."
+              checked={settings.use_send_location}
+              onChange={(v) => setSettings({ ...settings, use_send_location: v })}
+            />
+            {settings.use_send_location && (
+              <div className="sm:col-span-2 flex items-start gap-2 p-3 rounded-lg bg-muted/20 border border-border">
+                <MapPin size={16} className="shrink-0 mt-1 text-primary" />
+                <div className="flex-1 space-y-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Configure latitude e longitude da clínica nas configurações gerais da clínica.</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Dentista via WhatsApp */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Stethoscope size={20} className="text-primary" />
+              Dentista via WhatsApp
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Permita que os dentistas interajam com a IA pelo WhatsApp para consultar agenda, cancelar e reagendar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PermissionToggle
+              label="Ativar IA para Dentistas"
+              description="Dentistas podem consultar agenda, cancelar e reagendar via WhatsApp."
+              checked={settings.dentist_ai_enabled}
+              onChange={(v) => setSettings({ ...settings, dentist_ai_enabled: v })}
+            />
+            {settings.dentist_ai_enabled && (
+              <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
+                <div>
+                  <p><strong>Como funciona:</strong> O dentista envia mensagem pelo WhatsApp e a IA reconhece automaticamente pelo número cadastrado. Funcionalidades:</p>
+                  <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                    <li>Consultar agenda do dia ou semana</li>
+                    <li>Ver próximos pacientes</li>
+                    <li>Cancelar consultas de pacientes</li>
+                    <li>Reagendar consultas</li>
+                  </ul>
+                  <p className="mt-1 text-[10px] opacity-75">Os dentistas precisam ter o número de telefone cadastrado no sistema.</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
