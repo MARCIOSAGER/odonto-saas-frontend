@@ -28,6 +28,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
       }
 
+      // Título dinâmico da aba do browser
+      if (clinic.name) {
+        document.title = clinic.name
+      }
+
       // Favicon dinâmico da clínica (sobrescreve o favicon padrão da plataforma)
       try {
         if (clinic.favicon_url || clinic.logo_url) {
