@@ -26,6 +26,8 @@ import {
   Loader2,
   AlertCircle
 } from "lucide-react"
+import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 export default function DashboardHome() {
   const { data: session } = useSession()
@@ -59,7 +61,43 @@ export default function DashboardHome() {
     }
   })
 
-  if (loadingStats || loadingAppts) {
+  // Buscar Fluxo Semanal
+  const { data: weeklyFlow, isLoading: loadingFlow } = useQuery({
+    queryKey: ["weekly-flow"],
+    queryFn: async () => {
+      try {
+        const start = startOfWeek(new Date(), { weekStartsOn: 1 })
+        const end = endOfWeek(new Date(), { weekStartsOn: 1 })
+        
+        const res = await api.get("/appointments", { 
+          params: { 
+            start_date: start.toISOString().split('T')[0],
+            end_date: end.toISOString().split('T')[0]
+          } 
+        })
+        
+        const appointments = res.data?.data || []
+        const days = eachDayOfInterval({ start, end })
+        
+        return days.map(day => {
+          const count = appointments.filter((a: any) => {
+            const apptDate = new Date(a.date_time || a.data)
+            return isSameDay(apptDate, day)
+          }).length
+          
+          return {
+            name: format(day, 'EEE', { locale: ptBR }),
+            valor: count
+          }
+        })
+      } catch (error) {
+        console.error("Erro ao buscar fluxo semanal:", error)
+        return []
+      }
+    }
+  })
+
+  if (loadingStats || loadingAppts || loadingFlow) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -68,15 +106,7 @@ export default function DashboardHome() {
   }
 
   const appointmentsList = Array.isArray(todayAppointments) ? todayAppointments : []
-
-  const chartData = [
-    { name: 'Seg', valor: 12 },
-    { name: 'Ter', valor: 18 },
-    { name: 'Qua', valor: 15 },
-    { name: 'Qui', valor: 22 },
-    { name: 'Sex', valor: 30 },
-    { name: 'Sáb', valor: 10 },
-  ]
+  const chartData = weeklyFlow || []
 
   return (
     <div className="space-y-8 pb-12">
@@ -89,25 +119,21 @@ export default function DashboardHome() {
         <MetricCard 
           title="Total de Pacientes" 
           value={stats?.total_patients || 0} 
-          change="+12.5%"
           icon={<Users className="text-primary" size={20} />} 
         />
         <MetricCard 
           title="Confirmados Hoje" 
           value={stats?.confirmed_today || 0} 
-          change="+4"
           icon={<CalendarCheck className="text-success" size={20} />} 
         />
         <MetricCard 
           title="Agendamentos Pendentes" 
           value={stats?.pending_appointments || 0} 
-          change="-2"
           icon={<CalendarClock className="text-amber-500" size={20} />} 
         />
         <MetricCard 
           title="Faturamento Mensal" 
           value={`R$ ${stats?.monthly_revenue?.toLocaleString('pt-BR') || '0,00'}`} 
-          change="+18.2%"
           icon={<TrendingUp className="text-primary" size={20} />} 
         />
       </div>
@@ -213,8 +239,8 @@ export default function DashboardHome() {
   )
 }
 
-function MetricCard({ title, value, icon, change }: { title: string; value: string | number; icon: React.ReactNode; change: string }) {
-  const isPositive = change.startsWith("+")
+function MetricCard({ title, value, icon, change }: { title: string; value: string | number; icon: React.ReactNode; change?: string }) {
+  const isPositive = change?.startsWith("+")
   return (
     <Card className="border-border bg-card shadow-sm hover:shadow-md transition-all duration-200">
       <CardContent className="p-6">
@@ -222,13 +248,15 @@ function MetricCard({ title, value, icon, change }: { title: string; value: stri
           <div className="p-2 rounded-lg bg-accent/50 text-foreground">
             {icon}
           </div>
-          <div className={cn(
-            "flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full",
-            isPositive ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
-          )}>
-            {change}
-            <ArrowUpRight size={12} />
-          </div>
+          {change && (
+            <div className={cn(
+              "flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full",
+              isPositive ? "text-success bg-success/10" : "text-destructive bg-destructive/10"
+            )}>
+              {change}
+              <ArrowUpRight size={12} />
+            </div>
+          )}
         </div>
         <div className="space-y-1">
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
