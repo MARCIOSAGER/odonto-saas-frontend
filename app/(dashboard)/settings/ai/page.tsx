@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import {
   Loader2, Save, Bot, Info, Zap, Eye, EyeOff,
   CheckCircle, XCircle, Key, Cpu, MessageSquare, Shield,
-  MousePointer, Stethoscope, MapPin
+  MousePointer, Stethoscope, MapPin, Bell
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -92,6 +92,11 @@ export default function AISettingsPage() {
     use_satisfaction_poll: false,
     use_send_location: false,
     dentist_ai_enabled: false,
+    reminder_enabled: true,
+    reminder_24h: true,
+    reminder_1h: true,
+    reminder_message_24h: "",
+    reminder_message_1h: "",
   })
 
   const [showApiKey, setShowApiKey] = useState(false)
@@ -629,6 +634,74 @@ export default function AISettingsPage() {
                   <p className="mt-1 text-[10px] opacity-75">Os dentistas precisam ter o número de telefone cadastrado no sistema.</p>
                 </div>
               </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Lembretes Automáticos */}
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Bell size={20} className="text-primary" />
+              Lembretes Automáticos
+            </CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">
+              Envie lembretes automáticos via WhatsApp antes das consultas agendadas.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PermissionToggle
+              label="Ativar Lembretes"
+              description="Enviar lembretes automáticos antes das consultas."
+              checked={settings.reminder_enabled}
+              onChange={(v) => setSettings({ ...settings, reminder_enabled: v })}
+            />
+            {settings.reminder_enabled && (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <PermissionToggle
+                    label="Lembrete 24h antes"
+                    description="Envia mensagem um dia antes da consulta."
+                    checked={settings.reminder_24h}
+                    onChange={(v) => setSettings({ ...settings, reminder_24h: v })}
+                  />
+                  <PermissionToggle
+                    label="Lembrete 1h antes"
+                    description="Envia mensagem uma hora antes da consulta."
+                    checked={settings.reminder_1h}
+                    onChange={(v) => setSettings({ ...settings, reminder_1h: v })}
+                  />
+                </div>
+                {settings.reminder_24h && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem 24h (opcional)</label>
+                    <textarea
+                      className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={settings.reminder_message_24h || ""}
+                      onChange={(e) => setSettings({ ...settings, reminder_message_24h: e.target.value })}
+                      placeholder={"Deixe vazio para usar a mensagem padrão.\n\nVariáveis: {patientName}, {date}, {time}, {service}, {dentist}, {clinicName}"}
+                    />
+                  </div>
+                )}
+                {settings.reminder_1h && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem 1h (opcional)</label>
+                    <textarea
+                      className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      value={settings.reminder_message_1h || ""}
+                      onChange={(e) => setSettings({ ...settings, reminder_message_1h: e.target.value })}
+                      placeholder={"Deixe vazio para usar a mensagem padrão.\n\nVariáveis: {patientName}, {date}, {time}, {service}, {dentist}, {clinicName}"}
+                    />
+                  </div>
+                )}
+                <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
+                  <div>
+                    <p><strong>Como funciona:</strong> O sistema verifica automaticamente a cada 5 minutos as consultas próximas e envia os lembretes via WhatsApp.</p>
+                    <p className="mt-1">O paciente recebe uma mensagem pedindo para confirmar com SIM ou NÃO. A resposta é processada pela IA normalmente.</p>
+                  </div>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
