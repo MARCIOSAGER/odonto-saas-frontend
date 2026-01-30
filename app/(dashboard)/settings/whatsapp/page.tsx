@@ -44,20 +44,60 @@ export default function WhatsAppSettingsPage() {
     }
   }
 
-  // Carregar credenciais da clínica - SEM testar automaticamente
+  const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Verificar status silenciosamente (sem alterar isTesting)
+  const checkStatusSilently = useCallback(async () => {
+    try {
+      const res = await testWhatsApp.mutateAsync()
+      if (res?.connected) {
+        setConnectionStatus('connected')
+      } else {
+        setConnectionStatus('disconnected')
+      }
+    } catch {
+      setConnectionStatus('disconnected')
+    }
+  }, [testWhatsApp])
+
+  // Carregar credenciais + verificar status automaticamente
   useEffect(() => {
     if (clinic) {
       setInstanceId(clinic.z_api_instance || "")
       setToken(clinic.z_api_token || "")
       setClientToken(clinic.z_api_client_token || "")
+
+      // Auto-check se credenciais existem
+      if (clinic.z_api_instance && clinic.z_api_token) {
+        setConnectionStatus('checking')
+        checkStatusSilently()
+      }
     }
   }, [clinic])
 
-  // Limpar intervalo do QR Code ao desmontar
+  // Polling de status a cada 30 segundos
+  useEffect(() => {
+    if (!clinic?.z_api_instance || !clinic?.z_api_token) return
+
+    statusIntervalRef.current = setInterval(() => {
+      checkStatusSilently()
+    }, 30000)
+
+    return () => {
+      if (statusIntervalRef.current) {
+        clearInterval(statusIntervalRef.current)
+      }
+    }
+  }, [clinic?.z_api_instance, clinic?.z_api_token])
+
+  // Limpar intervalos ao desmontar
   useEffect(() => {
     return () => {
       if (qrIntervalRef.current) {
         clearInterval(qrIntervalRef.current)
+      }
+      if (statusIntervalRef.current) {
+        clearInterval(statusIntervalRef.current)
       }
     }
   }, [])
