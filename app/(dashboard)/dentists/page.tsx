@@ -39,15 +39,13 @@ export default function DentistsPage() {
     try {
       if (editingItem) {
         await updateDentist.mutateAsync({ id: editingItem.id, ...data })
-        toast.success("Dentista atualizado com sucesso!")
       } else {
         await createDentist.mutateAsync(data)
-        toast.success("Dentista cadastrado com sucesso!")
       }
       setIsModalOpen(false)
       setEditingItem(null)
     } catch (error) {
-      toast.error(editingItem ? "Erro ao atualizar dentista" : "Erro ao cadastrar dentista")
+      // Erro já tratado no hook
     }
   }
 
@@ -55,9 +53,8 @@ export default function DentistsPage() {
     if (!deleteId) return
     try {
       await deleteDentist.mutateAsync(deleteId)
-      toast.success("Profissional removido!")
     } catch (error) {
-      toast.error("Erro ao remover profissional")
+      // Erro já tratado no hook
     } finally {
       setDeleteId(null)
     }

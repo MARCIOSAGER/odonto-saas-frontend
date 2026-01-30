@@ -50,9 +50,8 @@ export default function PatientsPage() {
     if (!deleteId) return
     try {
       await deletePatient.mutateAsync(deleteId)
-      toast.success("Paciente removido com sucesso!")
     } catch (error) {
-      toast.error("Erro ao remover paciente")
+      // Erro já tratado no hook
     } finally {
       setDeleteId(null)
     }
@@ -67,14 +66,12 @@ export default function PatientsPage() {
     try {
       if (editingItem) {
         await updatePatient.mutateAsync({ id: editingItem.id, ...v })
-        toast.success("Paciente atualizado com sucesso!")
       } else {
         await createPatient.mutateAsync(v)
-        toast.success("Paciente criado com sucesso!")
       }
       handleClose()
     } catch (error) {
-      toast.error("Erro ao salvar paciente")
+      // Erro já tratado no hook
     }
   }
 

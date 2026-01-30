@@ -100,15 +100,26 @@ export default function ClinicSettingsPage() {
       const formData = new FormData()
       formData.append("file", file)
 
+      // 1. Upload da Logo
       const response = await api.post("/clinics/my/upload-logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
+      // 2. Upload também como Favicon (mesma imagem)
+      const faviconFormData = new FormData()
+      faviconFormData.append("file", file)
+      
+      await api.post("/clinics/my/upload-favicon", faviconFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
       if (response.data?.success) {
-        toast.success("Logo atualizada com sucesso!")
+        toast.success("Logo e favicon atualizados com sucesso!")
         if (response.data?.data?.logo) {
           const newLogo = response.data.data.logo
           setLogoPreview(newLogo)
+          // Atualizar favicon na página atual
+          updateFavicon(response.data?.data?.favicon || newLogo)
         }
       }
     } catch (error: any) {
@@ -116,6 +127,19 @@ export default function ClinicSettingsPage() {
       setLogoPreview(clinic?.logo || null)
     } finally {
       setUploading(false)
+    }
+  }
+
+  // Função para atualizar o favicon dinamicamente
+  const updateFavicon = (url: string) => {
+    const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement
+    if (link) {
+      link.href = url
+    } else {
+      const newLink = document.createElement('link')
+      newLink.rel = 'icon'
+      newLink.href = url
+      document.head.appendChild(newLink)
     }
   }
 

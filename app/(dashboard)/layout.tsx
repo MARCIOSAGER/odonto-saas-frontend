@@ -26,6 +26,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           console.error("Erro ao converter cor secundária:", e)
         }
       }
+
+      // Favicon dinâmico
+      if (clinic.favicon || clinic.logo) {
+        const faviconUrl = clinic.favicon || clinic.logo
+        const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement
+        if (link) {
+          link.href = faviconUrl
+        } else {
+          const newLink = document.createElement('link')
+          newLink.rel = 'icon'
+          newLink.href = faviconUrl
+          document.head.appendChild(newLink)
+        }
+      }
     }
   }, [clinic])
 
