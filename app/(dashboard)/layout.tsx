@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/header"
 import { useEffect } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { hexToHsl } from "@/lib/colors"
-
+import { getUploadUrl } from "@/lib/api"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { clinic } = useClinic()
@@ -28,6 +28,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
       }
 
+      // Favicon dinâmico da clínica (sobrescreve o favicon padrão da plataforma)
+      if (clinic.favicon_url || clinic.logo_url) {
+        const faviconUrl = getUploadUrl(clinic.favicon_url || clinic.logo_url)
+        if (faviconUrl) {
+          document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(el => el.remove())
+          const newLink = document.createElement('link')
+          newLink.rel = 'icon'
+          newLink.href = `${faviconUrl}${faviconUrl.includes('?') ? '&' : '?'}v=${Date.now()}`
+          document.head.appendChild(newLink)
+        }
+      }
     }
   }, [clinic])
 
