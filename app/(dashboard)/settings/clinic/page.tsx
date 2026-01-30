@@ -4,7 +4,7 @@ import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, Save, Palette, Building2 } from "lucide-react"
+import { Loader2, Save, Palette, Building2, Image as ImageIcon, Type } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
@@ -29,6 +29,7 @@ export default function ClinicSettingsPage() {
       cep: "",
       primary_color: "#0EA5E9",
       secondary_color: "#64748B",
+      logo_display_mode: "logo_name",
     }
   })
 
@@ -48,6 +49,7 @@ export default function ClinicSettingsPage() {
         cep: clinic.cep || clinic.zip_code || "",
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
+        logo_display_mode: clinic.logo_display_mode || "logo_name",
       })
       if (clinic.logo_url) {
         setLogoPreview(getUploadUrl(clinic.logo_url))
@@ -158,6 +160,7 @@ export default function ClinicSettingsPage() {
         cep: data.cep, // NÃO zip_code
         primary_color: data.primary_color,
         secondary_color: data.secondary_color,
+        logo_display_mode: data.logo_display_mode,
       }
 
       // Remover campos undefined/null/vazios
@@ -273,6 +276,33 @@ export default function ClinicSettingsPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Modo de Exibição do Logo na Sidebar */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Exibição no Menu Lateral</label>
+              <p className="text-xs text-muted-foreground">Escolha como seu logo e nome aparecem na barra lateral do sistema.</p>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { value: "logo_name", label: "Logo + Nome", icon: <><ImageIcon size={16} /><Type size={14} /></> },
+                  { value: "logo_only", label: "Só Logo", icon: <ImageIcon size={18} /> },
+                  { value: "name_only", label: "Só Nome", icon: <Type size={18} /> },
+                ] as const).map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setValue("logo_display_mode", option.value)}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all ${
+                      watch("logo_display_mode") === option.value
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-border hover:border-primary/30 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1">{option.icon}</div>
+                    <span className="text-xs font-medium">{option.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
