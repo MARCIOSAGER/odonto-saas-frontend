@@ -39,8 +39,8 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
       patient_id: initialData?.patient_id || "",
       dentist_id: initialData?.dentist_id || "",
       service_id: initialData?.service_id || "",
-      date: initialData?.date_time ? initialData.date_time.split('T')[0] : "",
-      time: initialData?.date_time ? initialData.date_time.split('T')[1].substring(0, 5) : "",
+      date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : "",
+      time: initialData?.time || "",
       notes: initialData?.notes || ""
     }
   })
@@ -51,8 +51,8 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
         patient_id: initialData.patient_id,
         dentist_id: initialData.dentist_id,
         service_id: initialData.service_id,
-        date: initialData.date_time ? initialData.date_time.split('T')[0] : "",
-        time: initialData.date_time ? initialData.date_time.split('T')[1].substring(0, 5) : "",
+        date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : "",
+        time: initialData.time || "",
         notes: initialData.notes || ""
       })
     }
@@ -87,14 +87,14 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
   }, [])
 
   const handleFormSubmit = (data: AppointmentInput) => {
-    // Combinar data e hora para o formato que o backend espera
-    const formattedData = {
+    // Backend espera date (YYYY-MM-DD) e time (HH:MM) separados
+    const formattedData: any = {
       patient_id: data.patient_id,
-      dentist_id: data.dentist_id,
+      dentist_id: data.dentist_id || undefined,
       service_id: data.service_id,
-      date_time: `${data.date}T${data.time}:00`,
-      notes: data.notes,
-      status: "Pendente"
+      date: data.date,
+      time: data.time,
+      notes: data.notes || undefined,
     }
     onSubmit(formattedData)
   }

@@ -119,12 +119,13 @@ export default function ClinicSettingsPage() {
       const newLogoUrl = logoData?.logo_url
       toast.success("Logo e favicon atualizados com sucesso!")
       if (newLogoUrl) {
-        setLogoPreview(newLogoUrl)
-        updateFavicon(newLogoUrl)
+        const fullUrl = getUploadUrl(newLogoUrl)
+        setLogoPreview(fullUrl)
+        updateFavicon(fullUrl)
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erro ao enviar logo")
-      setLogoPreview(clinic?.logo_url || null)
+      setLogoPreview(clinic?.logo_url ? getUploadUrl(clinic.logo_url) : null)
     } finally {
       setUploading(false)
     }

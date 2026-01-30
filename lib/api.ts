@@ -48,5 +48,7 @@ export function getUploadUrl(path: string | null | undefined): string {
   // Precisamos de: "https://api-odonto.marciosager.com"
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
   const backendBase = apiUrl.replace(/\/api.*$/, '')
-  return `${backendBase}${path}`
+  // Garantir que o path comece com /
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  return `${backendBase}${normalizedPath}`
 }

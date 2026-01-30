@@ -96,7 +96,7 @@ function AppointmentsContent() {
   const events = useMemo(
     () =>
       safeAppointments.map((a: any) => {
-        const start = new Date(a.date_time || `${a.date}T${a.hora}:00`)
+        const start = new Date(a.date_time || `${a.date}T${a.time || '00:00'}:00`)
         const end = new Date(start)
         end.setHours(start.getHours() + 1)
         return { 
@@ -237,10 +237,10 @@ function AppointmentsContent() {
                         <TD>
                           <div className="flex flex-col">
                             <span className="font-semibold text-gray-900 dark:text-gray-100">
-                              {format(new Date(a.date_time || a.data), 'dd/MM/yyyy')}
+                              {format(new Date(a.date_time || a.date), 'dd/MM/yyyy')}
                             </span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {a.date_time ? format(new Date(a.date_time), 'HH:mm') : a.hora}
+                              {a.time || (a.date_time ? format(new Date(a.date_time), 'HH:mm') : '--:--')}
                             </span>
                           </div>
                         </TD>
