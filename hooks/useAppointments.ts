@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useMemo, useEffect } from "react"
 
 export type Appointment = {
   id: string
@@ -29,20 +30,32 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
             limit: filters?.limit || 10
           }
         })
-        const data = res.data?.data
-        return {
-          data: Array.isArray(data) ? data : [],
-          meta: res.data?.meta || { total: 0, pages: 0 }
-        }
+        console.log('useAppointments API Raw Response:', res.data)
+        return res.data
       } catch (error) {
         console.error("Erro ao buscar agendamentos:", error)
-        return {
-          data: [],
-          meta: { total: 0, pages: 0 }
-        }
+        throw error
       }
     }
   })
+
+  // Extrair appointments com segurança máxima
+  const appointments = useMemo(() => {
+    const data = query.data
+    if (!data) return []
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data.data)) return data.data
+    if (data.appointments && Array.isArray(data.appointments)) return data.appointments
+    return []
+  }, [query.data])
+
+  const meta = query.data?.meta || { total: 0, pages: 0 }
+
+  useEffect(() => {
+    if (query.data) {
+      console.log('useAppointments - Final array:', appointments)
+    }
+  }, [query.data, appointments])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Appointment, "id">) => {
@@ -100,10 +113,11 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
   })
 
   return {
-    appointments: Array.isArray(query.data?.data) ? query.data.data : (Array.isArray(query.data) ? query.data : []),
-    meta: query.data?.meta || { total: 0, pages: 0 },
+    appointments,
+    meta,
     isLoading: query.isLoading,
     isError: query.isError,
+    refetch: query.refetch,
     createAppointment: createMutation,
     confirmAppointment: confirmMutation,
     cancelAppointment: cancelMutation,

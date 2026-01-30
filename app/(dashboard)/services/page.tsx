@@ -23,10 +23,14 @@ export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { services = [], isLoading, createService, deleteService, updateService } = useServices()
+  const { services, isLoading, isError, createService, deleteService, updateService } = useServices()
 
   // Garantir que services é sempre um array
-  const safeServices = useMemo(() => Array.isArray(services) ? services : [], [services])
+  const safeServices = useMemo(() => {
+    if (!services) return []
+    if (Array.isArray(services)) return services
+    return []
+  }, [services])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -55,12 +59,34 @@ export default function ServicesPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
+      console.log('Deletando serviço:', deleteId)
       await deleteService.mutateAsync(deleteId)
-    } catch (error) {
-      // Erro já tratado no hook
+      toast.success("Serviço excluído com sucesso!")
+    } catch (error: any) {
+      console.error('Erro ao excluir serviço:', error)
+      toast.error(error.response?.data?.message || "Erro ao excluir serviço")
     } finally {
       setDeleteId(null)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-destructive font-medium">Erro ao carregar serviços</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Tentar novamente
+        </Button>
+      </div>
+    )
   }
 
   return (

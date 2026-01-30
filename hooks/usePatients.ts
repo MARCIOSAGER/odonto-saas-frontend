@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useMemo, useEffect } from "react"
 
 export type Patient = {
   id: string
@@ -28,20 +29,31 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
             limit
           }
         })
-        const data = res.data?.data
-        return {
-          data: Array.isArray(data) ? data : [],
-          meta: res.data?.meta || { total: 0, pages: 0 }
-        }
+        console.log('usePatients API Raw Response:', res.data)
+        return res.data
       } catch (error) {
         console.error("Erro ao buscar pacientes:", error)
-        return {
-          data: [],
-          meta: { total: 0, pages: 0 }
-        }
+        throw error
       }
     }
   })
+
+  // Extrair patients com segurança máxima
+  const patients = useMemo(() => {
+    const data = query.data
+    if (!data) return []
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data.data)) return data.data
+    return []
+  }, [query.data])
+
+  const meta = query.data?.meta || { total: 0, pages: 0 }
+
+  useEffect(() => {
+    if (query.data) {
+      console.log('usePatients - Final array:', patients)
+    }
+  }, [query.data, patients])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Patient, "id">) => {
@@ -77,7 +89,6 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["patients"] })
-      toast.success("Paciente removido com sucesso")
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Erro ao remover paciente")
@@ -85,8 +96,8 @@ export function usePatients(search?: string, status?: string, page = 1, limit = 
   })
 
   return {
-    patients: Array.isArray(query.data?.data) ? query.data.data : (Array.isArray(query.data) ? query.data : []),
-    meta: query.data?.meta || { total: 0, pages: 0 },
+    patients,
+    meta,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

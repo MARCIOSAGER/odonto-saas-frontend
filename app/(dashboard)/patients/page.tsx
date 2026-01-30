@@ -29,15 +29,20 @@ export default function PatientsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { 
-    patients = [], 
+    patients, 
     isLoading, 
+    isError,
     createPatient, 
     updatePatient, 
     deletePatient 
   } = usePatients(search, status)
 
   // Garantir que patients é sempre um array
-  const safePatients = useMemo(() => Array.isArray(patients) ? patients : [], [patients])
+  const safePatients = useMemo(() => {
+    if (!patients) return []
+    if (Array.isArray(patients)) return patients
+    return []
+  }, [patients])
 
   const handleCreate = () => {
     setEditingItem(null)
@@ -52,9 +57,12 @@ export default function PatientsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
+      console.log('Deletando paciente:', deleteId)
       await deletePatient.mutateAsync(deleteId)
-    } catch (error) {
-      // Erro já tratado no hook
+      toast.success("Paciente excluído com sucesso!")
+    } catch (error: any) {
+      console.error('Erro ao excluir paciente:', error)
+      toast.error(error.response?.data?.message || "Erro ao excluir paciente")
     } finally {
       setDeleteId(null)
     }
@@ -76,6 +84,25 @@ export default function PatientsPage() {
     } catch (error) {
       // Erro já tratado no hook
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-destructive font-medium">Erro ao carregar pacientes</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Tentar novamente
+        </Button>
+      </div>
+    )
   }
 
   return (

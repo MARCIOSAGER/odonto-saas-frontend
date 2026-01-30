@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,29 +13,46 @@ export default function WhatsAppSettingsPage() {
   
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
+  const [isTesting, setIsTesting] = useState(false)
+
+  const handleTestConnection = useCallback(async () => {
+    setIsTesting(true)
+    setConnectionStatus('checking')
+    try {
+      const res = await testWhatsApp.mutateAsync()
+      if (res?.success) {
+        setConnectionStatus('connected')
+      } else {
+        setConnectionStatus('disconnected')
+      }
+    } catch (error) {
+      setConnectionStatus('disconnected')
+    } finally {
+      setIsTesting(false)
+    }
+  }, [testWhatsApp])
 
   useEffect(() => {
     if (clinic) {
       setInstanceId(clinic.z_api_instance || "")
       setToken(clinic.z_api_token || "")
+      
+      if (clinic.z_api_instance && clinic.z_api_token) {
+        handleTestConnection()
+      } else {
+        setConnectionStatus('disconnected')
+      }
     }
-  }, [clinic])
+  }, [clinic, handleTestConnection])
 
   const handleSave = async () => {
     try {
       await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token })
-      toast.success("Configurações do WhatsApp salvas!")
-    } catch (error) {
-      toast.error("Erro ao salvar configurações")
-    }
-  }
-
-  const handleTestConnection = async () => {
-    try {
-      await testWhatsApp.mutateAsync()
-      toast.success("Conexão testada com sucesso!")
-    } catch (error) {
-      toast.error("Funcionalidade em desenvolvimento")
+      toast.success("Credenciais salvas!")
+      handleTestConnection()
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Erro ao salvar")
     }
   }
 
@@ -46,8 +63,6 @@ export default function WhatsAppSettingsPage() {
       </div>
     )
   }
-
-  const isConnected = !!(clinic?.z_api_instance && clinic?.z_api_token)
 
   return (
     <div className="max-w-4xl space-y-6 pb-12">
@@ -62,18 +77,26 @@ export default function WhatsAppSettingsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-                  {isConnected ? <Smartphone size={24} /> : <AlertCircle size={24} />}
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                  connectionStatus === 'connected' ? 'bg-success/10 text-success' : 
+                  connectionStatus === 'checking' ? 'bg-yellow-100 text-yellow-600' : 'bg-muted text-muted-foreground'
+                }`}>
+                  {connectionStatus === 'connected' ? <Smartphone size={24} /> : <AlertCircle size={24} />}
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100">Status da Conexão</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {isConnected ? 'Sua instância do WhatsApp está ativa e conectada.' : 'WhatsApp não configurado ou desconectado.'}
+                    {connectionStatus === 'connected' ? 'Sua instância do WhatsApp está ativa e conectada.' : 
+                     connectionStatus === 'checking' ? 'Verificando conexão...' : 'WhatsApp não configurado ou desconectado.'}
                   </p>
                 </div>
               </div>
-              <Badge variant={isConnected ? "green" : "gray"} className="px-3 py-1">
-                {isConnected ? 'Conectado' : 'Desconectado'}
+              <Badge 
+                variant={connectionStatus === 'connected' ? "green" : connectionStatus === 'checking' ? "yellow" : "gray"} 
+                className="px-3 py-1"
+              >
+                {connectionStatus === 'connected' ? 'Conectado' : 
+                 connectionStatus === 'checking' ? 'Verificando...' : 'Desconectado'}
               </Badge>
             </div>
           </CardContent>
@@ -120,10 +143,10 @@ export default function WhatsAppSettingsPage() {
               <Button 
                 variant="outline" 
                 onClick={handleTestConnection} 
-                disabled={testWhatsApp.isPending}
+                disabled={isTesting}
                 className="flex-1 h-11 text-gray-700 dark:text-gray-300"
               >
-                {testWhatsApp.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
+                {isTesting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
                 Testar Conexão
               </Button>
             </div>

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useMemo, useEffect } from "react"
 
 export type Service = {
   id: string
@@ -13,19 +14,34 @@ export type Service = {
 export function useServices() {
   const queryClient = useQueryClient()
 
-  const query = useQuery<Service[]>({
+  const query = useQuery({
     queryKey: ["services"],
     queryFn: async () => {
       try {
         const res = await api.get("/services")
-        const data = res.data?.data
-        return Array.isArray(data) ? data : []
+        console.log('useServices API Raw Response:', res.data)
+        return res.data
       } catch (error) {
         console.error("Erro ao buscar serviços:", error)
-        return []
+        throw error
       }
     }
   })
+
+  // Extrair services com segurança máxima
+  const services = useMemo(() => {
+    const data = query.data
+    if (!data) return []
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data.data)) return data.data
+    return []
+  }, [query.data])
+
+  useEffect(() => {
+    if (query.data) {
+      console.log('useServices - Final array:', services)
+    }
+  }, [query.data, services])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Service, "id">) => {
@@ -47,7 +63,6 @@ export function useServices() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] })
-      toast.success("Serviço removido com sucesso")
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Erro ao remover serviço")
@@ -69,8 +84,9 @@ export function useServices() {
   })
 
   return {
-    services: Array.isArray(query.data) ? query.data : ((query.data as any)?.data || []),
+    services,
     isLoading: query.isLoading,
+    isError: query.isError,
     createService: createMutation,
     deleteService: deleteMutation,
     updateService: updateMutation

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useMemo, useEffect } from "react"
 
 export type Dentist = {
   id: string
@@ -14,19 +15,34 @@ export type Dentist = {
 export function useDentists() {
   const queryClient = useQueryClient()
 
-  const query = useQuery<Dentist[]>({
+  const query = useQuery({
     queryKey: ["dentists"],
     queryFn: async () => {
       try {
         const res = await api.get("/dentists")
-        const data = res.data?.data
-        return Array.isArray(data) ? data : []
+        console.log('useDentists API Raw Response:', res.data)
+        return res.data
       } catch (error) {
         console.error("Erro ao buscar dentistas:", error)
-        return []
+        throw error
       }
     }
   })
+
+  // Extrair dentists com segurança máxima
+  const dentists = useMemo(() => {
+    const data = query.data
+    if (!data) return []
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data.data)) return data.data
+    return []
+  }, [query.data])
+
+  useEffect(() => {
+    if (query.data) {
+      console.log('useDentists - Final array:', dentists)
+    }
+  }, [query.data, dentists])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Dentist, "id">) => {
@@ -48,7 +64,6 @@ export function useDentists() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dentists"] })
-      toast.success("Dentista removido com sucesso")
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || "Erro ao remover dentista")
@@ -70,8 +85,9 @@ export function useDentists() {
   })
 
   return {
-    dentists: Array.isArray(query.data) ? query.data : ((query.data as any)?.data || []),
+    dentists,
     isLoading: query.isLoading,
+    isError: query.isError,
     createDentist: createMutation,
     deleteDentist: deleteMutation,
     updateDentist: updateMutation
