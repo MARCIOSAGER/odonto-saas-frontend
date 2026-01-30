@@ -27,6 +27,43 @@ import {
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
+const statusMap: Record<string, string> = {
+  scheduled: "Agendado",
+  confirmed: "Confirmado",
+  completed: "Realizado",
+  cancelled: "Cancelado",
+  "no-show": "Faltou",
+}
+
+const statusVariant = (status: string): "green" | "yellow" | "red" => {
+  const s = status?.toLowerCase() || ""
+  if (s === "confirmed" || s === "confirmado") return "green"
+  if (s === "scheduled" || s === "agendado" || s === "pendente") return "yellow"
+  return "red"
+}
+
+function getPatientName(a: any): string {
+  return a.patient?.name || a.patient_name || a.paciente || ""
+}
+function getDentistName(a: any): string {
+  return a.dentist?.name || a.dentist_name || a.dentista || ""
+}
+function getServiceName(a: any): string {
+  return a.service?.name || a.service_name || a.servico || ""
+}
+function getStatusLabel(a: any): string {
+  return statusMap[a.status] || a.status || "Agendado"
+}
+function getAppointmentDate(a: any): Date {
+  if (a.date_time) return new Date(a.date_time)
+  if (a.date && a.time) {
+    const dateStr = typeof a.date === "string" ? a.date.split("T")[0] : new Date(a.date).toISOString().split("T")[0]
+    return new Date(`${dateStr}T${a.time}:00`)
+  }
+  if (a.date) return new Date(a.date)
+  return new Date()
+}
+
 function AppointmentsContent() {
   const searchParams = useSearchParams()
   const [view, setView] = useState<"lista" | "calendario">("lista")
@@ -35,7 +72,6 @@ function AppointmentsContent() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const { appointments, isLoading, isError, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
 
-  // Garantir que appointments é sempre um array (Segurança Extra)
   const safeAppointments = useMemo(() => {
     if (!appointments) return []
     if (Array.isArray(appointments)) return appointments
@@ -45,7 +81,6 @@ function AppointmentsContent() {
   useEffect(() => {
     if (searchParams.get("new") === "true") {
       setIsModalOpen(true)
-      // Limpar o param da URL sem recarregar a página
       window.history.replaceState({}, "", "/appointments")
     }
   }, [searchParams])
@@ -96,15 +131,16 @@ function AppointmentsContent() {
   const events = useMemo(
     () =>
       safeAppointments.map((a: any) => {
-        const start = new Date(a.date_time || `${a.date}T${a.time || '00:00'}:00`)
+        const start = getAppointmentDate(a)
         const end = new Date(start)
-        end.setHours(start.getHours() + 1)
-        return { 
-          id: a.id, 
-          title: `${a.patient_name || a.paciente} • ${a.service_name || a.servico}`, 
-          start, 
-          end, 
-          resource: a 
+        const duration = a.duration || a.service?.duration || 60
+        end.setMinutes(start.getMinutes() + duration)
+        return {
+          id: a.id,
+          title: `${getPatientName(a)} - ${getServiceName(a)}`,
+          start,
+          end,
+          resource: a
         }
       }),
     [safeAppointments]
@@ -136,21 +172,21 @@ function AppointmentsContent() {
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Agendamentos</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie as consultas e horários da clínica.</p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="bg-muted p-1 rounded-lg flex gap-1">
-            <Button 
-              variant={view === "lista" ? "default" : "ghost"} 
-              size="sm" 
+            <Button
+              variant={view === "lista" ? "default" : "ghost"}
+              size="sm"
               className="h-8 gap-2"
               onClick={() => setView("lista")}
             >
               <LayoutList size={14} />
               Lista
             </Button>
-            <Button 
-              variant={view === "calendario" ? "default" : "ghost"} 
-              size="sm" 
+            <Button
+              variant={view === "calendario" ? "default" : "ghost"}
+              size="sm"
               className="h-8 gap-2"
               onClick={() => setView("calendario")}
             >
@@ -172,13 +208,13 @@ function AppointmentsContent() {
               {editingItem ? "Editar Agendamento" : "Novo Agendamento"}
             </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              {editingItem 
-                ? "Atualize as informações da consulta selecionada." 
+              {editingItem
+                ? "Atualize as informações da consulta selecionada."
                 : "Selecione o paciente, dentista e serviço para marcar uma nova consulta."}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
-            <AppointmentForm 
+            <AppointmentForm
               initialData={editingItem}
               onSubmit={handleFormSubmit}
               onCancel={() => setIsModalOpen(false)}
@@ -232,66 +268,68 @@ function AppointmentsContent() {
                       </TD>
                     </TR>
                   ) : (
-                    safeAppointments.map((a: any) => (
-                      <TR key={a.id} className="hover:bg-muted/30 transition-colors">
-                        <TD>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">
-                              {format(new Date(a.date_time || a.date), 'dd/MM/yyyy')}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {a.time || (a.date_time ? format(new Date(a.date_time), 'HH:mm') : '--:--')}
-                            </span>
-                          </div>
-                        </TD>
-                        <TD className="font-semibold text-gray-900 dark:text-gray-100">{a.patient_name || a.paciente}</TD>
-                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.dentist_name || a.dentista}</TD>
-                        <TD className="text-gray-700 dark:text-gray-300 text-sm">{a.service_name || a.servico}</TD>
-                        <TD>
-                          <Badge variant={
-                            a.status === "Confirmado" ? "green" : 
-                            a.status === "Pendente" ? "yellow" : "red"
-                          }>
-                            {a.status}
-                          </Badge>
-                        </TD>
-                        <TD className="text-right">
-                          <div className="flex justify-end gap-1">
-                            {a.status === "Pendente" && (
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-success hover:bg-success/10"
-                                onClick={() => handleConfirm(a.id)}
-                                title="Confirmar"
-                                disabled={confirmAppointment.isPending}
+                    safeAppointments.map((a: any) => {
+                      const aptDate = getAppointmentDate(a)
+                      const label = getStatusLabel(a)
+                      const isScheduled = a.status === "scheduled"
+                      return (
+                        <TR key={a.id} className="hover:bg-muted/30 transition-colors">
+                          <TD>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                {format(aptDate, 'dd/MM/yyyy')}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {a.time || format(aptDate, 'HH:mm')}
+                              </span>
+                            </div>
+                          </TD>
+                          <TD className="font-semibold text-gray-900 dark:text-gray-100">{getPatientName(a)}</TD>
+                          <TD className="text-gray-700 dark:text-gray-300 text-sm">{getDentistName(a)}</TD>
+                          <TD className="text-gray-700 dark:text-gray-300 text-sm">{getServiceName(a)}</TD>
+                          <TD>
+                            <Badge variant={statusVariant(a.status)}>
+                              {label}
+                            </Badge>
+                          </TD>
+                          <TD className="text-right">
+                            <div className="flex justify-end gap-1">
+                              {isScheduled && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-success hover:bg-success/10"
+                                  onClick={() => handleConfirm(a.id)}
+                                  title="Confirmar"
+                                  disabled={confirmAppointment.isPending}
+                                >
+                                  {confirmAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
+                                onClick={() => handleEdit(a)}
+                                title="Editar"
                               >
-                                {confirmAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                <Pencil size={14} />
                               </Button>
-                            )}
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
-                              onClick={() => handleEdit(a)}
-                              title="Editar"
-                            >
-                              <Pencil size={14} />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
-                              onClick={() => setDeleteId(a.id)}
-                              title="Cancelar"
-                              disabled={cancelAppointment.isPending}
-                            >
-                              {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                            </Button>
-                          </div>
-                        </TD>
-                      </TR>
-                    ))
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
+                                onClick={() => setDeleteId(a.id)}
+                                title="Cancelar"
+                                disabled={cancelAppointment.isPending}
+                              >
+                                {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                              </Button>
+                            </div>
+                          </TD>
+                        </TR>
+                      )
+                    })
                   )}
                 </TBody>
               </Table>
@@ -300,6 +338,7 @@ function AppointmentsContent() {
             <div className="h-[700px] font-sans">
               <Calendar
                 localizer={localizer}
+                culture="pt-BR"
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
@@ -310,9 +349,32 @@ function AppointmentsContent() {
                   month: "Mês",
                   today: "Hoje",
                   previous: "Anterior",
-                  next: "Próximo"
+                  next: "Próximo",
+                  date: "Data",
+                  time: "Hora",
+                  event: "Evento",
+                  noEventsInRange: "Sem agendamentos neste período.",
+                  showMore: (total: number) => `+${total} mais`,
+                }}
+                formats={{
+                  timeGutterFormat: (date: Date) => format(date, 'HH:mm', { locale: ptBR }),
+                  eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+                    `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`,
+                  dayHeaderFormat: (date: Date) => format(date, "EEEE, dd 'de' MMMM", { locale: ptBR }),
+                  dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
+                    `${format(start, "dd 'de' MMMM", { locale: ptBR })} - ${format(end, "dd 'de' MMMM", { locale: ptBR })}`,
                 }}
                 className="rounded-lg"
+                eventPropGetter={() => ({
+                  style: {
+                    backgroundColor: 'hsl(var(--primary))',
+                    borderRadius: '6px',
+                    border: 'none',
+                    color: 'white',
+                    fontSize: '12px',
+                    padding: '2px 6px',
+                  }
+                })}
               />
             </div>
           )}

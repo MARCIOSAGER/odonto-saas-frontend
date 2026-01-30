@@ -9,7 +9,8 @@ export function useConversations(search?: string) {
     queryFn: async () => {
       const res = await api.get("/conversations", { params: { q: search } })
       return res.data
-    }
+    },
+    refetchInterval: 5000,
   })
 
   // Unwrap TransformInterceptor + pagination:
@@ -37,10 +38,17 @@ export function useMessages(phone: string | null) {
     queryKey: ["messages", phone],
     queryFn: async () => {
       if (!phone) return null
-      const res = await api.get(`/conversations/${phone}`)
-      return res.data
+      try {
+        const res = await api.get(`/conversations/${phone}`)
+        return res.data
+      } catch (err: any) {
+        // 404 = no messages yet (new conversation)
+        if (err?.response?.status === 404) return { data: { patient: null, data: [], meta: {} } }
+        throw err
+      }
     },
-    enabled: !!phone
+    enabled: !!phone,
+    refetchInterval: 3000,
   })
 
   // Unwrap TransformInterceptor:
