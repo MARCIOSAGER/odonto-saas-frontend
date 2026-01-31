@@ -99,22 +99,22 @@ export const authOptions: NextAuthOptions = {
           const data = response.data || response
 
           if (data?.requires_2fa) {
-            // Redirect to 2FA page - return URL with token
             return `/login/verify-2fa?token=${data.two_factor_token}&method=${data.two_factor_method || 'whatsapp'}`
           }
 
           if (data?.access_token) {
-            // Store backend tokens on user object for JWT callback
             ;(user as any).accessToken = data.access_token
             ;(user as any).role = data.user?.role
             ;(user as any).clinic_id = data.clinic?.id
             return true
           }
 
-          return false
+          // Redirect to login with backend error message
+          const errorMsg = response.message || data?.message || "Conta não encontrada. Registre-se primeiro."
+          return `/login?error=${encodeURIComponent(errorMsg)}`
         } catch (error) {
           console.error("Google login backend error:", error)
-          return false
+          return `/login?error=${encodeURIComponent("Erro ao conectar com Google. Tente novamente.")}`
         }
       }
       return true
