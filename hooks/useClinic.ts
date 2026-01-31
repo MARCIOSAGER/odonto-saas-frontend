@@ -171,6 +171,51 @@ export function useClinic() {
     }
   })
 
+  // Email / SMTP Settings
+  const emailSettingsQuery = useQuery({
+    queryKey: ["clinic", "email-settings"],
+    queryFn: async () => {
+      try {
+        const res = await api.get("/clinics/my/email-settings")
+        return res.data?.data || res.data || {}
+      } catch (error) {
+        console.error("Erro ao buscar configurações de e-mail:", error)
+        return {}
+      }
+    }
+  })
+
+  const updateEmailSettingsMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const res = await api.put("/clinics/my/email-settings", payload)
+      return res.data?.data || res.data || {}
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clinic", "email-settings"] })
+      toast.success("Configurações de e-mail atualizadas")
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao atualizar configurações")
+    }
+  })
+
+  const testEmailMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post("/clinics/my/test-email")
+      return res.data?.data || res.data
+    },
+    onSuccess: (data) => {
+      if (data?.success) {
+        toast.success(data?.message || "E-mail de teste enviado!")
+      } else {
+        toast.error(data?.message || "Falha ao enviar e-mail de teste")
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao testar e-mail")
+    }
+  })
+
   return {
     clinic: query.data,
     isLoading: query.isLoading,
@@ -184,6 +229,10 @@ export function useClinic() {
     disconnectWhatsApp: disconnectWhatsAppMutation,
     restartWhatsApp: restartWhatsAppMutation,
     restoreWhatsApp: restoreWhatsAppMutation,
-    testAI: testAIMutation
+    testAI: testAIMutation,
+    emailSettings: emailSettingsQuery.data,
+    isLoadingEmail: emailSettingsQuery.isLoading,
+    updateEmailSettings: updateEmailSettingsMutation,
+    testEmail: testEmailMutation,
   }
 } 
