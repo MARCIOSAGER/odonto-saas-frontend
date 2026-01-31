@@ -205,39 +205,56 @@ export default function SecuritySettingsPage() {
 
       {/* WhatsApp Setup Dialog */}
       <Dialog open={showWhatsAppDialog} onOpenChange={setShowWhatsAppDialog}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">
-              Ativar 2FA WhatsApp
-            </DialogTitle>
-            <DialogDescription className="text-gray-500 dark:text-gray-400">
-              Informe o número do WhatsApp que receberá os códigos de verificação.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
+        <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 px-6 py-5 text-white">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-white/20 flex items-center justify-center">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-white text-lg font-bold">
+                  Ativar 2FA via WhatsApp
+                </DialogTitle>
+                <p className="text-green-100 text-sm mt-0.5">
+                  Receba códigos de verificação no seu WhatsApp
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 py-5 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Número WhatsApp
+                Número do WhatsApp
               </label>
-              <Input
-                placeholder="5521999999999"
-                value={whatsAppPhone}
-                onChange={(e) => setWhatsAppPhone(e.target.value)}
-                className="text-gray-900 dark:text-gray-100"
-              />
+              <div className="relative">
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="5521999999999"
+                  value={whatsAppPhone}
+                  onChange={(e) => setWhatsAppPhone(e.target.value.replace(/\D/g, ""))}
+                  className="pl-10 h-11 text-gray-900 dark:text-gray-100 font-mono"
+                />
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Com DDI + DDD + número (ex: 5521999999999)
+                Formato: DDI + DDD + número (ex: 5521999999999)
+              </p>
+            </div>
+            <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg p-3">
+              <p className="text-xs text-green-700 dark:text-green-400">
+                A cada login, enviaremos um código de 6 dígitos para este número. O código expira em 5 minutos.
               </p>
             </div>
             <Button
-              className="w-full"
+              className="w-full h-11 bg-green-600 hover:bg-green-700 text-white"
               onClick={handleSetupWhatsApp}
               disabled={setupWhatsApp.isPending || whatsAppPhone.replace(/\D/g, "").length < 10}
             >
               {setupWhatsApp.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Ativar
+              ) : (
+                <ShieldCheck className="h-4 w-4 mr-2" />
+              )}
+              Ativar WhatsApp 2FA
             </Button>
           </div>
         </DialogContent>
@@ -245,51 +262,77 @@ export default function SecuritySettingsPage() {
 
       {/* TOTP Setup Dialog */}
       <Dialog open={showTotpDialog} onOpenChange={setShowTotpDialog}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">
-              Configurar App Autenticador
-            </DialogTitle>
-            <DialogDescription className="text-gray-500 dark:text-gray-400">
-              Escaneie o QR code com o Google Authenticator ou Authy.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
+        <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 px-6 py-5 text-white">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-white/20 flex items-center justify-center">
+                <QrCode className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-white text-lg font-bold">
+                  Configurar App Autenticador
+                </DialogTitle>
+                <p className="text-purple-100 text-sm mt-0.5">
+                  Google Authenticator, Authy ou similar
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 py-5 space-y-5">
+            {/* Step 1: QR Code */}
             {totpData?.qrCode && (
-              <div className="flex justify-center">
-                <img src={totpData.qrCode} alt="QR Code TOTP" className="w-48 h-48 rounded-lg" />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center h-5 w-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 text-xs font-bold">1</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Escaneie o QR Code</span>
+                </div>
+                <div className="flex justify-center py-2">
+                  <div className="p-3 bg-white rounded-xl shadow-sm border">
+                    <img src={totpData.qrCode} alt="QR Code TOTP" className="w-44 h-44" />
+                  </div>
+                </div>
               </div>
             )}
+
+            {/* Manual Secret */}
             {totpData?.secret && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Ou digite manualmente:
+                  Ou digite manualmente no app:
                 </p>
-                <p className="text-center font-mono text-sm bg-muted p-2 rounded select-all text-gray-900 dark:text-gray-100">
-                  {totpData.secret}
-                </p>
+                <div className="bg-muted rounded-lg p-2.5 border border-border">
+                  <p className="text-center font-mono text-sm tracking-wider select-all text-gray-900 dark:text-gray-100 break-all">
+                    {totpData.secret}
+                  </p>
+                </div>
               </div>
             )}
+
+            {/* Step 2: Verify Code */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Código de 6 dígitos
-              </label>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center h-5 w-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 text-xs font-bold">2</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Digite o código gerado</span>
+              </div>
               <Input
                 value={totpCode}
                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 placeholder="000000"
-                className="text-center text-lg font-mono tracking-widest text-gray-900 dark:text-gray-100"
+                className="text-center text-2xl font-mono tracking-[0.4em] h-12 text-gray-900 dark:text-gray-100"
                 maxLength={6}
               />
             </div>
+
             <Button
-              className="w-full"
+              className="w-full h-11 bg-purple-600 hover:bg-purple-700 text-white"
               onClick={handleVerifyTotp}
               disabled={verifyTotp.isPending || totpCode.length < 6}
             >
               {verifyTotp.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
+              ) : (
+                <ShieldCheck className="h-4 w-4 mr-2" />
+              )}
               Verificar e ativar
             </Button>
           </div>
@@ -298,19 +341,31 @@ export default function SecuritySettingsPage() {
 
       {/* Disable Dialog */}
       <Dialog open={showDisableDialog} onOpenChange={setShowDisableDialog}>
-        <DialogContent className="sm:max-w-[400px]">
-          <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">
-              Desativar 2FA
-            </DialogTitle>
-            <DialogDescription className="text-gray-500 dark:text-gray-400">
-              Para desativar, confirme sua senha atual.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
+        <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden">
+          <div className="bg-gradient-to-br from-red-500 to-red-600 px-6 py-5 text-white">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-full bg-white/20 flex items-center justify-center">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-white text-lg font-bold">
+                  Desativar 2FA
+                </DialogTitle>
+                <p className="text-red-100 text-sm mt-0.5">
+                  Sua conta ficará menos protegida
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg p-3">
+              <p className="text-xs text-red-700 dark:text-red-400">
+                Ao desativar a autenticação de dois fatores, sua conta ficará protegida apenas pela senha. Recomendamos manter o 2FA ativo.
+              </p>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Senha atual
+                Confirme sua senha
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -318,20 +373,22 @@ export default function SecuritySettingsPage() {
                   type="password"
                   value={disablePassword}
                   onChange={(e) => setDisablePassword(e.target.value)}
-                  className="pl-10 text-gray-900 dark:text-gray-100"
-                  placeholder="Digite sua senha"
+                  className="pl-10 h-11 text-gray-900 dark:text-gray-100"
+                  placeholder="Digite sua senha atual"
                 />
               </div>
             </div>
             <Button
               variant="destructive"
-              className="w-full"
+              className="w-full h-11"
               onClick={handleDisable}
               disabled={disable2fa.isPending || !disablePassword}
             >
               {disable2fa.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
+              ) : (
+                <Lock className="h-4 w-4 mr-2" />
+              )}
               Confirmar desativação
             </Button>
           </div>
