@@ -1,6 +1,6 @@
 import type { NextAuthOptions } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import axios from "axios"
+import Google from "next-auth/providers/google"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
 
@@ -19,7 +19,32 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
-        
+
+        // Handle 2FA completion: email="__2fa__", password="__token__:<access_token>"
+        if (credentials.email === "__2fa__" && credentials.password.startsWith("__token__:")) {
+          const accessToken = credentials.password.replace("__token__:", "")
+          try {
+            const meRes = await fetch(`${API_BASE_URL}/auth/me`, {
+              headers: { Authorization: `Bearer ${accessToken}` }
+            })
+            const meData = await meRes.json()
+            const profile = meData.data || meData
+            if (profile?.id) {
+              return {
+                id: String(profile.id),
+                name: profile.name,
+                email: profile.email,
+                accessToken,
+                role: profile.role,
+                clinic_id: profile.clinic?.id
+              }
+            }
+          } catch {
+            return null
+          }
+          return null
+        }
+
         try {
           const res = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
@@ -49,9 +74,51 @@ export const authOptions: NextAuthOptions = {
           return null
         }
       }
-    })
+    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          Google({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // Handle Google OAuth: exchange Google token for backend tokens
+      if (account?.provider === "google" && account.id_token) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/auth/google-login`, {
+            method: 'POST',
+            body: JSON.stringify({ google_id_token: account.id_token }),
+            headers: { "Content-Type": "application/json" }
+          })
+
+          const response = await res.json()
+          const data = response.data || response
+
+          if (data?.requires_2fa) {
+            // Redirect to 2FA page - return URL with token
+            return `/login/verify-2fa?token=${data.two_factor_token}&method=${data.two_factor_method || 'whatsapp'}`
+          }
+
+          if (data?.access_token) {
+            // Store backend tokens on user object for JWT callback
+            ;(user as any).accessToken = data.access_token
+            ;(user as any).role = data.user?.role
+            ;(user as any).clinic_id = data.clinic?.id
+            return true
+          }
+
+          return false
+        } catch (error) {
+          console.error("Google login backend error:", error)
+          return false
+        }
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.accessToken = (user as any).accessToken

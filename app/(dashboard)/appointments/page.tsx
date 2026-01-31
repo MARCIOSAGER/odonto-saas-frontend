@@ -13,6 +13,8 @@ import { ptBR } from "date-fns/locale"
 import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react"
 import { AppointmentForm } from "@/components/forms/appointment-form"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+import { useIsMobile } from "@/hooks/useIsMobile"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +68,7 @@ function getAppointmentDate(a: any): Date {
 
 function AppointmentsContent() {
   const searchParams = useSearchParams()
+  const isMobile = useIsMobile()
   const [view, setView] = useState<"lista" | "calendario">("lista")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
@@ -167,7 +170,7 @@ function AppointmentsContent() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Agendamentos</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie as consultas e horários da clínica.</p>
@@ -248,8 +251,8 @@ function AppointmentsContent() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : view === "lista" ? (
-            <div className="rounded-md border border-border overflow-hidden">
-              <Table>
+            <div className="rounded-md border border-border overflow-x-auto">
+              <Table className="min-w-[700px]">
                 <THead className="bg-muted/50">
                   <TR>
                     <TH className="font-bold text-gray-900 dark:text-gray-100">Data/Hora</TH>
@@ -335,16 +338,17 @@ function AppointmentsContent() {
               </Table>
             </div>
           ) : (
-            <div className="h-[700px] font-sans">
+            <div className={cn("font-sans", isMobile ? "h-[450px]" : "h-[700px]")}>
               <Calendar
                 localizer={localizer}
                 culture="pt-BR"
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
-                defaultView="week"
-                views={["week", "month"]}
+                defaultView={isMobile ? "day" : "week"}
+                views={isMobile ? ["day", "month"] : ["week", "month"]}
                 messages={{
+                  day: "Dia",
                   week: "Semana",
                   month: "Mês",
                   today: "Hoje",

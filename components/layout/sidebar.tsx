@@ -4,13 +4,13 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { signOut, useSession } from "next-auth/react"
-import { 
-  LayoutDashboard, 
-  Hospital, 
-  Users, 
-  CalendarDays, 
-  User, 
-  Wallet, 
+import {
+  LayoutDashboard,
+  Hospital,
+  Users,
+  CalendarDays,
+  User,
+  Wallet,
   Settings,
   LogOut,
   ChevronLeft,
@@ -19,7 +19,8 @@ import {
   ChevronDown,
   Smartphone,
   Bot,
-  UserCircle
+  UserCircle,
+  ShieldCheck
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -42,6 +43,7 @@ const settingsSubmenu = [
   { href: "/settings/clinic", label: "Minha Clínica", icon: Hospital },
   { href: "/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
   { href: "/settings/ai", label: "Assistente IA", icon: Bot },
+  { href: "/settings/security", label: "Segurança", icon: ShieldCheck },
   { href: "/settings", label: "Minha Conta", icon: UserCircle },
 ]
 

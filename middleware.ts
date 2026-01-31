@@ -6,7 +6,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
 
-  const isAuthPage = pathname === "/login" || pathname === "/register"
+  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname.startsWith("/forgot-password") || pathname.startsWith("/login/verify-2fa")
   const isPublicPage = pathname === "/"
 
   // Se for uma página interna e não tiver token, manda pro login
@@ -34,7 +34,10 @@ export const config = {
   matcher: [
     "/",
     "/login",
+    "/login/verify-2fa",
     "/register",
+    "/forgot-password",
+    "/forgot-password/reset",
     "/home",
     "/appointments/:path*",
     "/clinics/:path*",
