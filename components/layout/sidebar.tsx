@@ -20,7 +20,8 @@ import {
   Smartphone,
   Bot,
   UserCircle,
-  ShieldCheck
+  ShieldCheck,
+  Mail
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -42,6 +43,7 @@ const clinicItems = [
 const settingsSubmenu = [
   { href: "/settings/clinic", label: "Minha Clínica", icon: Hospital },
   { href: "/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
+  { href: "/settings/email", label: "E-mail", icon: Mail },
   { href: "/settings/ai", label: "Assistente IA", icon: Bot },
   { href: "/settings/security", label: "Segurança", icon: ShieldCheck },
   { href: "/settings", label: "Minha Conta", icon: UserCircle },
