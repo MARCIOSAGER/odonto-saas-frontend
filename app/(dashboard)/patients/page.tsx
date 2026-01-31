@@ -107,7 +107,7 @@ export default function PatientsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Pacientes</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie o cadastro de pacientes da sua clínica.</p>
@@ -197,8 +197,8 @@ export default function PatientsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="rounded-md border border-border overflow-hidden">
-              <Table>
+            <div className="rounded-md border border-border overflow-x-auto">
+              <Table className="min-w-[640px]">
                 <THead className="bg-muted/50">
                   <TR>
                     <TH className="font-bold text-gray-900 dark:text-gray-100">Nome</TH>

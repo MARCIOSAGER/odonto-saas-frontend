@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/dialog"
-import { Search, Send, MessageSquare, Loader2, Plus, User, Phone } from "lucide-react"
+import { Search, Send, MessageSquare, Loader2, Plus, User, Phone, ArrowLeft } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useIsMobile } from "@/hooks/useIsMobile"
 
 export default function ConversationsPage() {
+  const isMobile = useIsMobile()
   const [search, setSearch] = useState("")
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null)
   const [messageText, setMessageText] = useState("")
@@ -100,9 +102,9 @@ export default function ConversationsPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-6 overflow-hidden">
+    <div className={cn("flex h-[calc(100vh-120px)] overflow-hidden", isMobile ? "flex-col" : "gap-6")}>
       {/* Lista de Conversas */}
-      <div className="w-80 flex flex-col gap-4">
+      <div className={cn("flex flex-col gap-4", isMobile ? (selectedPhone ? "hidden" : "w-full") : "w-80")}>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -176,12 +178,23 @@ export default function ConversationsPage() {
       </div>
 
       {/* Janela de Chat */}
-      <Card className="flex-1 border-border bg-card shadow-sm flex flex-col overflow-hidden">
+      <Card className={cn("border-border bg-card shadow-sm flex flex-col overflow-hidden", isMobile ? (selectedPhone ? "flex-1" : "hidden") : "flex-1")}>
         {selectedPhone ? (
           <>
             {/* Header do Chat */}
             <div className="p-4 border-b border-border bg-muted/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
+                {isMobile && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={() => setSelectedPhone(null)}
+                    aria-label="Voltar"
+                  >
+                    <ArrowLeft size={18} />
+                  </Button>
+                )}
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
                   {(selectedConversation?.patient_name || patient?.name || "?").charAt(0).toUpperCase()}
                 </div>
@@ -198,7 +211,7 @@ export default function ConversationsPage() {
             </div>
 
             {/* Mensagens */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-3 bg-[#F8FAFC] dark:bg-gray-900/50">
+            <div className={cn("flex-1 overflow-y-auto space-y-3 bg-[#F8FAFC] dark:bg-gray-900/50", isMobile ? "p-3" : "p-6")}>
               {loadingChat ? (
                 <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
               ) : !Array.isArray(messages) || messages.length === 0 ? (
@@ -210,7 +223,8 @@ export default function ConversationsPage() {
                   <div
                     key={m.id}
                     className={cn(
-                      "flex flex-col max-w-[70%]",
+                      "flex flex-col",
+                      isMobile ? "max-w-[85%]" : "max-w-[70%]",
                       m.direction === "outgoing" ? "ml-auto items-end" : "mr-auto items-start"
                     )}
                   >
