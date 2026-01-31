@@ -26,7 +26,7 @@ export const registerSchema = z.object({
   password: z.string().min(8, { message: "Senha deve ter no mínimo 8 caracteres" }),
   confirmPassword: z.string().min(8, { message: "Confirmação é obrigatória" }),
   clinic_name: z.string().min(3, { message: "Nome da clínica deve ter no mínimo 3 caracteres" }),
-  cnpj: z.string().min(14, { message: "CNPJ inválido" }).max(18, { message: "CNPJ inválido" }),
+  cnpj: z.string().min(11, { message: "CPF ou CNPJ inválido" }).max(18, { message: "CPF ou CNPJ inválido" }),
   phone: z.string().min(10, { message: "Telefone inválido" }).max(15, { message: "Telefone inválido" })
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",

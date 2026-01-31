@@ -12,9 +12,18 @@ import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone } from "lucide-react"
 import { api } from "@/lib/api"
 
-function maskCNPJ(value: string) {
-  return value
-    .replace(/\D/g, "")
+function maskDocument(value: string) {
+  const digits = value.replace(/\D/g, "")
+  if (digits.length <= 11) {
+    // CPF: 000.000.000-00
+    return digits
+      .replace(/^(\d{3})(\d)/, "$1.$2")
+      .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+      .replace(/\.(\d{3})(\d)/, ".$1-$2")
+      .slice(0, 14)
+  }
+  // CNPJ: 00.000.000/0000-00
+  return digits
     .replace(/^(\d{2})(\d)/, "$1.$2")
     .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
     .replace(/\.(\d{3})(\d)/, ".$1/$2")
@@ -79,9 +88,9 @@ export default function RegisterPage() {
         if (msg.includes("Email")) {
           setApiError("Este e-mail já está cadastrado.")
         } else if (msg.includes("CNPJ")) {
-          setApiError("Este CNPJ já está cadastrado.")
+          setApiError("Este CPF/CNPJ já está cadastrado.")
         } else {
-          setApiError("E-mail ou CNPJ já cadastrado.")
+          setApiError("E-mail ou CPF/CNPJ já cadastrado.")
         }
       } else {
         setApiError("Erro ao criar conta. Tente novamente.")
@@ -232,15 +241,15 @@ export default function RegisterPage() {
                   {errors.clinic_name && <p className="text-xs text-destructive">{errors.clinic_name.message}</p>}
                 </div>
 
-                {/* CNPJ + Telefone */}
+                {/* CPF/CNPJ + Telefone */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">CNPJ</label>
+                    <label className="text-sm font-medium text-foreground">CPF ou CNPJ</label>
                     <Input
-                      placeholder="00.000.000/0000-00"
+                      placeholder="000.000.000-00"
                       className="h-11 bg-white dark:bg-gray-900 text-foreground"
                       {...register("cnpj")}
-                      onChange={(e) => setValue("cnpj", maskCNPJ(e.target.value))}
+                      onChange={(e) => setValue("cnpj", maskDocument(e.target.value))}
                     />
                     {errors.cnpj && <p className="text-xs text-destructive">{errors.cnpj.message}</p>}
                   </div>
