@@ -10,11 +10,13 @@ import { signIn } from "next-auth/react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { api } from "@/lib/api"
+import { Suspense } from "react"
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const {
@@ -22,7 +24,8 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting }
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) })
-  const [apiError, setApiError] = useState<string | null>(null)
+  const urlError = searchParams.get("error")
+  const [apiError, setApiError] = useState<string | null>(urlError)
 
   const onSubmit = async (data: LoginInput) => {
     setApiError(null)
@@ -217,5 +220,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+      <LoginContent />
+    </Suspense>
   )
 }
