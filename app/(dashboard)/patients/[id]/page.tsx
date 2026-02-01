@@ -1,26 +1,216 @@
 "use client"
 import { useParams } from "next/navigation"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { mockPatients } from "@/lib/mock"
+import { useEffect, useState, useCallback } from "react"
+import { api } from "@/lib/api"
+import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles } from "lucide-react"
+import { PatientSummaryCard } from "@/components/ai/patient-summary-card"
+import { TreatmentPlanAi } from "@/components/ai/treatment-plan-ai"
+import { ClinicalNotesGenerator } from "@/components/ai/clinical-notes-generator"
+import { OdontogramViewer } from "@/components/odontogram/odontogram-viewer"
+
+interface Patient {
+  id: string
+  name: string
+  phone: string
+  cpf: string | null
+  email: string | null
+  birth_date: string | null
+  address: string | null
+  notes: string | null
+  status: string
+  last_visit: string | null
+  created_at: string
+}
+
+type TabKey = "resumo" | "odontograma" | "prontuario" | "tratamento"
 
 export default function PatientDetailPage() {
   const params = useParams()
   const id = params?.id as string
-  const patient = mockPatients.find((p) => p.id === id)
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<TabKey>("resumo")
+
+  const loadPatient = useCallback(async () => {
+    try {
+      const res = await api.get(`/patients/${id}`)
+      setPatient(res.data?.data || res.data)
+    } catch {
+      // handle error
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (id) loadPatient()
+  }, [id, loadPatient])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!patient) {
+    return (
+      <div className="text-center py-20 text-muted-foreground">
+        Paciente não encontrado
+      </div>
+    )
+  }
+
+  const age = patient.birth_date
+    ? Math.floor(
+        (Date.now() - new Date(patient.birth_date).getTime()) /
+          (365.25 * 24 * 60 * 60 * 1000)
+      )
+    : null
+
+  const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
+    { key: "resumo", label: "Resumo", icon: User },
+    { key: "odontograma", label: "Odontograma", icon: FileText },
+    { key: "prontuario", label: "Prontuário IA", icon: Sparkles },
+    { key: "tratamento", label: "Plano de Tratamento", icon: Calendar },
+  ]
+
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Detalhes do Paciente</h2>
-        </CardHeader>
-        <CardContent className="space-y-1 text-sm">
-          <div><span className="text-gray-600">Nome:</span> {patient?.name}</div>
-          <div><span className="text-gray-600">Telefone:</span> {patient?.phone}</div>
-          <div><span className="text-gray-600">CPF:</span> {patient?.cpf}</div>
-          <div><span className="text-gray-600">Email:</span> {patient?.email}</div>
-          <div><span className="text-gray-600">Status:</span> {patient?.status}</div>
-        </CardContent>
-      </Card>
+    <div className="space-y-6">
+      {/* Patient header */}
+      <div className="border rounded-xl p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{patient.name}</h1>
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
+              {patient.phone && (
+                <span className="flex items-center gap-1">
+                  <Phone className="h-3.5 w-3.5" />
+                  {patient.phone}
+                </span>
+              )}
+              {patient.email && (
+                <span className="flex items-center gap-1">
+                  <Mail className="h-3.5 w-3.5" />
+                  {patient.email}
+                </span>
+              )}
+              {age !== null && (
+                <span>{age} anos</span>
+              )}
+              {patient.cpf && (
+                <span>CPF: {patient.cpf}</span>
+              )}
+            </div>
+          </div>
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+              patient.status === "active"
+                ? "bg-green-100 text-green-800"
+                : "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {patient.status === "active" ? "Ativo" : patient.status}
+          </span>
+        </div>
+
+        {patient.notes && (
+          <p className="text-sm text-muted-foreground mt-3 bg-muted/50 p-3 rounded-lg">
+            {patient.notes}
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground">
+          {patient.last_visit && (
+            <span>Última visita: {new Date(patient.last_visit).toLocaleDateString("pt-BR")}</span>
+          )}
+          <span>Cadastro: {new Date(patient.created_at).toLocaleDateString("pt-BR")}</span>
+        </div>
+      </div>
+
+      {/* AI Summary Card */}
+      <PatientSummaryCard patientId={id} />
+
+      {/* Tabs */}
+      <div className="border-b">
+        <div className="flex gap-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      <div>
+        {activeTab === "resumo" && (
+          <div className="space-y-4">
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Informações do paciente</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Nome:</span>{" "}
+                  {patient.name}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Telefone:</span>{" "}
+                  {patient.phone}
+                </div>
+                {patient.email && (
+                  <div>
+                    <span className="text-muted-foreground">Email:</span>{" "}
+                    {patient.email}
+                  </div>
+                )}
+                {patient.cpf && (
+                  <div>
+                    <span className="text-muted-foreground">CPF:</span>{" "}
+                    {patient.cpf}
+                  </div>
+                )}
+                {patient.birth_date && (
+                  <div>
+                    <span className="text-muted-foreground">Nascimento:</span>{" "}
+                    {new Date(patient.birth_date).toLocaleDateString("pt-BR")}
+                  </div>
+                )}
+                {patient.address && (
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground">Endereço:</span>{" "}
+                    {patient.address}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "odontograma" && (
+          <OdontogramViewer patientId={id} />
+        )}
+
+        {activeTab === "prontuario" && (
+          <ClinicalNotesGenerator patientId={id} />
+        )}
+
+        {activeTab === "tratamento" && (
+          <TreatmentPlanAi patientId={id} />
+        )}
+      </div>
     </div>
   )
 }

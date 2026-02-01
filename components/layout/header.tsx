@@ -1,7 +1,6 @@
 "use client"
-import { Search, Bell, Plus, Calendar, HelpCircle } from "lucide-react"
+import { Search, Plus, Calendar, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import {
   DropdownMenu,
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MobileNav } from "./mobile-nav"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 export function Header() {
   const router = useRouter()
@@ -22,31 +22,37 @@ export function Header() {
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 md:px-6 backdrop-blur-md">
       <div className="flex flex-1 items-center gap-4">
         <MobileNav />
-        <div className="relative w-full max-w-md hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Buscar pacientes, agendamentos..." 
-            className="pl-10 h-10 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/20"
-          />
-        </div>
+        <button
+          onClick={() => {
+            const event = new KeyboardEvent("keydown", { key: "k", metaKey: true })
+            document.dispatchEvent(event)
+          }}
+          className="relative w-full max-w-md hidden md:flex items-center gap-2 h-10 px-3 rounded-lg bg-muted/40 text-sm text-muted-foreground hover:bg-muted/60 transition-colors"
+        >
+          <Search className="h-4 w-4" />
+          <span>Buscar pacientes, agendamentos...</span>
+          <kbd className="ml-auto pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <span className="text-xs">⌘</span>K
+          </kbd>
+        </button>
       </div>
 
       <div className="flex items-center gap-3">
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           className="hidden sm:flex gap-2 font-medium"
           onClick={handleNewAppointment}
         >
           <Plus size={16} />
           Novo Agendamento
         </Button>
-        
+
         <div className="h-8 w-px bg-border mx-2 hidden sm:block" />
 
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="text-muted-foreground hover:text-foreground"
           onClick={() => router.push("/appointments")}
           title="Calendário"
@@ -54,19 +60,7 @@ export function Header() {
           <Calendar size={20} />
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground" title="Notificações">
-              <Bell size={20} />
-              <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary border-2 border-background" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              Nenhuma notificação no momento
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -76,13 +70,13 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => router.push("/settings")}>
-              ⚙️ Configurações
+              Configurações
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/docs")}>
-              📖 Documentação
+              Documentação
             </DropdownMenuItem>
             <DropdownMenuItem>
-              💬 Suporte
+              Suporte
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

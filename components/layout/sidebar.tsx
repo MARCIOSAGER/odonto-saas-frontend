@@ -21,7 +21,11 @@ import {
   Bot,
   UserCircle,
   ShieldCheck,
-  Mail
+  Mail,
+  Zap,
+  CreditCard,
+  BarChart3,
+  Star,
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -35,17 +39,21 @@ const mainItems = [
 ]
 
 const clinicItems = [
-  { href: "/clinics", label: "Minha Clínica", icon: Hospital },
+  { href: "/clinics", label: "Minha Cl\u00ednica", icon: Hospital },
   { href: "/dentists", label: "Dentistas", icon: User },
-  { href: "/services", label: "Serviços", icon: Wallet },
+  { href: "/services", label: "Servi\u00e7os", icon: Wallet },
+  { href: "/reports", label: "Relat\u00f3rios", icon: BarChart3 },
 ]
 
 const settingsSubmenu = [
   { href: "/settings/clinic", label: "Minha Clínica", icon: Hospital },
   { href: "/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
+  { href: "/settings/whatsapp/automations", label: "Automações", icon: Zap },
   { href: "/settings/email", label: "E-mail", icon: Mail },
   { href: "/settings/ai", label: "Assistente IA", icon: Bot },
-  { href: "/settings/security", label: "Segurança", icon: ShieldCheck },
+  { href: "/settings/nps", label: "NPS", icon: Star },
+  { href: "/settings/billing", label: "Faturamento", icon: CreditCard },
+  { href: "/settings/security", label: "Seguran\u00e7a", icon: ShieldCheck },
   { href: "/settings", label: "Minha Conta", icon: UserCircle },
 ]
 

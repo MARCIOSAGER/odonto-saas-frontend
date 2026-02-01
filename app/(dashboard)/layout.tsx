@@ -1,13 +1,24 @@
 "use client"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { CommandPalette } from "@/components/command-palette/command-palette"
 import { useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { useClinic } from "@/hooks/useClinic"
 import { hexToHsl } from "@/lib/colors"
 import { getUploadUrl } from "@/lib/api"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { clinic } = useClinic()
+  const pathname = usePathname()
+  const router = useRouter()
+
+  // Redirect to onboarding if not completed
+  useEffect(() => {
+    if (clinic && clinic.onboarding_completed === false && !pathname.startsWith("/onboarding")) {
+      router.push("/onboarding")
+    }
+  }, [clinic, pathname, router])
 
   useEffect(() => {
     if (clinic) {
@@ -64,6 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <Header />
         <main className="container py-4 md:py-6">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   )
 }

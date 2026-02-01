@@ -216,9 +216,12 @@ export function useClinic() {
     }
   })
 
+  const refreshClinic = () => queryClient.invalidateQueries({ queryKey: ["clinic"] })
+
   return {
     clinic: query.data,
     isLoading: query.isLoading,
+    refreshClinic,
     updateClinic: updateClinicMutation,
     aiSettings: aiSettingsQuery.data,
     isLoadingAI: aiSettingsQuery.isLoading,

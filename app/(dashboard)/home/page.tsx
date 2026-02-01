@@ -16,16 +16,18 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts"
-import { 
-  Users, 
-  CalendarCheck, 
-  CalendarClock, 
+import {
+  Users,
+  CalendarCheck,
+  CalendarClock,
   TrendingUp,
   ArrowUpRight,
   MoreHorizontal,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle
 } from "lucide-react"
+import Link from "next/link"
 import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
@@ -101,6 +103,25 @@ export default function DashboardHome() {
     }
   })
 
+  // Subscription / trial info
+  const { data: subscription } = useQuery({
+    queryKey: ["subscription-current"],
+    queryFn: async () => {
+      try {
+        const res = await api.get("/subscriptions/current")
+        return res.data
+      } catch {
+        return null
+      }
+    },
+  })
+
+  const trialDaysLeft = subscription?.status === "trialing" && subscription?.trial_end
+    ? Math.max(0, Math.ceil((new Date(subscription.trial_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null
+
+  const isExpired = subscription?.status === "expired"
+
   if (loadingStats || loadingAppts || loadingFlow) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -114,9 +135,47 @@ export default function DashboardHome() {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Trial / Expired banner */}
+      {trialDaysLeft !== null && trialDaysLeft <= 7 && (
+        <div className={cn(
+          "flex items-center gap-3 p-4 rounded-xl border",
+          trialDaysLeft <= 1 ? "bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800" : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800"
+        )}>
+          <AlertTriangle className={cn("h-5 w-5 shrink-0", trialDaysLeft <= 1 ? "text-red-600" : "text-amber-600")} />
+          <div className="flex-1">
+            <p className={cn("text-sm font-medium", trialDaysLeft <= 1 ? "text-red-800 dark:text-red-200" : "text-amber-800 dark:text-amber-200")}>
+              {trialDaysLeft === 0
+                ? "Seu per\u00edodo de teste expira hoje!"
+                : `Seu per\u00edodo de teste expira em ${trialDaysLeft} dia${trialDaysLeft > 1 ? "s" : ""}.`}
+            </p>
+            <p className={cn("text-xs mt-0.5", trialDaysLeft <= 1 ? "text-red-600 dark:text-red-300" : "text-amber-600 dark:text-amber-300")}>
+              Assine um plano para continuar usando todos os recursos.
+            </p>
+          </div>
+          <Link href="/settings/billing">
+            <Button size="sm" variant={trialDaysLeft <= 1 ? "destructive" : "default"}>
+              Assinar agora
+            </Button>
+          </Link>
+        </div>
+      )}
+
+      {isExpired && (
+        <div className="flex items-center gap-3 p-4 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800">
+          <AlertTriangle className="h-5 w-5 shrink-0 text-red-600" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">Seu per&iacute;odo de teste expirou</p>
+            <p className="text-xs mt-0.5 text-red-600 dark:text-red-300">O acesso est&aacute; em modo somente leitura. Assine para desbloquear todos os recursos.</p>
+          </div>
+          <Link href="/settings/billing">
+            <Button size="sm" variant="destructive">Assinar agora</Button>
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Olá, {session?.user?.name || "Doutor"}</h1>
-        <p className="text-gray-500 dark:text-gray-400">Aqui está o que está acontecendo na sua clínica hoje.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ol&aacute;, {session?.user?.name || "Doutor"}</h1>
+        <p className="text-gray-500 dark:text-gray-400">Aqui est&aacute; o que est&aacute; acontecendo na sua cl&iacute;nica hoje.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
