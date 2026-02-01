@@ -103,6 +103,13 @@ export default function OnboardingPage() {
     }
   }, [clinic])
 
+  function getErrorMessage(error: any, fallback: string): string {
+    const msg = error?.response?.data?.message
+    if (Array.isArray(msg)) return msg.join(". ")
+    if (typeof msg === "string") return msg
+    return fallback
+  }
+
   async function handleClinicSave() {
     if (!clinicForm.name || !clinicForm.phone) {
       toast.error("Preencha nome e telefone da cl\u00ednica")
@@ -112,8 +119,8 @@ export default function OnboardingPage() {
     try {
       await api.put("/clinics/my/profile", clinicForm)
       setStep(1)
-    } catch {
-      toast.error("Erro ao salvar dados da cl\u00ednica")
+    } catch (error: any) {
+      toast.error(getErrorMessage(error, "Erro ao salvar dados da cl\u00ednica"))
     } finally {
       setLoading(false)
     }
@@ -128,8 +135,13 @@ export default function OnboardingPage() {
     try {
       await api.post("/dentists", dentist)
       setStep(2)
-    } catch {
-      toast.error("Erro ao cadastrar dentista")
+    } catch (error: any) {
+      if (error?.response?.status === 409) {
+        toast.info("Dentista j\u00e1 cadastrado, continuando...")
+        setStep(2)
+      } else {
+        toast.error(getErrorMessage(error, "Erro ao cadastrar dentista"))
+      }
     } finally {
       setLoading(false)
     }
@@ -147,16 +159,30 @@ export default function OnboardingPage() {
       if (customService.name) {
         toCreate.push({ ...customService, selected: true })
       }
+      let created = 0
+      let skipped = 0
       for (const s of toCreate) {
-        await api.post("/services", {
-          name: s.name,
-          price: parseFloat(s.price) || 0,
-          duration: parseInt(s.duration) || 30,
-        })
+        try {
+          await api.post("/services", {
+            name: s.name,
+            price: parseFloat(s.price) || 0,
+            duration: parseInt(s.duration) || 30,
+          })
+          created++
+        } catch (err: any) {
+          if (err?.response?.status === 409) {
+            skipped++
+          } else {
+            throw err
+          }
+        }
+      }
+      if (skipped > 0 && created === 0) {
+        toast.info("Servi\u00e7os j\u00e1 cadastrados anteriormente")
       }
       setStep(3)
-    } catch {
-      toast.error("Erro ao cadastrar servi\u00e7os")
+    } catch (error: any) {
+      toast.error(getErrorMessage(error, "Erro ao cadastrar servi\u00e7os"))
     } finally {
       setLoading(false)
     }
@@ -175,8 +201,8 @@ export default function OnboardingPage() {
       })
       await refreshClinic()
       setStep(4)
-    } catch {
-      toast.error("Erro ao salvar hor\u00e1rios")
+    } catch (error: any) {
+      toast.error(getErrorMessage(error, "Erro ao salvar hor\u00e1rios"))
     } finally {
       setLoading(false)
     }
