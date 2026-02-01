@@ -26,6 +26,8 @@ import {
   CreditCard,
   BarChart3,
   Star,
+  UserCog,
+  DollarSign,
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -46,6 +48,8 @@ const clinicItems = [
 
 const adminItems = [
   { href: "/clinics", label: "Cl\u00ednicas", icon: Hospital },
+  { href: "/admin/users", label: "Usu\u00e1rios", icon: UserCog },
+  { href: "/admin/billing", label: "Faturamento", icon: DollarSign },
 ]
 
 const settingsSubmenu = [
@@ -191,7 +195,7 @@ export function Sidebar() {
             <ul className="space-y-1">
               {adminItems.map((item) => {
                 const Icon = item.icon
-                const active = pathname === item.href
+                const active = pathname === item.href || pathname.startsWith(item.href + "/")
                 return (
                   <li key={item.href}>
                     <Link
