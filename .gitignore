@@ -1,2 +1,9 @@
 .next
 node_modules
+
+# Env files
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development

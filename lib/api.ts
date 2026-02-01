@@ -43,7 +43,7 @@ export type ApiError = {
  */
 export function getUploadUrl(path: string | null | undefined): string {
   if (!path) return ''
-  if (path.startsWith('http') || path.startsWith('data:')) return path
+  if (path.startsWith('http')) return path
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
   try {
     const url = new URL(apiUrl)

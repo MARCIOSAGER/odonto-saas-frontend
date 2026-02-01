@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useMemo, useEffect } from "react"
+import { useMemo } from "react"
 
 export type Appointment = {
   id: string
@@ -30,7 +30,6 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
             limit: filters?.limit || 10
           }
         })
-        console.log('useAppointments API Raw Response:', res.data)
         // Unwrap TransformInterceptor: { success, data: actualPayload, timestamp }
         return res.data?.data || res.data
       } catch (error) {
@@ -53,12 +52,6 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
   }, [query.data])
 
   const meta = query.data?.meta || query.data?.data?.meta || { total: 0, pages: 0 }
-
-  useEffect(() => {
-    if (query.data) {
-      console.log('useAppointments - Final array:', appointments)
-    }
-  }, [query.data, appointments])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Appointment, "id">) => {

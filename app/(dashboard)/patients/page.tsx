@@ -57,11 +57,9 @@ export default function PatientsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      console.log('Deletando paciente:', deleteId)
       await deletePatient.mutateAsync(deleteId)
       toast.success("Paciente excluído com sucesso!")
     } catch (error: any) {
-      console.error('Erro ao excluir paciente:', error)
       toast.error(error.response?.data?.message || "Erro ao excluir paciente")
     } finally {
       setDeleteId(null)

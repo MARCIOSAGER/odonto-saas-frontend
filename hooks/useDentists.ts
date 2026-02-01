@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useMemo, useEffect } from "react"
+import { useMemo } from "react"
 
 export type Dentist = {
   id: string
@@ -20,7 +20,6 @@ export function useDentists() {
     queryFn: async () => {
       try {
         const res = await api.get("/dentists")
-        console.log('useDentists API Raw Response:', res.data)
         return res.data
       } catch (error) {
         console.error("Erro ao buscar dentistas:", error)
@@ -37,12 +36,6 @@ export function useDentists() {
     if (Array.isArray(data.data)) return data.data
     return []
   }, [query.data])
-
-  useEffect(() => {
-    if (query.data) {
-      console.log('useDentists - Final array:', dentists)
-    }
-  }, [query.data, dentists])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Dentist, "id">) => {

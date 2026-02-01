@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { useMemo, useEffect } from "react"
+import { useMemo } from "react"
 
 export type Service = {
   id: string
@@ -19,7 +19,6 @@ export function useServices() {
     queryFn: async () => {
       try {
         const res = await api.get("/services")
-        console.log('useServices API Raw Response:', res.data)
         return res.data
       } catch (error) {
         console.error("Erro ao buscar serviços:", error)
@@ -36,12 +35,6 @@ export function useServices() {
     if (Array.isArray(data.data)) return data.data
     return []
   }, [query.data])
-
-  useEffect(() => {
-    if (query.data) {
-      console.log('useServices - Final array:', services)
-    }
-  }, [query.data, services])
 
   const createMutation = useMutation({
     mutationFn: async (payload: Omit<Service, "id">) => {

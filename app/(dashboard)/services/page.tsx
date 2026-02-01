@@ -59,11 +59,9 @@ export default function ServicesPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      console.log('Deletando serviço:', deleteId)
       await deleteService.mutateAsync(deleteId)
       toast.success("Serviço excluído com sucesso!")
     } catch (error: any) {
-      console.error('Erro ao excluir serviço:', error)
       toast.error(error.response?.data?.message || "Erro ao excluir serviço")
     } finally {
       setDeleteId(null)

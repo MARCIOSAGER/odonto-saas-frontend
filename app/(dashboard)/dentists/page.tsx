@@ -59,11 +59,9 @@ export default function DentistsPage() {
   const handleDelete = async () => {
     if (!deleteId) return
     try {
-      console.log('Deletando dentista:', deleteId)
       await deleteDentist.mutateAsync(deleteId)
       toast.success("Dentista excluído com sucesso!")
     } catch (error: any) {
-      console.error('Erro ao excluir dentista:', error)
       toast.error(error.response?.data?.message || "Erro ao excluir dentista")
     } finally {
       setDeleteId(null)
