@@ -67,10 +67,15 @@ function Verify2faContent() {
     if (!twoFactorToken || resending) return
     setResending(true)
     try {
-      await api.post("/auth/2fa/send-code", {
+      const res = await api.post("/auth/2fa/send-code", {
         two_factor_token: twoFactorToken
       })
-      toast.success("Código reenviado!")
+      const data = res.data?.data || res.data
+      if (data?.delivery_method === "email" && method === "whatsapp") {
+        toast.success("WhatsApp indisponível. Código reenviado por e-mail!")
+      } else {
+        toast.success("Código reenviado!")
+      }
       setCountdown(60)
     } catch {
       toast.error("Erro ao reenviar código")
@@ -120,6 +125,8 @@ function Verify2faContent() {
           <p className="text-xl text-white/90 max-w-lg">
             {method === "totp"
               ? "Abra seu app autenticador e digite o código de 6 dígitos."
+              : method === "email"
+              ? "Enviamos um código para o seu e-mail. Digite abaixo para continuar."
               : "Enviamos um código para o seu WhatsApp. Digite abaixo para continuar."}
           </p>
         </div>
@@ -143,6 +150,8 @@ function Verify2faContent() {
               <p className="text-muted-foreground">
                 {method === "totp"
                   ? "Digite o código do seu app autenticador (Google Authenticator, Authy, etc.)"
+                  : method === "email"
+                  ? "Digite o código de 6 dígitos enviado para o seu e-mail."
                   : "Digite o código de 6 dígitos enviado para o seu WhatsApp."}
               </p>
             </div>

@@ -40,14 +40,18 @@ function LoginContent() {
       // Check if 2FA is required
       if (result?.requires_2fa) {
         if (result?.code_sent === false) {
-          setApiError("Não foi possível enviar o código via WhatsApp. Verifique se o WhatsApp está configurado na clínica.")
+          setApiError("Não foi possível enviar o código de verificação. Tente novamente mais tarde.")
           toast.error("Erro ao enviar código 2FA")
           return
         }
+        const deliveryMethod = result.code_delivery_method || result.two_factor_method || "whatsapp"
         const params = new URLSearchParams({
           token: result.two_factor_token,
-          method: result.two_factor_method || "whatsapp"
+          method: deliveryMethod
         })
+        if (deliveryMethod === "email" && result.two_factor_method === "whatsapp") {
+          toast.info("WhatsApp indisponível. Código enviado por e-mail.")
+        }
         router.push(`/login/verify-2fa?${params.toString()}`)
         return
       }

@@ -100,9 +100,10 @@ export const authOptions: NextAuthOptions = {
 
           if (data?.requires_2fa) {
             if (data?.code_sent === false) {
-              return `/login?error=${encodeURIComponent("Não foi possível enviar o código via WhatsApp. Verifique se o WhatsApp está configurado na clínica.")}`
+              return `/login?error=${encodeURIComponent("Não foi possível enviar o código de verificação. Tente novamente mais tarde.")}`
             }
-            return `/login/verify-2fa?token=${data.two_factor_token}&method=${data.two_factor_method || 'whatsapp'}`
+            const deliveryMethod = data.code_delivery_method || data.two_factor_method || 'whatsapp'
+            return `/login/verify-2fa?token=${data.two_factor_token}&method=${deliveryMethod}`
           }
 
           if (data?.access_token) {
