@@ -39,6 +39,11 @@ function LoginContent() {
 
       // Check if 2FA is required
       if (result?.requires_2fa) {
+        if (result?.code_sent === false) {
+          setApiError("Não foi possível enviar o código via WhatsApp. Verifique se o WhatsApp está configurado na clínica.")
+          toast.error("Erro ao enviar código 2FA")
+          return
+        }
         const params = new URLSearchParams({
           token: result.two_factor_token,
           method: result.two_factor_method || "whatsapp"

@@ -99,6 +99,9 @@ export const authOptions: NextAuthOptions = {
           const data = response.data || response
 
           if (data?.requires_2fa) {
+            if (data?.code_sent === false) {
+              return `/login?error=${encodeURIComponent("Não foi possível enviar o código via WhatsApp. Verifique se o WhatsApp está configurado na clínica.")}`
+            }
             return `/login/verify-2fa?token=${data.two_factor_token}&method=${data.two_factor_method || 'whatsapp'}`
           }
 
