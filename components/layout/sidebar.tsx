@@ -39,10 +39,13 @@ const mainItems = [
 ]
 
 const clinicItems = [
-  { href: "/clinics", label: "Minha Cl\u00ednica", icon: Hospital },
   { href: "/dentists", label: "Dentistas", icon: User },
   { href: "/services", label: "Servi\u00e7os", icon: Wallet },
   { href: "/reports", label: "Relat\u00f3rios", icon: BarChart3 },
+]
+
+const adminItems = [
+  { href: "/clinics", label: "Cl\u00ednicas", icon: Hospital },
 ]
 
 const settingsSubmenu = [
@@ -65,6 +68,7 @@ export function Sidebar() {
   const [settingsOpen, setSettingsOpen] = useState(pathname.includes("/settings"))
   
   const user = session?.user
+  const isAdmin = (user as any)?.role === "superadmin"
   const userInitials = user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "US"
 
   return (
@@ -175,6 +179,39 @@ export function Sidebar() {
             })}
           </ul>
         </div>
+
+        {/* Admin (superadmin only) */}
+        {isAdmin && (
+          <div>
+            {!isCollapsed && (
+              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                Administra&ccedil;&atilde;o
+              </p>
+            )}
+            <ul className="space-y-1">
+              {adminItems.map((item) => {
+                const Icon = item.icon
+                const active = pathname === item.href
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                        active
+                          ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <Icon size={18} className={cn("shrink-0", active ? "text-white" : "group-hover:text-primary")} />
+                      {!isCollapsed && <span>{item.label}</span>}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        )}
 
         {/* Configurações com Submenu */}
         <div>

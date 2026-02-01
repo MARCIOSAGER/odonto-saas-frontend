@@ -62,10 +62,10 @@ export default function ReportsPage() {
         api.get(`/reports/patients?${params}`),
         api.get("/reports/cashflow"),
       ])
-      setRevenue(revRes.data)
-      setAppointments(aptRes.data)
-      setPatients(patRes.data)
-      setCashflow(cfRes.data)
+      setRevenue(revRes.data?.data || revRes.data)
+      setAppointments(aptRes.data?.data || aptRes.data)
+      setPatients(patRes.data?.data || patRes.data)
+      setCashflow(cfRes.data?.data || cfRes.data)
     } catch {
       // ignore
     } finally {

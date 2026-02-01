@@ -38,9 +38,10 @@ export default function NpsSettingsPage() {
         api.get("/nps/stats"),
         api.get(`/nps/responses?page=${page}&limit=15`),
       ])
-      setStats(statsRes.data)
-      setResponses(responsesRes.data?.data || [])
-      setTotalPages(responsesRes.data?.meta?.totalPages || 1)
+      setStats(statsRes.data?.data || statsRes.data)
+      const respBody = responsesRes.data?.data || responsesRes.data
+      setResponses(respBody?.data || [])
+      setTotalPages(respBody?.meta?.totalPages || 1)
     } catch {
       // ignore
     } finally {
