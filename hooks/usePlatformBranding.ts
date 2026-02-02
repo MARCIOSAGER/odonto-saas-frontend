@@ -43,7 +43,7 @@ export function usePlatformBranding() {
       const res = await publicApi.get("/api/v1/system-config/public")
       return (res.data?.data || res.data) as Record<string, string>
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
     retry: 1,
   })
 
@@ -64,7 +64,7 @@ export function usePlatformBranding() {
       }
     },
     enabled: !!clinicSlug,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
     retry: 1,
   })
 

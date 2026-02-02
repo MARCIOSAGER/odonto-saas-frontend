@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState, useCallback, useRef } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,6 +17,7 @@ import {
 } from "lucide-react"
 
 export default function AdminBrandingPage() {
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
@@ -65,6 +67,7 @@ export default function AdminBrandingPage() {
     try {
       const configs = Object.entries(form).map(([key, value]) => ({ key, value }))
       await api.put("/system-config/bulk", { configs })
+      await queryClient.invalidateQueries({ queryKey: ["platform-branding"] })
       toast.success("Branding salvo com sucesso!")
     } catch {
       toast.error("Erro ao salvar branding")

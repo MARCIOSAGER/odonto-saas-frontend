@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -30,6 +31,7 @@ interface ConfigItem {
 }
 
 export default function AdminSettingsPage() {
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
 
@@ -84,6 +86,7 @@ export default function AdminSettingsPage() {
     try {
       const payload = Object.entries(configs).map(([key, value]) => ({ key, value }))
       await api.put("/system-config/bulk", { configs: payload })
+      await queryClient.invalidateQueries({ queryKey: ["platform-branding"] })
       toast.success("Configurações salvas com sucesso!")
     } catch {
       toast.error("Erro ao salvar configurações")
