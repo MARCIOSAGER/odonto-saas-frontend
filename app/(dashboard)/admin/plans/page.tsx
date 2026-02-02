@@ -424,7 +424,7 @@ export default function AdminPlansPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Desativar plano</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja desativar o plano "{deleteTarget?.display_name}"? Ele não aparecerá mais para novos clientes.
+              Deseja desativar o plano &ldquo;{deleteTarget?.display_name}&rdquo;? Ele não aparecerá mais para novos clientes.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -246,13 +246,13 @@ export default function ClinicsPage() {
                   <th className="text-left py-3 px-4 font-medium">Plano</th>
                   <th className="text-left py-3 px-4 font-medium">Status</th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <Users className="h-4 w-4 inline" title="Pacientes" />
+                    <span title="Pacientes"><Users className="h-4 w-4 inline" /></span>
                   </th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <Stethoscope className="h-4 w-4 inline" title="Dentistas" />
+                    <span title="Dentistas"><Stethoscope className="h-4 w-4 inline" /></span>
                   </th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <CalendarDays className="h-4 w-4 inline" title="Agendamentos" />
+                    <span title="Agendamentos"><CalendarDays className="h-4 w-4 inline" /></span>
                   </th>
                   <th className="text-left py-3 px-4 font-medium">Criada em</th>
                   <th className="text-right py-3 px-4 font-medium">Ações</th>
