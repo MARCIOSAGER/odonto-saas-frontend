@@ -55,7 +55,7 @@ const adminItems = [
   { href: "/admin/plans", label: "Planos", icon: Package },
   { href: "/admin/billing", label: "Faturamento", icon: DollarSign },
   { href: "/admin/branding", label: "Branding", icon: Palette },
-  { href: "/admin/settings", label: "Configura\u00e7\u00f5es", icon: Settings2 },
+  { href: "/admin/settings", label: "Config. Plataforma", icon: Settings2 },
 ]
 
 const settingsSubmenu = [
