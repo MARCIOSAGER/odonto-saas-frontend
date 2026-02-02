@@ -3,6 +3,9 @@ import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import {
   Loader2,
   Plus,
@@ -267,144 +270,161 @@ export default function AdminPlansPage() {
 
       {/* Create/Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar plano" : "Novo plano"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Nome (slug)</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="standard"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
+          <div className="space-y-6 py-2">
+            {/* Identificação */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-foreground">Identificação</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Nome (slug)</label>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="standard"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Nome de exibição</label>
+                  <Input
+                    value={form.display_name}
+                    onChange={(e) => setForm({ ...form, display_name: e.target.value })}
+                    placeholder="Padrão"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Nome de exibição</label>
-                <input
-                  type="text"
-                  value={form.display_name}
-                  onChange={(e) => setForm({ ...form, display_name: e.target.value })}
-                  placeholder="Padrão"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Descrição</label>
-              <textarea
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Para clínicas em crescimento..."
-                rows={2}
-                className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Preço mensal (R$)</label>
-                <input
-                  type="number"
-                  value={form.price_monthly}
-                  onChange={(e) => setForm({ ...form, price_monthly: Number(e.target.value) })}
-                  min={0}
-                  step={0.01}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Preço anual (R$)</label>
-                <input
-                  type="number"
-                  value={form.price_yearly}
-                  onChange={(e) => setForm({ ...form, price_yearly: Number(e.target.value) })}
-                  min={0}
-                  step={0.01}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Descrição</label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Para clínicas em crescimento..."
+                  rows={2}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Max pacientes</label>
-                <input
-                  type="number"
-                  value={form.max_patients}
-                  onChange={(e) => setForm({ ...form, max_patients: e.target.value })}
-                  placeholder="Ilimitado"
-                  min={1}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Max dentistas</label>
-                <input
-                  type="number"
-                  value={form.max_dentists}
-                  onChange={(e) => setForm({ ...form, max_dentists: e.target.value })}
-                  placeholder="Ilimitado"
-                  min={1}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Max agend./mês</label>
-                <input
-                  type="number"
-                  value={form.max_appointments_month}
-                  onChange={(e) => setForm({ ...form, max_appointments_month: e.target.value })}
-                  placeholder="Ilimitado"
-                  min={1}
-                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
-                />
+            <div className="border-t border-border" />
+
+            {/* Preços */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-foreground">Preços</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Preço mensal (R$)</label>
+                  <Input
+                    type="number"
+                    value={form.price_monthly}
+                    onChange={(e) => setForm({ ...form, price_monthly: Number(e.target.value) })}
+                    min={0}
+                    step={0.01}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Preço anual (R$)</label>
+                  <Input
+                    type="number"
+                    value={form.price_yearly}
+                    onChange={(e) => setForm({ ...form, price_yearly: Number(e.target.value) })}
+                    min={0}
+                    step={0.01}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.ai_enabled}
-                  onChange={(e) => setForm({ ...form, ai_enabled: e.target.checked })}
-                  className="rounded"
-                />
-                IA habilitada
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.priority_support}
-                  onChange={(e) => setForm({ ...form, priority_support: e.target.checked })}
-                  className="rounded"
-                />
-                Suporte prioritário
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.custom_branding}
-                  onChange={(e) => setForm({ ...form, custom_branding: e.target.checked })}
-                  className="rounded"
-                />
-                Marca própria
-              </label>
+            <div className="border-t border-border" />
+
+            {/* Limites */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-foreground">Limites</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Max pacientes</label>
+                  <Input
+                    type="number"
+                    value={form.max_patients}
+                    onChange={(e) => setForm({ ...form, max_patients: e.target.value })}
+                    placeholder="Ilimitado"
+                    min={1}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Max dentistas</label>
+                  <Input
+                    type="number"
+                    value={form.max_dentists}
+                    onChange={(e) => setForm({ ...form, max_dentists: e.target.value })}
+                    placeholder="Ilimitado"
+                    min={1}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Max agend./mês</label>
+                  <Input
+                    type="number"
+                    value={form.max_appointments_month}
+                    onChange={(e) => setForm({ ...form, max_appointments_month: e.target.value })}
+                    placeholder="Ilimitado"
+                    min={1}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Ordem de exibição</label>
-              <input
+            <div className="border-t border-border" />
+
+            {/* Recursos */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-foreground">Recursos</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">IA habilitada</p>
+                    <p className="text-xs text-muted-foreground">Permite uso do assistente de IA</p>
+                  </div>
+                  <Switch
+                    checked={form.ai_enabled}
+                    onCheckedChange={(checked) => setForm({ ...form, ai_enabled: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Suporte prioritário</p>
+                    <p className="text-xs text-muted-foreground">Atendimento com prioridade</p>
+                  </div>
+                  <Switch
+                    checked={form.priority_support}
+                    onCheckedChange={(checked) => setForm({ ...form, priority_support: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Marca própria</p>
+                    <p className="text-xs text-muted-foreground">Personalização com logo e cores</p>
+                  </div>
+                  <Switch
+                    checked={form.custom_branding}
+                    onCheckedChange={(checked) => setForm({ ...form, custom_branding: checked })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border" />
+
+            {/* Ordem */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Ordem de exibição</label>
+              <Input
                 type="number"
                 value={form.sort_order}
                 onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })}
                 min={0}
-                className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-background"
+                className="max-w-[120px]"
               />
             </div>
           </div>

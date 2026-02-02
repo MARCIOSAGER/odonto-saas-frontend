@@ -7,22 +7,22 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema, RegisterInput } from "@/lib/validations"
 import { signIn } from "next-auth/react"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone, Check } from "lucide-react"
-import { api } from "@/lib/api"
+import { api, getUploadUrl } from "@/lib/api"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { adjustBrightness } from "@/lib/colors"
 
 function maskDocument(value: string) {
   const digits = value.replace(/\D/g, "")
   if (digits.length <= 11) {
-    // CPF: 000.000.000-00
     return digits
       .replace(/^(\d{3})(\d)/, "$1.$2")
       .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
       .replace(/\.(\d{3})(\d)/, ".$1-$2")
       .slice(0, 14)
   }
-  // CNPJ: 00.000.000/0000-00
   return digits
     .replace(/^(\d{2})(\d)/, "$1.$2")
     .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
@@ -39,7 +39,8 @@ function maskPhone(value: string) {
     .slice(0, 15)
 }
 
-export default function RegisterPage() {
+function RegisterContent() {
+  const { branding } = usePlatformBranding()
   const [showPassword, setShowPassword] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const {
@@ -49,10 +50,11 @@ export default function RegisterPage() {
     formState: { errors, isSubmitting }
   } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) })
 
+  const clinicParam = branding.clinicSlug ? `?clinic=${branding.clinicSlug}` : ""
+
   const onSubmit = async (data: RegisterInput) => {
     setApiError(null)
     try {
-      // Clean masks before sending
       const cleanData = {
         name: data.name,
         email: data.email,
@@ -64,7 +66,6 @@ export default function RegisterPage() {
 
       await api.post("/auth/register", cleanData)
 
-      // Auto-login after registration
       const res = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -102,18 +103,32 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 auth-gradient-bg" />
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white relative overflow-hidden"
+        style={{ backgroundColor: branding.primaryColor }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(-45deg, ${adjustBrightness(branding.primaryColor, -15)}, ${branding.primaryColor}, ${adjustBrightness(branding.primaryColor, 10)}, ${adjustBrightness(branding.primaryColor, -25)})`,
+            backgroundSize: "400% 400%",
+            animation: "gradient-shift 8s ease infinite",
+          }}
+        />
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-          <div className="bg-white p-1 rounded-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0EA5E9"/>
-            </svg>
-          </div>
-          Odonto SaaS
+          {branding.logoUrl ? (
+            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain bg-white p-0.5" />
+          ) : (
+            <div className="bg-white p-1 rounded-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill={branding.primaryColor}/>
+              </svg>
+            </div>
+          )}
+          {branding.name}
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -162,7 +177,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2026 Odonto SaaS. Todos os direitos reservados.
+          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
         </div>
       </div>
 
@@ -314,12 +329,20 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "200ms" }}>
             Já tem uma conta?{" "}
-            <Link href="/login" className="font-semibold text-primary hover:underline">
+            <Link href={`/login${clinicParam}`} className="font-semibold text-primary hover:underline">
               Fazer login
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+      <RegisterContent />
+    </Suspense>
   )
 }

@@ -3,20 +3,27 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { getUploadUrl } from "@/lib/api"
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { branding } = usePlatformBranding()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight">
-          <div className="bg-sky-600 p-1.5 rounded-lg">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
-            </svg>
-          </div>
-          <span>Odonto SaaS</span>
+          {branding.logoUrl ? (
+            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain" />
+          ) : (
+            <div className="p-1.5 rounded-lg" style={{ backgroundColor: branding.primaryColor }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
+              </svg>
+            </div>
+          )}
+          <span>{branding.name}</span>
         </Link>
 
         {/* Desktop nav */}

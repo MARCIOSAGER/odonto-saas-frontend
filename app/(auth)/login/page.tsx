@@ -11,12 +11,15 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { api } from "@/lib/api"
+import { api, getUploadUrl } from "@/lib/api"
 import { Suspense } from "react"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { adjustBrightness } from "@/lib/colors"
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { branding } = usePlatformBranding()
   const [showPassword, setShowPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const {
@@ -26,6 +29,8 @@ function LoginContent() {
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) })
   const urlError = searchParams.get("error")
   const [apiError, setApiError] = useState<string | null>(urlError)
+
+  const clinicParam = branding.clinicSlug ? `?clinic=${branding.clinicSlug}` : ""
 
   const onSubmit = async (data: LoginInput) => {
     setApiError(null)
@@ -84,20 +89,34 @@ function LoginContent() {
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo - Visual Branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 auth-gradient-bg" />
-        
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white relative overflow-hidden"
+        style={{ backgroundColor: branding.primaryColor }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(-45deg, ${adjustBrightness(branding.primaryColor, -15)}, ${branding.primaryColor}, ${adjustBrightness(branding.primaryColor, 10)}, ${adjustBrightness(branding.primaryColor, -25)})`,
+            backgroundSize: "400% 400%",
+            animation: "gradient-shift 8s ease infinite",
+          }}
+        />
+
         {/* Decorativo */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-          <div className="bg-white p-1 rounded-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0EA5E9"/>
-            </svg>
-          </div>
-          Odonto SaaS
+          {branding.logoUrl ? (
+            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain bg-white p-0.5" />
+          ) : (
+            <div className="bg-white p-1 rounded-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill={branding.primaryColor}/>
+              </svg>
+            </div>
+          )}
+          {branding.name}
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -147,7 +166,7 @@ function LoginContent() {
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2026 Odonto SaaS. Todos os direitos reservados.
+          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
         </div>
       </div>
 
@@ -170,8 +189,8 @@ function LoginContent() {
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="nome@clinica.com" 
+                    <Input
+                      placeholder="nome@clinica.com"
                       className="pl-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                       {...register("email")}
                     />
@@ -182,14 +201,14 @@ function LoginContent() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium leading-none text-foreground">Senha</label>
-                    <Link href="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                    <Link href={`/forgot-password${clinicParam}`} className="text-xs text-primary hover:underline font-medium">
                       Esqueceu a senha?
                     </Link>
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      type={showPassword ? "text" : "password"} 
+                    <Input
+                      type={showPassword ? "text" : "password"}
                       className="pl-10 pr-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                       {...register("password")}
                     />
@@ -210,9 +229,9 @@ function LoginContent() {
                   </div>
                 )}
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-base font-semibold group" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold group"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Autenticando..." : "Entrar no sistema"}
@@ -248,7 +267,7 @@ function LoginContent() {
 
           <p className="text-center text-sm text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "200ms" }}>
             Ainda não tem uma conta?{" "}
-            <Link href="/register" className="font-semibold text-primary hover:underline">
+            <Link href={`/register${clinicParam}`} className="font-semibold text-primary hover:underline">
               Começar teste grátis
             </Link>
           </p>

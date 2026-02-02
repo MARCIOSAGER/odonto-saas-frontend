@@ -1,10 +1,12 @@
+"use client"
+import { Suspense } from "react"
 import { Hero } from "@/components/marketing/hero"
 import { Features } from "@/components/marketing/features"
 import { PricingTable } from "@/components/marketing/pricing-table"
 import { Faq } from "@/components/marketing/faq"
 import { Cta } from "@/components/marketing/cta"
 
-export default function LandingPage() {
+function LandingContent() {
   return (
     <>
       <Hero />
@@ -13,5 +15,13 @@ export default function LandingPage() {
       <Faq />
       <Cta />
     </>
+  )
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+      <LandingContent />
+    </Suspense>
   )
 }

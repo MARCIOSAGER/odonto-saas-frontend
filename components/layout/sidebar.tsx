@@ -29,6 +29,8 @@ import {
   UserCog,
   DollarSign,
   Package,
+  Palette,
+  Settings2,
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -52,6 +54,8 @@ const adminItems = [
   { href: "/admin/users", label: "Usu\u00e1rios", icon: UserCog },
   { href: "/admin/plans", label: "Planos", icon: Package },
   { href: "/admin/billing", label: "Faturamento", icon: DollarSign },
+  { href: "/admin/branding", label: "Branding", icon: Palette },
+  { href: "/admin/settings", label: "Configura\u00e7\u00f5es", icon: Settings2 },
 ]
 
 const settingsSubmenu = [

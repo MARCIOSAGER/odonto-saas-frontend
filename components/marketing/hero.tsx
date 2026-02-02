@@ -1,8 +1,12 @@
+"use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Shield, Zap, Users } from "lucide-react"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 
 export function Hero() {
+  const { branding } = usePlatformBranding()
+
   return (
     <section className="relative overflow-hidden">
       {/* Background gradient */}
@@ -18,13 +22,16 @@ export function Hero() {
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
-            Gestão completa para sua{" "}
-            <span className="text-sky-600 dark:text-sky-400">clínica odontológica</span>
+            {branding.heroTitle || (
+              <>
+                Gestão completa para sua{" "}
+                <span className="text-sky-600 dark:text-sky-400">clínica odontológica</span>
+              </>
+            )}
           </h1>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Agenda, prontuários, financeiro, WhatsApp e inteligência artificial em uma
-            única plataforma. Tudo que você precisa para crescer.
+            {branding.heroSubtitle || "Agenda, prontuários, financeiro, WhatsApp e inteligência artificial em uma única plataforma. Tudo que você precisa para crescer."}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

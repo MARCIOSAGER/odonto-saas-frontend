@@ -6,18 +6,23 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { forgotPasswordSchema, ForgotPasswordInput } from "@/lib/validations"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { toast } from "sonner"
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
-import { api } from "@/lib/api"
+import { api, getUploadUrl } from "@/lib/api"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { adjustBrightness } from "@/lib/colors"
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
+  const { branding } = usePlatformBranding()
   const [sent, setSent] = useState(false)
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
   } = useForm<ForgotPasswordInput>({ resolver: zodResolver(forgotPasswordSchema) })
+
+  const clinicParam = branding.clinicSlug ? `?clinic=${branding.clinicSlug}` : ""
 
   const onSubmit = async (data: ForgotPasswordInput) => {
     try {
@@ -31,18 +36,32 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-sky-700 to-blue-900" />
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white relative overflow-hidden"
+        style={{ backgroundColor: branding.primaryColor }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(-45deg, ${adjustBrightness(branding.primaryColor, -15)}, ${branding.primaryColor}, ${adjustBrightness(branding.primaryColor, 10)}, ${adjustBrightness(branding.primaryColor, -25)})`,
+            backgroundSize: "400% 400%",
+            animation: "gradient-shift 8s ease infinite",
+          }}
+        />
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-          <div className="bg-white p-1 rounded-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0EA5E9"/>
-            </svg>
-          </div>
-          Odonto SaaS
+          {branding.logoUrl ? (
+            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain bg-white p-0.5" />
+          ) : (
+            <div className="bg-white p-1 rounded-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill={branding.primaryColor}/>
+              </svg>
+            </div>
+          )}
+          {branding.name}
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -55,7 +74,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2025 Odonto SaaS. Todos os direitos reservados.
+          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
         </div>
       </div>
 
@@ -75,7 +94,7 @@ export default function ForgotPasswordPage() {
                   Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha. Verifique também a pasta de spam.
                 </p>
               </div>
-              <Link href="/login">
+              <Link href={`/login${clinicParam}`}>
                 <Button variant="outline" className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
                   Voltar ao login
@@ -121,7 +140,7 @@ export default function ForgotPasswordPage() {
               </Card>
 
               <p className="text-center text-sm text-muted-foreground">
-                <Link href="/login" className="font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                <Link href={`/login${clinicParam}`} className="font-semibold text-primary hover:underline inline-flex items-center gap-1">
                   <ArrowLeft className="h-3 w-3" />
                   Voltar ao login
                 </Link>
@@ -131,5 +150,13 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+      <ForgotPasswordContent />
+    </Suspense>
   )
 }

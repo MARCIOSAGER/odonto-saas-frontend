@@ -30,3 +30,20 @@ export function hexToHsl(hex: string): string {
 
   return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
+
+/**
+ * Adjusts the brightness of a hex color by a percentage.
+ * Positive percent lightens, negative percent darkens.
+ */
+export function adjustBrightness(hex: string, percent: number): string {
+  hex = hex.replace(/^#/, '')
+  if (hex.length === 3) {
+    hex = hex.split('').map(c => c + c).join('')
+  }
+
+  const r = Math.min(255, Math.max(0, parseInt(hex.substring(0, 2), 16) + Math.round(255 * percent / 100)))
+  const g = Math.min(255, Math.max(0, parseInt(hex.substring(2, 4), 16) + Math.round(255 * percent / 100)))
+  const b = Math.min(255, Math.max(0, parseInt(hex.substring(4, 6), 16) + Math.round(255 * percent / 100)))
+
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+}

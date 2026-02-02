@@ -1,6 +1,11 @@
+"use client"
 import Link from "next/link"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { getUploadUrl } from "@/lib/api"
 
 export function Footer() {
+  const { branding } = usePlatformBranding()
+
   return (
     <footer className="border-t bg-muted/30">
       <div className="container py-12">
@@ -8,15 +13,19 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-              <div className="bg-sky-600 p-1.5 rounded-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
-                </svg>
-              </div>
-              <span>Odonto SaaS</span>
+              {branding.logoUrl ? (
+                <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-7 w-7 rounded-lg object-contain" />
+              ) : (
+                <div className="p-1.5 rounded-lg" style={{ backgroundColor: branding.primaryColor }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
+                  </svg>
+                </div>
+              )}
+              <span>{branding.name}</span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
-              A plataforma completa para gestão de clínicas odontológicas.
+              {branding.description || "A plataforma completa para gestão de clínicas odontológicas."}
             </p>
           </div>
 
@@ -50,7 +59,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Odonto SaaS. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
         </div>
       </div>
     </footer>

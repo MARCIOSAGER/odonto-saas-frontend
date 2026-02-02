@@ -4,7 +4,7 @@ import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Loader2, Save, Palette, Building2, Image as ImageIcon, Type } from "lucide-react"
+import { Loader2, Save, Palette, Building2, Image as ImageIcon, Type, Link2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
@@ -27,6 +27,7 @@ export default function ClinicSettingsPage() {
       city: "",
       state: "",
       cep: "",
+      slug: "",
       primary_color: "#0EA5E9",
       secondary_color: "#64748B",
       logo_display_mode: "logo_name",
@@ -47,6 +48,7 @@ export default function ClinicSettingsPage() {
         city: clinic.city || "",
         state: clinic.state || "",
         cep: clinic.cep || clinic.zip_code || "",
+        slug: clinic.slug || "",
         primary_color: clinic.primary_color || "#0EA5E9",
         secondary_color: clinic.secondary_color || "#64748B",
         logo_display_mode: clinic.logo_display_mode || "logo_name",
@@ -158,6 +160,7 @@ export default function ClinicSettingsPage() {
         city: data.city,
         state: data.state,
         cep: data.cep, // NÃO zip_code
+        slug: data.slug || undefined,
         primary_color: data.primary_color,
         secondary_color: data.secondary_color,
         logo_display_mode: data.logo_display_mode,
@@ -351,6 +354,20 @@ export default function ClinicSettingsPage() {
                 {...register("email")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                <Link2 size={14} />
+                Slug para White-Label
+              </label>
+              <Input
+                {...register("slug")}
+                placeholder="minha-clinica"
+                className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
+              />
+              <p className="text-xs text-muted-foreground">
+                Usado para login personalizado: <code className="bg-muted px-1 py-0.5 rounded text-xs">/login?clinic=seu-slug</code>. Apenas letras minúsculas, números e hífens.
+              </p>
             </div>
             <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Endereço Completo</label>

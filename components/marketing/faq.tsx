@@ -7,7 +7,7 @@ const faqs = [
   {
     question: "Preciso instalar algum software?",
     answer:
-      "Não. O Odonto SaaS é 100% online e funciona em qualquer navegador. Você também pode instalar como app no celular (PWA) diretamente pelo navegador, sem precisar de loja de aplicativos.",
+      "Não. O nossa plataforma é 100% online e funciona em qualquer navegador. Você também pode instalar como app no celular (PWA) diretamente pelo navegador, sem precisar de loja de aplicativos.",
   },
   {
     question: "O plano grátis tem limitação de tempo?",
