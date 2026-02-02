@@ -7,12 +7,12 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema, RegisterInput } from "@/lib/validations"
 import { signIn } from "next-auth/react"
-import { useState, useEffect, Suspense } from "react"
+import { useState, Suspense } from "react"
 import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone, Check } from "lucide-react"
 import { api, getUploadUrl } from "@/lib/api"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
-import { adjustBrightness, hexToHsl } from "@/lib/colors"
+import { adjustBrightness } from "@/lib/colors"
 
 function maskDocument(value: string) {
   const digits = value.replace(/\D/g, "")
@@ -42,17 +42,6 @@ function maskPhone(value: string) {
 function RegisterContent() {
   const { branding } = usePlatformBranding()
   const [showPassword, setShowPassword] = useState(false)
-
-  useEffect(() => {
-    if (!branding.primaryColor) return
-    const hsl = hexToHsl(branding.primaryColor)
-    document.documentElement.style.setProperty("--primary", hsl)
-    document.documentElement.style.setProperty("--ring", hsl)
-    return () => {
-      document.documentElement.style.removeProperty("--primary")
-      document.documentElement.style.removeProperty("--ring")
-    }
-  }, [branding.primaryColor])
   const [apiError, setApiError] = useState<string | null>(null)
   const {
     register,
