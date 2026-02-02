@@ -50,14 +50,13 @@ function LoginContent() {
           return
         }
         const deliveryMethod = result.code_delivery_method || result.two_factor_method || "whatsapp"
-        const params = new URLSearchParams({
-          token: result.two_factor_token,
-          method: deliveryMethod
-        })
+        // Store 2FA token in sessionStorage instead of URL to avoid exposure in browser history/logs
+        sessionStorage.setItem("2fa_token", result.two_factor_token)
+        sessionStorage.setItem("2fa_method", deliveryMethod)
         if (deliveryMethod === "email" && result.two_factor_method === "whatsapp") {
           toast.info("WhatsApp indisponível. Código enviado por e-mail.")
         }
-        router.push(`/login/verify-2fa?${params.toString()}`)
+        router.push("/login/verify-2fa")
         return
       }
 

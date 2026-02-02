@@ -13,12 +13,34 @@ import Link from "next/link"
 function Verify2faContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const twoFactorToken = searchParams.get("token")
-  const method = searchParams.get("method") || "whatsapp"
+  const [twoFactorToken, setTwoFactorToken] = useState<string | null>(null)
+  const [method, setMethod] = useState("whatsapp")
   const [code, setCode] = useState("")
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
   const [countdown, setCountdown] = useState(0)
+  const [ready, setReady] = useState(false)
+
+  // Read token from sessionStorage (preferred) or URL params (fallback from server-side redirect)
+  // If found in URL, move to sessionStorage and clean the URL to avoid exposure in browser history
+  useEffect(() => {
+    const urlToken = searchParams.get("token")
+    const urlMethod = searchParams.get("method")
+
+    if (urlToken) {
+      sessionStorage.setItem("2fa_token", urlToken)
+      if (urlMethod) sessionStorage.setItem("2fa_method", urlMethod)
+      setTwoFactorToken(urlToken)
+      setMethod(urlMethod || "whatsapp")
+      window.history.replaceState({}, "", "/login/verify-2fa")
+    } else {
+      const storedToken = sessionStorage.getItem("2fa_token")
+      const storedMethod = sessionStorage.getItem("2fa_method")
+      setTwoFactorToken(storedToken)
+      setMethod(storedMethod || "whatsapp")
+    }
+    setReady(true)
+  }, [searchParams])
 
   useEffect(() => {
     if (countdown > 0) {
@@ -48,6 +70,8 @@ function Verify2faContent() {
         })
 
         if (signInRes?.ok) {
+          sessionStorage.removeItem("2fa_token")
+          sessionStorage.removeItem("2fa_method")
           toast.success("Login realizado com sucesso!")
           window.location.href = "/home"
         } else {
@@ -82,6 +106,14 @@ function Verify2faContent() {
     } finally {
       setResending(false)
     }
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   if (!twoFactorToken) {
