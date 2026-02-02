@@ -40,7 +40,7 @@ export function usePlatformBranding() {
   const platformQuery = useQuery({
     queryKey: ["platform-branding"],
     queryFn: async () => {
-      const res = await publicApi.get("/api/v1/system-config/public")
+      const res = await publicApi.get("/system-config/public")
       return (res.data?.data || res.data) as Record<string, string>
     },
     staleTime: 30 * 1000,
@@ -50,7 +50,7 @@ export function usePlatformBranding() {
   const clinicQuery = useQuery({
     queryKey: ["clinic-branding-public", clinicSlug],
     queryFn: async () => {
-      const res = await publicApi.get(`/api/v1/clinics/public/branding/${clinicSlug}`)
+      const res = await publicApi.get(`/clinics/public/branding/${clinicSlug}`)
       return (res.data?.data || res.data) as {
         id: string
         name: string
