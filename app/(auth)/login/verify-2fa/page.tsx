@@ -7,12 +7,15 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { toast } from "sonner"
 import { ShieldCheck, Loader2, ArrowLeft } from "lucide-react"
-import { api } from "@/lib/api"
+import { api, getUploadUrl } from "@/lib/api"
 import Link from "next/link"
+import { usePlatformBranding } from "@/hooks/usePlatformBranding"
+import { adjustBrightness } from "@/lib/colors"
 
 function Verify2faContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { branding } = usePlatformBranding()
   const [twoFactorToken, setTwoFactorToken] = useState<string | null>(null)
   const [method, setMethod] = useState("whatsapp")
   const [code, setCode] = useState("")
@@ -136,18 +139,32 @@ function Verify2faContent() {
   return (
     <div className="flex min-h-screen">
       {/* Lado Esquerdo */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-sky-700 to-blue-900" />
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 text-white relative overflow-hidden"
+        style={{ backgroundColor: branding.primaryColor }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(-45deg, ${adjustBrightness(branding.primaryColor, -15)}, ${branding.primaryColor}, ${adjustBrightness(branding.primaryColor, 10)}, ${adjustBrightness(branding.primaryColor, -25)})`,
+            backgroundSize: "400% 400%",
+            animation: "gradient-shift 8s ease infinite",
+          }}
+        />
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-          <div className="bg-white p-1 rounded-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="#0EA5E9"/>
-            </svg>
-          </div>
-          Odonto SaaS
+          {branding.logoUrl ? (
+            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain bg-white p-0.5" />
+          ) : (
+            <div className="bg-white p-1 rounded-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill={branding.primaryColor}/>
+              </svg>
+            </div>
+          )}
+          {branding.name}
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -164,7 +181,7 @@ function Verify2faContent() {
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2025 Odonto SaaS. Todos os direitos reservados.
+          © 2025 {branding.name}. Todos os direitos reservados.
         </div>
       </div>
 
