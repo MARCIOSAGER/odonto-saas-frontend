@@ -9,7 +9,7 @@ import { registerSchema, RegisterInput } from "@/lib/validations"
 import { signIn } from "next-auth/react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone, Check } from "lucide-react"
 import { api } from "@/lib/api"
 
 function maskDocument(value: string) {
@@ -123,20 +123,46 @@ export default function RegisterPage() {
           <p className="text-xl text-white/90 max-w-lg">
             Crie sua conta e comece a gerenciar seu consultório em poucos minutos. Sem cartão de crédito.
           </p>
-          <div className="flex items-center gap-4 pt-4">
+
+          <div className="space-y-3 pt-2">
+            {[
+              "Teste grátis completo, sem compromisso",
+              "Configuração em menos de 5 minutos",
+              "Atendimento via WhatsApp com IA incluso",
+            ].map((feature) => (
+              <div key={feature} className="flex items-center gap-3">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
+                  <Check className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-sm text-white/90">{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4 pt-2">
             <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-10 h-10 rounded-full border-2 border-sky-600 bg-gray-200" />
+              {[
+                { initials: "RC", bg: "bg-emerald-500" },
+                { initials: "AM", bg: "bg-violet-500" },
+                { initials: "LS", bg: "bg-amber-500" },
+                { initials: "JP", bg: "bg-rose-500" },
+              ].map((avatar) => (
+                <div
+                  key={avatar.initials}
+                  className={`w-9 h-9 rounded-full border-2 border-white/30 ${avatar.bg} flex items-center justify-center text-[11px] font-bold text-white`}
+                >
+                  {avatar.initials}
+                </div>
               ))}
             </div>
-            <p className="text-sm font-medium text-white">
-              Junte-se a +2.000 profissionais de odontologia.
+            <p className="text-sm font-medium text-white/90">
+              +2.000 profissionais já usam
             </p>
           </div>
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2025 Odonto SaaS. Todos os direitos reservados.
+          © 2026 Odonto SaaS. Todos os direitos reservados.
         </div>
       </div>
 
