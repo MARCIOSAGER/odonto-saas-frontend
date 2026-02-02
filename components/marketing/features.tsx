@@ -102,10 +102,11 @@ export function Features() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature) => (
+          {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="group rounded-xl border bg-card p-6 hover:shadow-md transition-shadow"
+              className="group rounded-xl border bg-card p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-fade-in-up opacity-0"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="h-10 w-10 rounded-lg bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mb-4">
                 <feature.icon className="h-5 w-5 text-sky-600 dark:text-sky-400" />

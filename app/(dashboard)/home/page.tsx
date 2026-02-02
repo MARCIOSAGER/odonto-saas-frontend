@@ -173,36 +173,40 @@ export default function DashboardHome() {
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 animate-fade-in-up">
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ol&aacute;, {session?.user?.name || "Doutor"}</h1>
         <p className="text-gray-500 dark:text-gray-400">Aqui est&aacute; o que est&aacute; acontecendo na sua cl&iacute;nica hoje.</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard 
-          title="Total de Pacientes" 
-          value={stats?.total_patients || 0} 
-          icon={<Users className="text-primary" size={20} />} 
+        <MetricCard
+          title="Total de Pacientes"
+          value={stats?.total_patients || 0}
+          icon={<Users className="text-primary" size={20} />}
+          delay={0}
         />
-        <MetricCard 
-          title="Confirmados Hoje" 
-          value={stats?.confirmed_today || 0} 
-          icon={<CalendarCheck className="text-success" size={20} />} 
+        <MetricCard
+          title="Confirmados Hoje"
+          value={stats?.confirmed_today || 0}
+          icon={<CalendarCheck className="text-success" size={20} />}
+          delay={75}
         />
-        <MetricCard 
-          title="Agendamentos Pendentes" 
-          value={stats?.pending_appointments || 0} 
-          icon={<CalendarClock className="text-amber-500" size={20} />} 
+        <MetricCard
+          title="Agendamentos Pendentes"
+          value={stats?.pending_appointments || 0}
+          icon={<CalendarClock className="text-amber-500" size={20} />}
+          delay={150}
         />
-        <MetricCard 
-          title="Faturamento Mensal" 
-          value={`R$ ${stats?.monthly_revenue?.toLocaleString('pt-BR') || '0,00'}`} 
-          icon={<TrendingUp className="text-primary" size={20} />} 
+        <MetricCard
+          title="Faturamento Mensal"
+          value={`R$ ${stats?.monthly_revenue?.toLocaleString('pt-BR') || '0,00'}`}
+          icon={<TrendingUp className="text-primary" size={20} />}
+          delay={225}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-7">
-        <Card className="lg:col-span-4 overflow-hidden border-border bg-card shadow-sm">
+        <Card className="lg:col-span-4 overflow-hidden border-border bg-card shadow-sm animate-fade-in-up opacity-0" style={{ animationDelay: "300ms" }}>
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div className="space-y-1">
               <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Fluxo de Pacientes</h3>
@@ -254,7 +258,7 @@ export default function DashboardHome() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-3 border-border bg-card shadow-sm">
+        <Card className="lg:col-span-3 border-border bg-card shadow-sm animate-fade-in-up opacity-0" style={{ animationDelay: "375ms" }}>
           <CardHeader className="flex flex-row items-center justify-between">
             <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Próximos Hoje</h3>
             <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900 dark:hover:text-gray-100">
@@ -302,10 +306,10 @@ export default function DashboardHome() {
   )
 }
 
-function MetricCard({ title, value, icon, change }: { title: string; value: string | number; icon: React.ReactNode; change?: string }) {
+function MetricCard({ title, value, icon, change, delay = 0 }: { title: string; value: string | number; icon: React.ReactNode; change?: string; delay?: number }) {
   const isPositive = change?.startsWith("+")
   return (
-    <Card className="border-border bg-card shadow-sm hover:shadow-md transition-all duration-200">
+    <Card className="border-border bg-card shadow-sm hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 animate-scale-in opacity-0" style={{ animationDelay: `${delay}ms` }}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="p-2 rounded-lg bg-accent/50 text-foreground">

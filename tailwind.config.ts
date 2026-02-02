@@ -61,10 +61,37 @@ const config: Config = {
       },
       boxShadow: {
         sm: "0 1px 2px 0 rgba(0,0,0,0.05)",
-        md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        md: "0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)",
+        lg: "0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04)",
+        "card-hover": "0 8px 30px rgba(0,0,0,0.08)",
       },
       fontFamily: {
-        inter: ["var(--font-inter)", "system-ui", "sans-serif"]
+        jakarta: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        inter: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+      },
+      keyframes: {
+        "fade-in-up": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "scale-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" },
+        },
+        "slide-in-left": {
+          from: { opacity: "0", transform: "translateX(-8px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+      },
+      animation: {
+        "fade-in-up": "fade-in-up 0.4s ease-out forwards",
+        "fade-in": "fade-in 0.3s ease-out forwards",
+        "scale-in": "scale-in 0.3s ease-out forwards",
+        "slide-in-left": "slide-in-left 0.3s ease-out forwards",
       }
     }
   },

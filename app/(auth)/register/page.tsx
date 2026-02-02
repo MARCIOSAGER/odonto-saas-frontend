@@ -103,7 +103,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen">
       {/* Lado Esquerdo */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-sky-600 p-12 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-sky-600 via-sky-700 to-blue-900" />
+        <div className="absolute inset-0 auth-gradient-bg" />
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-sky-400/20 rounded-full blur-3xl" />
 
@@ -143,14 +143,14 @@ export default function RegisterPage() {
       {/* Lado Direito */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
         <div className="w-full max-w-md space-y-6">
-          <div className="space-y-2 text-center lg:text-left">
+          <div className="space-y-2 text-center lg:text-left animate-fade-in-up">
             <h2 className="text-3xl font-bold tracking-tight text-foreground">Criar conta</h2>
             <p className="text-muted-foreground">
               Preencha os dados abaixo para começar seu teste grátis.
             </p>
           </div>
 
-          <Card className="border-none shadow-none lg:shadow-md lg:border lg:bg-card">
+          <Card className="border-none shadow-none lg:shadow-md lg:border lg:bg-card animate-fade-in-up opacity-0" style={{ animationDelay: "100ms" }}>
             <CardContent className="pt-6">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Nome */}
@@ -286,7 +286,7 @@ export default function RegisterPage() {
             </CardContent>
           </Card>
 
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-sm text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "200ms" }}>
             Já tem uma conta?{" "}
             <Link href="/login" className="font-semibold text-primary hover:underline">
               Fazer login

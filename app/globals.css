@@ -28,8 +28,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 214.3 31.8% 93%;
+    --input: 214.3 31.8% 93%;
     --ring: 199 89% 48%;
 
     --radius: 0.75rem;
@@ -77,4 +77,34 @@
 
 .container {
   @apply max-w-7xl mx-auto px-4;
+}
+
+/* Background pattern */
+.bg-dotted {
+  background-image: radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Auth gradient animation */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.auth-gradient-bg {
+  background: linear-gradient(-45deg, #0369a1, #0ea5e9, #0284c7, #075985);
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Focus ring */
+@layer base {
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    box-shadow: 0 0 0 3px hsla(var(--primary), 0.15);
+    border-color: hsl(var(--primary));
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
 }
