@@ -28,6 +28,7 @@ import {
   Star,
   UserCog,
   DollarSign,
+  Package,
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -49,6 +50,7 @@ const clinicItems = [
 const adminItems = [
   { href: "/clinics", label: "Cl\u00ednicas", icon: Hospital },
   { href: "/admin/users", label: "Usu\u00e1rios", icon: UserCog },
+  { href: "/admin/plans", label: "Planos", icon: Package },
   { href: "/admin/billing", label: "Faturamento", icon: DollarSign },
 ]
 

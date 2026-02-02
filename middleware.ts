@@ -4,6 +4,7 @@ import { getToken } from "next-auth/jwt"
 
 const PUBLIC_PATHS = ["/", "/pricing", "/terms", "/privacy"]
 const AUTH_PATHS = ["/login", "/register", "/forgot-password", "/login/verify-2fa"]
+const SUPERADMIN_PATHS = ["/admin", "/clinics"]
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -35,6 +36,15 @@ export async function middleware(req: NextRequest) {
   // Todas as outras rotas (dashboard) exigem autenticação
   if (!token) {
     const url = new URL("/login", req.url)
+    return NextResponse.redirect(url)
+  }
+
+  // Rotas de admin: exigem role superadmin
+  const isSuperadminRoute = SUPERADMIN_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  )
+  if (isSuperadminRoute && token.role !== "superadmin") {
+    const url = new URL("/home", req.url)
     return NextResponse.redirect(url)
   }
 
