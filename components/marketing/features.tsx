@@ -108,8 +108,8 @@ export function Features() {
               className="group rounded-xl border bg-card p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 animate-fade-in-up opacity-0"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="h-10 w-10 rounded-lg bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mb-4">
-                <feature.icon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <feature.icon className="h-5 w-5 text-primary" />
               </div>
               <h3 className="font-semibold text-lg">{feature.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">

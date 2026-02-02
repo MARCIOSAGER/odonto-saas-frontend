@@ -6,16 +6,27 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { forgotPasswordSchema, ForgotPasswordInput } from "@/lib/validations"
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { toast } from "sonner"
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
 import { api, getUploadUrl } from "@/lib/api"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
-import { adjustBrightness } from "@/lib/colors"
+import { adjustBrightness, hexToHsl } from "@/lib/colors"
 
 function ForgotPasswordContent() {
   const { branding } = usePlatformBranding()
   const [sent, setSent] = useState(false)
+
+  useEffect(() => {
+    if (!branding.primaryColor) return
+    const hsl = hexToHsl(branding.primaryColor)
+    document.documentElement.style.setProperty("--primary", hsl)
+    document.documentElement.style.setProperty("--ring", hsl)
+    return () => {
+      document.documentElement.style.removeProperty("--primary")
+      document.documentElement.style.removeProperty("--ring")
+    }
+  }, [branding.primaryColor])
   const {
     register,
     handleSubmit,

@@ -2,10 +2,14 @@
 import { Suspense } from "react"
 import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
+import { BrandingCSSInjector } from "@/components/branding-css-injector"
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
+      <Suspense fallback={null}>
+        <BrandingCSSInjector />
+      </Suspense>
       <Suspense fallback={<div className="h-16 border-b bg-background" />}>
         <Navbar />
       </Suspense>

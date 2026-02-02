@@ -12,15 +12,26 @@ import { toast } from "sonner"
 import { Eye, EyeOff, Lock, Mail, ArrowRight, Check } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { api, getUploadUrl } from "@/lib/api"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
-import { adjustBrightness } from "@/lib/colors"
+import { adjustBrightness, hexToHsl } from "@/lib/colors"
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { branding } = usePlatformBranding()
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (!branding.primaryColor) return
+    const hsl = hexToHsl(branding.primaryColor)
+    document.documentElement.style.setProperty("--primary", hsl)
+    document.documentElement.style.setProperty("--ring", hsl)
+    return () => {
+      document.documentElement.style.removeProperty("--primary")
+      document.documentElement.style.removeProperty("--ring")
+    }
+  }, [branding.primaryColor])
   const [googleLoading, setGoogleLoading] = useState(false)
   const {
     register,
