@@ -270,11 +270,11 @@ export default function AdminPlansPage() {
 
       {/* Create/Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Editar plano" : "Novo plano"}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6 py-2">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
             {/* Identificação */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-foreground">Identificação</h4>
