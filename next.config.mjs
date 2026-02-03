@@ -1,4 +1,3 @@
-import { withSentryConfig } from '@sentry/nextjs';
 import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./i18n.ts');
@@ -47,9 +46,18 @@ const nextConfig = {
 
 const config = withNextIntl(nextConfig);
 
-export default process.env.NEXT_PUBLIC_SENTRY_DSN
-  ? withSentryConfig(config, {
+// Sentry wrapping - dynamic import to avoid build failure when @sentry/nextjs is not installed
+let finalConfig = config;
+try {
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    const { withSentryConfig } = await import('@sentry/nextjs');
+    finalConfig = withSentryConfig(config, {
       silent: true,
       disableSourceMapUpload: !process.env.SENTRY_AUTH_TOKEN,
-    })
-  : config;
+    });
+  }
+} catch {
+  // @sentry/nextjs not installed - skip Sentry wrapping
+}
+
+export default finalConfig;
