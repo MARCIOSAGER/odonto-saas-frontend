@@ -73,9 +73,18 @@ export function CommandPalette() {
         api.get(`/dentists?search=${encodeURIComponent(query)}&limit=5`).catch(() => null),
       ])
 
-      const patients: SearchResult[] = (
-        patientsRes?.data?.data || patientsRes?.data || []
-      )
+      // TransformInterceptor wraps: { success, data: { data: [...], meta } } or { success, data: [...] }
+      const unwrap = (res: any): any[] => {
+        const body = res?.data
+        if (!body) return []
+        const inner = body.data
+        if (inner && Array.isArray(inner.data)) return inner.data
+        if (Array.isArray(inner)) return inner
+        if (Array.isArray(body)) return body
+        return []
+      }
+
+      const patients: SearchResult[] = unwrap(patientsRes)
         .slice(0, 5)
         .map((p: any) => ({
           id: p.id,
@@ -84,9 +93,7 @@ export function CommandPalette() {
           subtitle: p.phone || p.cpf,
         }))
 
-      const dentists: SearchResult[] = (
-        dentistsRes?.data?.data || dentistsRes?.data || []
-      )
+      const dentists: SearchResult[] = unwrap(dentistsRes)
         .slice(0, 5)
         .map((d: any) => ({
           id: d.id,

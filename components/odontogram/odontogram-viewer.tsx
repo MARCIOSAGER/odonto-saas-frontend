@@ -1,67 +1,60 @@
 "use client"
-import { useEffect, useState, useCallback } from "react"
-import { api } from "@/lib/api"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { useState, useMemo } from "react"
+import { useTranslations } from "next-intl"
+import { Loader2, AlertCircle } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OdontogramChart } from "./odontogram-chart"
-
-interface Tooth {
-  tooth_number: number
-  status: string
-  surfaces?: Record<string, string> | null
-  notes?: string | null
-}
+import { ToothDetailPanel } from "./tooth-detail-panel"
+import { useOdontogram, useOdontogramLegend } from "@/hooks/useOdontogram"
+import type { DentitionType, OdontogramEntry } from "@/hooks/useOdontogram"
 
 interface Props {
   patientId: string
+  readOnly?: boolean
 }
 
-export function OdontogramViewer({ patientId }: Props) {
-  const [teeth, setTeeth] = useState<Tooth[]>([])
-  const [loading, setLoading] = useState(true)
+export function OdontogramViewer({ patientId, readOnly = false }: Props) {
+  const t = useTranslations("odontogram")
+  const [dentitionType, setDentitionType] = useState<DentitionType>("PERMANENT")
+  const [selectedTooth, setSelectedTooth] = useState<number | null>(null)
+  const [panelOpen, setPanelOpen] = useState(false)
 
-  const loadOdontogram = useCallback(async () => {
-    try {
-      const res = await api.get(`/patients/${patientId}/odontogram`)
-      const data = res.data?.data || res.data
-      setTeeth(data?.teeth || [])
-    } catch {
-      // No odontogram yet - start with empty
-      setTeeth([])
-    } finally {
-      setLoading(false)
-    }
-  }, [patientId])
+  // Fetch odontogram data via TanStack Query
+  const {
+    data: odontogramData,
+    isLoading: odontogramLoading,
+    isError: odontogramError,
+  } = useOdontogram(patientId, dentitionType)
 
-  useEffect(() => {
-    loadOdontogram()
-  }, [loadOdontogram])
+  // Fetch legend data
+  const { data: legendData, isLoading: legendLoading } = useOdontogramLegend()
 
-  async function handleToothUpdate(toothNumber: number, status: string, notes?: string) {
-    try {
-      await api.put(`/patients/${patientId}/odontogram/teeth/${toothNumber}`, {
-        tooth_number: toothNumber,
-        status,
-        notes,
-      })
+  const teeth = odontogramData?.teeth || []
+  const legend = legendData || []
 
-      setTeeth((prev) => {
-        const existing = prev.find((t) => t.tooth_number === toothNumber)
-        if (existing) {
-          return prev.map((t) =>
-            t.tooth_number === toothNumber ? { ...t, status, notes } : t
-          )
-        }
-        return [...prev, { tooth_number: toothNumber, status, notes }]
-      })
+  // Get entries for the selected tooth
+  const selectedToothEntries = useMemo<OdontogramEntry[]>(() => {
+    if (!selectedTooth) return []
+    const tooth = teeth.find((t) => t.tooth_number === selectedTooth)
+    return tooth?.entries || []
+  }, [selectedTooth, teeth])
 
-      toast.success(`Dente ${toothNumber} atualizado`)
-    } catch {
-      toast.error("Erro ao atualizar dente")
+  function handleToothClick(toothNumber: number) {
+    if (readOnly) return
+    setSelectedTooth(toothNumber)
+    setPanelOpen(true)
+  }
+
+  function handlePanelClose(open: boolean) {
+    setPanelOpen(open)
+    if (!open) {
+      setSelectedTooth(null)
     }
   }
 
-  if (loading) {
+  const isLoading = odontogramLoading || legendLoading
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -69,10 +62,58 @@ export function OdontogramViewer({ patientId }: Props) {
     )
   }
 
+  if (odontogramError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
+        <AlertCircle className="h-6 w-6" />
+        <span className="text-sm">{t("loadError")}</span>
+      </div>
+    )
+  }
+
   return (
-    <OdontogramChart
-      teeth={teeth}
-      onToothUpdate={handleToothUpdate}
-    />
+    <div className="space-y-4">
+      {/* Dentition type selector */}
+      <div className="flex justify-center">
+        <Tabs
+          value={dentitionType}
+          onValueChange={(v) => setDentitionType(v as DentitionType)}
+        >
+          <TabsList>
+            <TabsTrigger value="PERMANENT">
+              {t("permanentDentition")}
+            </TabsTrigger>
+            <TabsTrigger value="DECIDUOUS">
+              {t("deciduousDentition")}
+            </TabsTrigger>
+            <TabsTrigger value="MIXED">
+              {t("mixedDentition")}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Odontogram chart */}
+      <OdontogramChart
+        teeth={teeth}
+        legend={legend}
+        dentitionType={dentitionType}
+        onToothClick={handleToothClick}
+        selectedTooth={selectedTooth}
+        readOnly={readOnly}
+      />
+
+      {/* Tooth detail side panel */}
+      {!readOnly && (
+        <ToothDetailPanel
+          patientId={patientId}
+          toothNumber={selectedTooth}
+          open={panelOpen}
+          onOpenChange={handlePanelClose}
+          legend={legend}
+          currentEntries={selectedToothEntries}
+        />
+      )}
+    </div>
   )
 }
