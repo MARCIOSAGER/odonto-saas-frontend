@@ -18,9 +18,27 @@ export default defineConfig({
   },
 
   projects: [
+    // Setup: authenticate and save session
     {
-      name: "chromium",
+      name: "setup",
+      testMatch: /auth\.setup\.ts/,
+    },
+    // Unauthenticated tests (no setup dependency)
+    {
+      name: "unauthenticated",
+      testMatch: /\.(spec)\.ts/,
+      testIgnore: /authenticated\./,
       use: { ...devices["Desktop Chrome"] },
+    },
+    // Authenticated tests (depend on setup)
+    {
+      name: "authenticated",
+      testMatch: /authenticated\./,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "e2e/.auth/user.json",
+      },
     },
   ],
 
