@@ -8,15 +8,7 @@ import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { useTranslations } from "next-intl"
-import {
-  AreaChart,
-  Area,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts"
+import dynamic from "next/dynamic"
 import {
   Users,
   CalendarCheck,
@@ -31,6 +23,11 @@ import {
 import Link from "next/link"
 import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
+
+const WeeklyFlowChart = dynamic(() => import("@/components/dashboard/weekly-flow-chart"), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full animate-pulse bg-muted rounded" />,
+})
 
 export default function DashboardHome() {
   const { data: session } = useSession()
@@ -216,47 +213,7 @@ export default function DashboardHome() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    dy={10}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      borderColor: 'hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }} 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="valor" 
-                    stroke="#0EA5E9" 
-                    strokeWidth={2}
-                    fillOpacity={1} 
-                    fill="url(#colorValue)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <WeeklyFlowChart data={chartData} />
           </CardContent>
         </Card>
 

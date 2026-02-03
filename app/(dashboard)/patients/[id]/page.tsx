@@ -1,18 +1,53 @@
 "use client"
 import { useParams } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
+import dynamic from "next/dynamic"
 import { api } from "@/lib/api"
 import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles, ClipboardList, Pill, DollarSign, History } from "lucide-react"
 import { PatientSummaryCard } from "@/components/ai/patient-summary-card"
-import { TreatmentPlanAi } from "@/components/ai/treatment-plan-ai"
-import { ClinicalNotesGenerator } from "@/components/ai/clinical-notes-generator"
-import { OdontogramViewer } from "@/components/odontogram/odontogram-viewer"
-import { PrescriptionForm } from "@/components/prescriptions/prescription-form"
-import { PrescriptionList } from "@/components/prescriptions/prescription-list"
-import { AnamnesisForm } from "@/components/ai/anamnesis-form"
-import { PatientFinancial } from "@/components/patients/patient-financial"
-import { PatientTimeline } from "@/components/patients/patient-timeline"
 import { useDentists } from "@/hooks/useDentists"
+
+function TabSkeleton() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="h-8 bg-muted rounded w-1/3" />
+      <div className="h-64 bg-muted rounded" />
+    </div>
+  )
+}
+
+const OdontogramViewer = dynamic(
+  () => import("@/components/odontogram/odontogram-viewer").then(m => ({ default: m.OdontogramViewer })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const ClinicalNotesGenerator = dynamic(
+  () => import("@/components/ai/clinical-notes-generator").then(m => ({ default: m.ClinicalNotesGenerator })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const TreatmentPlanAi = dynamic(
+  () => import("@/components/ai/treatment-plan-ai").then(m => ({ default: m.TreatmentPlanAi })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const PrescriptionForm = dynamic(
+  () => import("@/components/prescriptions/prescription-form").then(m => ({ default: m.PrescriptionForm })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const PrescriptionList = dynamic(
+  () => import("@/components/prescriptions/prescription-list").then(m => ({ default: m.PrescriptionList })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const AnamnesisForm = dynamic(
+  () => import("@/components/ai/anamnesis-form").then(m => ({ default: m.AnamnesisForm })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const PatientFinancial = dynamic(
+  () => import("@/components/patients/patient-financial").then(m => ({ default: m.PatientFinancial })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
+const PatientTimeline = dynamic(
+  () => import("@/components/patients/patient-timeline").then(m => ({ default: m.PatientTimeline })),
+  { ssr: false, loading: () => <TabSkeleton /> }
+)
 
 interface Patient {
   id: string

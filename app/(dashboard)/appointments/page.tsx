@@ -1,21 +1,26 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState, useMemo, useEffect, useCallback, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useAppointments } from "@/hooks/useAppointments"
-import { Calendar, dateFnsLocalizer } from "react-big-calendar"
-import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop"
-import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
-import { format, parse, startOfWeek, getDay } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { format } from "date-fns"
 import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react"
+
+const CalendarView = dynamic(() => import("@/components/appointments/calendar-view"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[700px] items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  ),
+})
 import { AppointmentForm } from "@/components/forms/appointment-form"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/useIsMobile"
 import {
   AlertDialog,
@@ -27,11 +32,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-const DnDCalendar = withDragAndDrop(Calendar)
-
-const locales = { "pt-BR": ptBR }
-const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
 
 const statusMap: Record<string, string> = {
   scheduled: "Agendado",
@@ -399,76 +399,13 @@ function AppointmentsContent() {
               </Table>
             </div>
           ) : (
-            <div className={cn("font-sans", isMobile ? "h-[450px]" : "h-[700px]")}>
-              <DnDCalendar
-                localizer={localizer}
-                culture="pt-BR"
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                defaultView={isMobile ? "day" : "week"}
-                views={isMobile ? ["day", "month"] : ["day", "week", "month"]}
-                selectable
-                onSelectSlot={handleSelectSlot}
-                onEventDrop={handleEventDrop}
-                onEventResize={() => {}}
-                resizable={false}
-                draggableAccessor={draggableAccessor}
-                messages={{
-                  day: "Dia",
-                  week: "Semana",
-                  month: "Mês",
-                  today: "Hoje",
-                  previous: "Anterior",
-                  next: "Próximo",
-                  date: "Data",
-                  time: "Hora",
-                  event: "Evento",
-                  noEventsInRange: "Sem agendamentos neste período.",
-                  showMore: (total: number) => `+${total} mais`,
-                }}
-                formats={{
-                  timeGutterFormat: (date: Date) => format(date, 'HH:mm', { locale: ptBR }),
-                  eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
-                    `${format(start, 'HH:mm')} - ${format(end, 'HH:mm')}`,
-                  dayHeaderFormat: (date: Date) => format(date, "EEEE, dd 'de' MMMM", { locale: ptBR }),
-                  dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
-                    `${format(start, "dd 'de' MMMM", { locale: ptBR })} - ${format(end, "dd 'de' MMMM", { locale: ptBR })}`,
-                }}
-                className="rounded-lg"
-                eventPropGetter={(event: any) => {
-                  const status = event.resource?.status?.toLowerCase() || ""
-                  let backgroundColor = 'hsl(var(--primary))'
-                  let opacity = 1
-
-                  if (status === "confirmed" || status === "confirmado") {
-                    backgroundColor = '#16a34a'
-                  } else if (status === "cancelled" || status === "cancelado") {
-                    backgroundColor = '#dc2626'
-                    opacity = 0.5
-                  } else if (status === "completed" || status === "concluido" || status === "realizado") {
-                    backgroundColor = '#6b7280'
-                  } else if (status === "no-show" || status === "faltou") {
-                    backgroundColor = '#f59e0b'
-                    opacity = 0.6
-                  }
-
-                  return {
-                    style: {
-                      backgroundColor,
-                      borderRadius: '6px',
-                      border: 'none',
-                      color: 'white',
-                      fontSize: '12px',
-                      padding: '2px 6px',
-                      opacity,
-                      cursor: draggableAccessor({ resource: event.resource } as any) ? 'grab' : 'default',
-                      textDecoration: (status === "cancelled" || status === "cancelado") ? 'line-through' : 'none',
-                    }
-                  }
-                }}
-              />
-            </div>
+            <CalendarView
+              events={events}
+              isMobile={isMobile}
+              onSelectSlot={handleSelectSlot}
+              onEventDrop={handleEventDrop}
+              draggableAccessor={draggableAccessor}
+            />
           )}
         </CardContent>
       </Card>
