@@ -6,9 +6,10 @@ import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
-import { Search, Plus, FilterX, Loader2, Edit2, Trash2 } from "lucide-react"
+import { Search, Plus, FilterX, Loader2, Edit2, Trash2, Eye } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function PatientsPage() {
+  const router = useRouter()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"Todos" | "Ativo" | "Inativo">("Todos")
   const [open, setOpen] = useState(false)
@@ -217,11 +219,14 @@ export default function PatientsPage() {
                     safePatients.map((p: any) => (
                       <TR key={p.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
-                          <div className="flex items-center gap-3">
+                          <div
+                            className="flex items-center gap-3 cursor-pointer"
+                            onClick={() => router.push(`/patients/${p.id}`)}
+                          >
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
                               {(p.name || p.nome || "P").charAt(0)}
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100">{p.name || p.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">{p.name || p.nome}</span>
                           </div>
                         </TD>
                         <TD className="text-gray-700 dark:text-gray-300">{p.phone || p.telefone}</TD>
@@ -233,19 +238,30 @@ export default function PatientsPage() {
                         </TD>
                         <TD className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
+                              onClick={() => router.push(`/patients/${p.id}`)}
+                              title="Ver detalhes"
+                            >
+                              <Eye size={14} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                               onClick={() => handleEdit(p)}
+                              title="Editar"
                             >
                               <Edit2 size={14} />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                               onClick={() => setDeleteId(p.id)}
+                              title="Excluir"
                             >
                               <Trash2 size={14} />
                             </Button>
