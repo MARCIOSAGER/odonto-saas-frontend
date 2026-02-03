@@ -14,8 +14,11 @@ import { getUploadUrl } from "@/lib/api"
 export default function ClinicSettingsPage() {
   const { clinic, isLoading, updateClinic } = useClinic()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const faviconInputRef = useRef<HTMLInputElement>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [faviconPreview, setFaviconPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadingFavicon, setUploadingFavicon] = useState(false)
 
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
@@ -55,6 +58,9 @@ export default function ClinicSettingsPage() {
       })
       if (clinic.logo_url) {
         setLogoPreview(getUploadUrl(clinic.logo_url))
+      }
+      if (clinic.favicon_url) {
+        setFaviconPreview(getUploadUrl(clinic.favicon_url))
       }
       // Aplicar cores iniciais
       try {
@@ -105,27 +111,15 @@ export default function ClinicSettingsPage() {
       const formData = new FormData()
       formData.append("file", file)
 
-      // 1. Upload da Logo
       const response = await api.post("/clinics/my/upload-logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
-      // 2. Upload também como Favicon (mesma imagem)
-      const faviconFormData = new FormData()
-      faviconFormData.append("file", file)
-      
-      await api.post("/clinics/my/upload-favicon", faviconFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-
-      // TransformInterceptor wraps: { success, data: { logo_url: "..." }, timestamp }
       const logoData = response.data?.data || response.data
       const newLogoUrl = logoData?.logo_url
-      toast.success("Logo e favicon atualizados com sucesso!")
+      toast.success("Logo atualizado com sucesso!")
       if (newLogoUrl) {
-        const fullUrl = getUploadUrl(newLogoUrl)
-        setLogoPreview(fullUrl)
-        updateFavicon(fullUrl)
+        setLogoPreview(getUploadUrl(newLogoUrl))
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Erro ao enviar logo")
@@ -145,6 +139,49 @@ export default function ClinicSettingsPage() {
       newLink.rel = 'icon'
       newLink.href = url
       document.head.appendChild(newLink)
+    }
+  }
+
+  const handleFaviconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/") && !file.name.endsWith(".ico")) {
+      toast.error("Selecione uma imagem válida")
+      return
+    }
+
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("O favicon deve ter no máximo 1MB")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => setFaviconPreview(e.target?.result as string)
+    reader.readAsDataURL(file)
+
+    setUploadingFavicon(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      const response = await api.post("/clinics/my/upload-favicon", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+
+      const faviconData = response.data?.data || response.data
+      const newFaviconUrl = faviconData?.favicon_url
+      toast.success("Favicon atualizado com sucesso!")
+      if (newFaviconUrl) {
+        const fullUrl = getUploadUrl(newFaviconUrl)
+        setFaviconPreview(fullUrl)
+        updateFavicon(fullUrl)
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Erro ao enviar favicon")
+      setFaviconPreview(clinic?.favicon_url ? getUploadUrl(clinic.favicon_url) : null)
+    } finally {
+      setUploadingFavicon(false)
     }
   }
 
@@ -241,16 +278,16 @@ export default function ClinicSettingsPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Logo da Clínica</label>
                   <div className="flex items-center gap-4">
                     <div className="w-32 h-32 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
                       {logoPreview ? (
-                        <img 
-                          src={logoPreview} 
-                          alt="Logo" 
-                          className="w-full h-full object-contain" 
+                        <img
+                          src={logoPreview}
+                          alt="Logo"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <span className="text-gray-400 text-sm text-center px-2">Sem logo</span>
@@ -258,24 +295,64 @@ export default function ClinicSettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <input 
-                        ref={fileInputRef} 
-                        type="file" 
-                        accept="image/png,image/jpeg,image/svg+xml" 
-                        onChange={handleLogoChange} 
-                        className="hidden" 
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/svg+xml"
+                        onChange={handleLogoChange}
+                        className="hidden"
                       />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => fileInputRef.current?.click()} 
-                        disabled={uploading} 
-                      > 
-                        {uploading ? "Enviando..." : "Alterar Logo"} 
-                      </Button> 
-                      <p className="text-xs text-muted-foreground"> 
-                        PNG, JPG ou SVG. Máximo 5MB. 
-                      </p> 
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        {uploading ? "Enviando..." : "Alterar Logo"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG ou SVG. Máximo 5MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Favicon da Clínica</label>
+                  <p className="text-xs text-muted-foreground">Ícone que aparece na aba do navegador.</p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
+                      {faviconPreview ? (
+                        <img
+                          src={faviconPreview}
+                          alt="Favicon"
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-[10px] text-center px-1">Sem favicon</span>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        ref={faviconInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/svg+xml,image/x-icon,image/vnd.microsoft.icon"
+                        onChange={handleFaviconChange}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => faviconInputRef.current?.click()}
+                        disabled={uploadingFavicon}
+                      >
+                        {uploadingFavicon ? "Enviando..." : "Alterar Favicon"}
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG, ICO ou SVG. Máximo 1MB.
+                      </p>
                     </div>
                   </div>
                 </div>
