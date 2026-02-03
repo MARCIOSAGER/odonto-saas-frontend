@@ -13,9 +13,41 @@ export const viewport: Viewport = {
   themeColor: "#0284c7",
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://odontosaas.com.br"
+const description = "Software odontológico completo: agenda, odontograma digital, prontuário com IA, WhatsApp integrado, receituário e relatórios. Teste grátis por 14 dias."
+
 export const metadata: Metadata = {
-  title: "Odonto SaaS",
-  description: "Sistema completo para gestão de clínicas odontológicas",
+  title: {
+    default: "Odonto SaaS — Gestão de Clínicas Odontológicas",
+    template: "%s | Odonto SaaS",
+  },
+  description,
+  keywords: [
+    "software odontológico",
+    "gestão de clínica odontológica",
+    "odontograma digital",
+    "prontuário eletrônico odontológico",
+    "agenda dentista",
+    "sistema para dentista",
+    "SaaS odontológico",
+    "receituário digital",
+    "WhatsApp clínica",
+  ],
+  authors: [{ name: "Odonto SaaS" }],
+  metadataBase: new URL(siteUrl),
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "Odonto SaaS",
+    title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
+    description,
+    url: siteUrl,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
+    description,
+  },
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
