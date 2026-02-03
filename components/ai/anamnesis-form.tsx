@@ -74,8 +74,20 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
       setResult(res.data)
       setSaved(false)
       onCompleted?.(res.data)
-    } catch {
-      toast.error("Erro ao processar anamnese com IA")
+    } catch (err: any) {
+      const status = err?.response?.status
+      const msg = err?.response?.data?.message
+      if (status === 500) {
+        toast.error(msg || "Erro interno do servidor. Verifique se a chave de IA está configurada.")
+      } else if (status === 401 || status === 403) {
+        toast.error("Sessão expirada. Faça login novamente.")
+      } else if (status === 429) {
+        toast.error("Muitas requisições. Aguarde um momento e tente novamente.")
+      } else if (!err?.response) {
+        toast.error("Sem conexão com o servidor. Verifique sua internet.")
+      } else {
+        toast.error(msg || "Erro ao processar anamnese com IA.")
+      }
     } finally {
       setLoading(false)
     }
@@ -107,8 +119,9 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
       })
       toast.success("Anamnese salva com sucesso")
       setSaved(true)
-    } catch {
-      toast.error("Erro ao salvar anamnese")
+    } catch (err: any) {
+      const msg = err?.response?.data?.message
+      toast.error(msg || "Erro ao salvar anamnese.")
     } finally {
       setSaving(false)
     }

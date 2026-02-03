@@ -56,8 +56,13 @@ export function PrescriptionList({ patientId }: Props) {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-    } catch {
-      toast.error("Erro ao baixar PDF")
+    } catch (err: any) {
+      const status = err?.response?.status
+      if (status === 404) {
+        toast.error("PDF não encontrado. O documento pode não ter sido gerado ainda.")
+      } else {
+        toast.error("Erro ao baixar PDF.")
+      }
     }
   }
 
@@ -66,8 +71,9 @@ export function PrescriptionList({ patientId }: Props) {
       await api.post(`/prescriptions/${id}/send`, { via: "whatsapp" })
       toast.success("Enviado por WhatsApp")
       load()
-    } catch {
-      toast.error("Erro ao enviar")
+    } catch (err: any) {
+      const msg = err?.response?.data?.message
+      toast.error(msg || "Erro ao enviar por WhatsApp.")
     }
   }
 

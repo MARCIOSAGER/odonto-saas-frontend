@@ -55,8 +55,20 @@ export function TreatmentPlanAi({ patientId }: Props) {
       setPlan(res.data)
       setSaved(false)
       setExpandedPhases(new Set([0]))
-    } catch {
-      toast.error("Erro ao gerar plano de tratamento")
+    } catch (err: any) {
+      const status = err?.response?.status
+      const msg = err?.response?.data?.message
+      if (status === 500) {
+        toast.error(msg || "Erro interno do servidor. Verifique se a chave de IA está configurada.")
+      } else if (status === 401 || status === 403) {
+        toast.error("Sessão expirada. Faça login novamente.")
+      } else if (status === 429) {
+        toast.error("Muitas requisições. Aguarde um momento e tente novamente.")
+      } else if (!err?.response) {
+        toast.error("Sem conexão com o servidor. Verifique sua internet.")
+      } else {
+        toast.error(msg || "Erro ao gerar plano de tratamento.")
+      }
     } finally {
       setLoading(false)
     }
@@ -76,8 +88,9 @@ export function TreatmentPlanAi({ patientId }: Props) {
       })
       toast.success("Plano de tratamento salvo com sucesso")
       setSaved(true)
-    } catch {
-      toast.error("Erro ao salvar plano de tratamento")
+    } catch (err: any) {
+      const msg = err?.response?.data?.message
+      toast.error(msg || "Erro ao salvar plano de tratamento.")
     } finally {
       setSaving(false)
     }

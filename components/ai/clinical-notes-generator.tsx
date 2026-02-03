@@ -45,8 +45,20 @@ export function ClinicalNotesGenerator({ patientId, appointmentId, onGenerated }
       const data = res.data
       setNotes(data)
       onGenerated?.(data)
-    } catch {
-      toast.error("Erro ao gerar prontuário. Verifique suas configurações de IA.")
+    } catch (err: any) {
+      const status = err?.response?.status
+      const msg = err?.response?.data?.message
+      if (status === 500) {
+        toast.error(msg || "Erro interno do servidor. Verifique se a chave de IA está configurada.")
+      } else if (status === 401 || status === 403) {
+        toast.error("Sessão expirada. Faça login novamente.")
+      } else if (status === 429) {
+        toast.error("Muitas requisições. Aguarde um momento e tente novamente.")
+      } else if (!err?.response) {
+        toast.error("Sem conexão com o servidor. Verifique sua internet.")
+      } else {
+        toast.error(msg || "Erro ao gerar prontuário.")
+      }
     } finally {
       setLoading(false)
     }
