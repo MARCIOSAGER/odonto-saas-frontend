@@ -197,7 +197,7 @@ export function useOdontogramLegend() {
   return useQuery({
     queryKey: ["odontogram-legend"],
     queryFn: async () => {
-      const res = await api.get("/clinics/odontogram/legend")
+      const res = await api.get("/odontogram/legend")
       const data = res.data?.data || res.data
       return (Array.isArray(data) ? data : []) as OdontogramLegendItem[]
     },

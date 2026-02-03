@@ -212,7 +212,7 @@ function HistoryList({
   }
 
   function formatSurfaces(surfaces: Surface[]): string {
-    return surfaces.join(", ")
+    return (surfaces || []).join(", ")
   }
 
   async function handleSupersede(entryId: string) {
