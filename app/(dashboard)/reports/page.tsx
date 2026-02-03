@@ -3,6 +3,11 @@ import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
 import { Loader2, DollarSign, Users, Calendar, TrendingUp, Download, BarChart3, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend,
+  AreaChart, Area,
+} from "recharts"
 
 interface RevenueData {
   total_revenue: number
@@ -37,6 +42,46 @@ interface CashflowData {
 }
 
 type TabKey = "receita" | "atendimentos" | "pacientes" | "fluxo"
+
+const CHART_COLORS = {
+  primary: "#10b981",
+  secondary: "#3b82f6",
+  completed: "#22c55e",
+  cancelled: "#ef4444",
+  noShow: "#f59e0b",
+  scheduled: "#3b82f6",
+  muted: "#94a3b8",
+}
+
+const PIE_COLORS = [CHART_COLORS.completed, CHART_COLORS.cancelled, CHART_COLORS.noShow, CHART_COLORS.scheduled]
+
+function formatMonthLabel(month: string) {
+  const [y, m] = month.split("-")
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
+  return `${months[parseInt(m, 10) - 1]}/${y.slice(2)}`
+}
+
+function CurrencyTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-popover border rounded-lg shadow-lg px-3 py-2 text-sm">
+      <p className="font-medium">{label}</p>
+      <p className="text-green-600 font-bold">
+        {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload[0].value)}
+      </p>
+    </div>
+  )
+}
+
+function CountTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-popover border rounded-lg shadow-lg px-3 py-2 text-sm">
+      <p className="font-medium">{label}</p>
+      <p className="text-primary font-bold">{payload[0].value} pacientes</p>
+    </div>
+  )
+}
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("receita")
@@ -107,6 +152,11 @@ export default function ReportsPage() {
 
   const formatCurrency = (v: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
+
+  const formatCurrencyShort = (v: number) => {
+    if (v >= 1000) return `R$${(v / 1000).toFixed(1)}k`
+    return `R$${v.toFixed(0)}`
+  }
 
   const tabs: { key: TabKey; label: string; icon: typeof DollarSign }[] = [
     { key: "receita", label: "Receita", icon: DollarSign },
@@ -181,25 +231,20 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              {/* Revenue by month */}
+              {/* Revenue by month - BarChart */}
               {revenue.by_month.length > 0 && (
                 <div className="bg-card border rounded-xl p-5 space-y-3">
                   <p className="text-sm font-medium">Receita por m&ecirc;s</p>
-                  <div className="space-y-2">
-                    {revenue.by_month.map((m) => {
-                      const maxRev = Math.max(...revenue.by_month.map((x) => x.revenue))
-                      const pct = maxRev > 0 ? (m.revenue / maxRev) * 100 : 0
-                      return (
-                        <div key={m.month} className="flex items-center gap-3">
-                          <span className="text-xs font-medium w-16">{m.month}</span>
-                          <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-primary rounded-full flex items-center justify-end pr-2" style={{ width: `${Math.max(pct, 5)}%` }}>
-                              <span className="text-[10px] text-primary-foreground font-medium">{formatCurrency(m.revenue)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={revenue.by_month.map(m => ({ ...m, label: formatMonthLabel(m.month) }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                        <YAxis tickFormatter={formatCurrencyShort} tick={{ fontSize: 11 }} width={65} />
+                        <Tooltip content={<CurrencyTooltip />} />
+                        <Bar dataKey="revenue" fill={CHART_COLORS.primary} radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
@@ -218,16 +263,16 @@ export default function ReportsPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="divide-y">
-                    {revenue.by_dentist.map((d, i) => (
-                      <div key={i} className="flex items-center justify-between py-2">
-                        <div>
-                          <p className="text-sm font-medium">{d.name}</p>
-                          <p className="text-xs text-muted-foreground">{d.count} atendimentos</p>
-                        </div>
-                        <span className="text-sm font-bold text-green-600">{formatCurrency(d.revenue)}</span>
-                      </div>
-                    ))}
+                  <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={revenue.by_dentist} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis type="number" tickFormatter={formatCurrencyShort} tick={{ fontSize: 11 }} />
+                        <YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={120} />
+                        <Tooltip content={<CurrencyTooltip />} />
+                        <Bar dataKey="revenue" fill={CHART_COLORS.secondary} radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
@@ -270,6 +315,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Status distribution - PieChart + status cards */}
               <div className="bg-card border rounded-xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Resumo por status</p>
@@ -282,18 +328,52 @@ export default function ReportsPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                  {[
-                    { label: "Realizados", value: appointments.completed, color: "bg-green-100 text-green-800" },
-                    { label: "Cancelados", value: appointments.cancelled, color: "bg-red-100 text-red-800" },
-                    { label: "Faltas", value: appointments.no_show, color: "bg-amber-100 text-amber-800" },
-                    { label: "Agendados", value: appointments.total - appointments.completed - appointments.cancelled - appointments.no_show, color: "bg-blue-100 text-blue-800" },
-                  ].map((item) => (
-                    <div key={item.label} className={`rounded-lg p-3 text-center ${item.color}`}>
-                      <p className="text-2xl font-bold">{item.value}</p>
-                      <p className="text-xs font-medium">{item.label}</p>
-                    </div>
-                  ))}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Pie Chart */}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Realizados", value: appointments.completed },
+                            { name: "Cancelados", value: appointments.cancelled },
+                            { name: "Faltas", value: appointments.no_show },
+                            { name: "Agendados", value: Math.max(0, appointments.total - appointments.completed - appointments.cancelled - appointments.no_show) },
+                          ].filter(d => d.value > 0)}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={90}
+                          paddingAngle={3}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          labelLine={false}
+                        >
+                          {PIE_COLORS.map((color, i) => (
+                            <Cell key={i} fill={color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend verticalAlign="bottom" height={36} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Status cards */}
+                  <div className="grid grid-cols-2 gap-3 content-center">
+                    {[
+                      { label: "Realizados", value: appointments.completed, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+                      { label: "Cancelados", value: appointments.cancelled, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+                      { label: "Faltas", value: appointments.no_show, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+                      { label: "Agendados", value: appointments.total - appointments.completed - appointments.cancelled - appointments.no_show, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+                    ].map((item) => (
+                      <div key={item.label} className={`rounded-lg p-3 text-center ${item.color}`}>
+                        <p className="text-2xl font-bold">{item.value}</p>
+                        <p className="text-xs font-medium">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -317,6 +397,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* New patients by month - AreaChart */}
               {patients.by_month.length > 0 && (
                 <div className="bg-card border rounded-xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
@@ -330,21 +411,28 @@ export default function ReportsPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    {patients.by_month.map((m) => {
-                      const maxCount = Math.max(...patients.by_month.map((x) => x.new_patients))
-                      const pct = maxCount > 0 ? (m.new_patients / maxCount) * 100 : 0
-                      return (
-                        <div key={m.month} className="flex items-center gap-3">
-                          <span className="text-xs font-medium w-16">{m.month}</span>
-                          <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-primary rounded-full flex items-center justify-end pr-2" style={{ width: `${Math.max(pct, 8)}%` }}>
-                              <span className="text-[10px] text-primary-foreground font-medium">{m.new_patients}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={patients.by_month.map(m => ({ ...m, label: formatMonthLabel(m.month) }))}>
+                        <defs>
+                          <linearGradient id="patientGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={CHART_COLORS.secondary} stopOpacity={0.3} />
+                            <stop offset="95%" stopColor={CHART_COLORS.secondary} stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                        <Tooltip content={<CountTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="new_patients"
+                          stroke={CHART_COLORS.secondary}
+                          strokeWidth={2}
+                          fill="url(#patientGradient)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               )}
@@ -369,6 +457,30 @@ export default function ReportsPage() {
                   <p className="text-xs text-muted-foreground">60-90 dias</p>
                   <p className="text-2xl font-bold mt-1">{formatCurrency(cashflow.projection_90d.revenue)}</p>
                   <p className="text-xs text-muted-foreground mt-1">{cashflow.projection_90d.appointments} consultas agendadas</p>
+                </div>
+              </div>
+
+              {/* Cashflow projection chart */}
+              <div className="bg-card border rounded-xl p-5 space-y-3">
+                <p className="text-sm font-medium">Proje&ccedil;&atilde;o de receita</p>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={[
+                      { period: "0-30 dias", revenue: cashflow.projection_30d.revenue, appointments: cashflow.projection_30d.appointments },
+                      { period: "30-60 dias", revenue: cashflow.projection_60d.revenue, appointments: cashflow.projection_60d.appointments },
+                      { period: "60-90 dias", revenue: cashflow.projection_90d.revenue, appointments: cashflow.projection_90d.appointments },
+                    ]}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis dataKey="period" tick={{ fontSize: 12 }} />
+                      <YAxis tickFormatter={formatCurrencyShort} tick={{ fontSize: 11 }} width={65} />
+                      <Tooltip content={<CurrencyTooltip />} />
+                      <Bar dataKey="revenue" fill={CHART_COLORS.primary} radius={[6, 6, 0, 0]}>
+                        <Cell fill="#10b981" />
+                        <Cell fill="#3b82f6" />
+                        <Cell fill="#8b5cf6" />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
