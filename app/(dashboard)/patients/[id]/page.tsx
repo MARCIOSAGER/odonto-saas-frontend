@@ -2,11 +2,15 @@
 import { useParams } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
-import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles } from "lucide-react"
+import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles, ClipboardList, Pill } from "lucide-react"
 import { PatientSummaryCard } from "@/components/ai/patient-summary-card"
 import { TreatmentPlanAi } from "@/components/ai/treatment-plan-ai"
 import { ClinicalNotesGenerator } from "@/components/ai/clinical-notes-generator"
 import { OdontogramViewer } from "@/components/odontogram/odontogram-viewer"
+import { PrescriptionForm } from "@/components/prescriptions/prescription-form"
+import { PrescriptionList } from "@/components/prescriptions/prescription-list"
+import { AnamnesisForm } from "@/components/ai/anamnesis-form"
+import { useDentists } from "@/hooks/useDentists"
 
 interface Patient {
   id: string
@@ -22,7 +26,7 @@ interface Patient {
   created_at: string
 }
 
-type TabKey = "resumo" | "odontograma" | "prontuario" | "tratamento"
+type TabKey = "resumo" | "odontograma" | "prontuario" | "tratamento" | "receitas" | "anamnese"
 
 export default function PatientDetailPage() {
   const params = useParams()
@@ -30,6 +34,9 @@ export default function PatientDetailPage() {
   const [patient, setPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>("resumo")
+  const [selectedDentistId, setSelectedDentistId] = useState<string>("")
+  const [prescriptionKey, setPrescriptionKey] = useState(0)
+  const { dentists } = useDentists()
 
   const loadPatient = useCallback(async () => {
     try {
@@ -74,6 +81,8 @@ export default function PatientDetailPage() {
     { key: "odontograma", label: "Odontograma", icon: FileText },
     { key: "prontuario", label: "Prontuário IA", icon: Sparkles },
     { key: "tratamento", label: "Plano de Tratamento", icon: Calendar },
+    { key: "receitas", label: "Receitas", icon: Pill },
+    { key: "anamnese", label: "Anamnese", icon: ClipboardList },
   ]
 
   return (
@@ -133,7 +142,7 @@ export default function PatientDetailPage() {
       <PatientSummaryCard patientId={id} />
 
       {/* Tabs */}
-      <div className="border-b">
+      <div className="border-b overflow-x-auto">
         <div className="flex gap-1">
           {tabs.map((tab) => {
             const Icon = tab.icon
@@ -141,7 +150,7 @@ export default function PatientDetailPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.key
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground"
@@ -209,6 +218,49 @@ export default function PatientDetailPage() {
 
         {activeTab === "tratamento" && (
           <TreatmentPlanAi patientId={id} />
+        )}
+
+        {activeTab === "receitas" && (
+          <div className="space-y-6">
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Nova Receita / Atestado / Encaminhamento</h3>
+              <div className="mb-4">
+                <label className="text-sm font-medium block mb-1">Dentista</label>
+                <select
+                  value={selectedDentistId}
+                  onChange={(e) => setSelectedDentistId(e.target.value)}
+                  className="w-full max-w-xs px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">Selecionar dentista...</option>
+                  {dentists.map((d: { id: string; name: string; cro: string }) => (
+                    <option key={d.id} value={d.id}>
+                      Dr(a). {d.name} - CRO {d.cro}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedDentistId ? (
+                <PrescriptionForm
+                  patientId={id}
+                  dentistId={selectedDentistId}
+                  onCreated={() => setPrescriptionKey((k) => k + 1)}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Selecione um dentista para criar receitas.
+                </p>
+              )}
+            </div>
+
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Documentos Anteriores</h3>
+              <PrescriptionList key={prescriptionKey} patientId={id} />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "anamnese" && (
+          <AnamnesisForm patientId={id} />
         )}
       </div>
     </div>

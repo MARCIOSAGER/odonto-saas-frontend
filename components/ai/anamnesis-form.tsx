@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { Sparkles, Loader2, AlertTriangle, Shield, Pill } from "lucide-react"
+import { Sparkles, Loader2, AlertTriangle, Shield, Pill, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -50,6 +50,8 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [result, setResult] = useState<AnamnesisResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   async function processWithAi() {
     const filledAnswers: Record<string, string> = {}
@@ -70,11 +72,45 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
         answers: filledAnswers,
       })
       setResult(res.data)
+      setSaved(false)
       onCompleted?.(res.data)
     } catch {
       toast.error("Erro ao processar anamnese com IA")
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function saveAnamnesis() {
+    if (!result || !patientId) return
+    setSaving(true)
+    try {
+      await api.post("/anamnesis", {
+        patient_id: patientId,
+        allergies: result.allergies || [],
+        medications: result.medications || [],
+        conditions: result.conditions || [],
+        surgeries: answers.surgeries || null,
+        habits: {
+          smoking: answers.smoking || null,
+          bruxism: answers.bruxism || null,
+          breathing: answers.breathing || null,
+          other: answers.habits || null,
+        },
+        risk_classification: result.riskClassification || null,
+        contraindications: result.contraindications || [],
+        alerts: result.alerts || [],
+        warnings: result.warnings || [],
+        ai_notes: result.notes || null,
+        ai_recommendations: result.recommendations || null,
+        raw_answers: answers,
+      })
+      toast.success("Anamnese salva com sucesso")
+      setSaved(true)
+    } catch {
+      toast.error("Erro ao salvar anamnese")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -212,6 +248,22 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
               <h5 className="text-xs font-semibold uppercase mb-1">Recomendações</h5>
               <p className="text-sm">{result.recommendations}</p>
             </div>
+          )}
+
+          {patientId && (
+            <Button
+              onClick={saveAnamnesis}
+              disabled={saving || saved}
+              variant={saved ? "outline" : "default"}
+              className="gap-2"
+            >
+              {saving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {saved ? "Salvo" : "Salvar Anamnese"}
+            </Button>
           )}
         </div>
       )}

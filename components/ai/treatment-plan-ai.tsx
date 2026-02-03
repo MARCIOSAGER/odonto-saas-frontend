@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
-import { Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react"
+import { Sparkles, Loader2, ChevronDown, ChevronUp, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -44,6 +44,8 @@ const PRIORITY_COLORS: Record<string, string> = {
 export function TreatmentPlanAi({ patientId }: Props) {
   const [plan, setPlan] = useState<TreatmentPlan | null>(null)
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([0]))
 
   async function generate() {
@@ -51,11 +53,33 @@ export function TreatmentPlanAi({ patientId }: Props) {
     try {
       const res = await api.post(`/ai/treatment-plan/${patientId}`)
       setPlan(res.data)
+      setSaved(false)
       setExpandedPhases(new Set([0]))
     } catch {
       toast.error("Erro ao gerar plano de tratamento")
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function savePlan() {
+    if (!plan) return
+    setSaving(true)
+    try {
+      await api.post("/treatment-plans", {
+        patient_id: patientId,
+        patient_summary: plan.patientSummary || null,
+        phases: plan.phases || null,
+        total_cost: plan.totalCost || null,
+        total_sessions: plan.totalSessions || null,
+        recommendations: plan.recommendations || null,
+      })
+      toast.success("Plano de tratamento salvo com sucesso")
+      setSaved(true)
+    } catch {
+      toast.error("Erro ao salvar plano de tratamento")
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -171,6 +195,20 @@ export function TreatmentPlanAi({ patientId }: Props) {
               <p className="text-sm">{plan.recommendations}</p>
             </div>
           )}
+
+          <Button
+            onClick={savePlan}
+            disabled={saving || saved}
+            variant={saved ? "outline" : "default"}
+            className="gap-2"
+          >
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            {saved ? "Salvo" : "Salvar Plano"}
+          </Button>
         </div>
       )}
 

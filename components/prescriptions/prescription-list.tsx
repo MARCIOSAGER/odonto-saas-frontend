@@ -9,6 +9,7 @@ interface Prescription {
   id: string
   type: string
   content: Record<string, unknown>
+  pdf_url: string | null
   sent_at: string | null
   sent_via: string | null
   created_at: string
@@ -43,6 +44,22 @@ export function PrescriptionList({ patientId }: Props) {
   useEffect(() => {
     load()
   }, [load])
+
+  async function downloadPdf(id: string) {
+    try {
+      const res = await api.get(`/prescriptions/${id}/download`, { responseType: "blob" })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", `documento_${id.slice(0, 8)}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      toast.error("Erro ao baixar PDF")
+    }
+  }
 
   async function sendViaWhatsApp(id: string) {
     try {
@@ -95,6 +112,15 @@ export function PrescriptionList({ patientId }: Props) {
                     Enviado via {p.sent_via}
                   </span>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => downloadPdf(p.id)}
+                  className="h-7 gap-1 text-xs"
+                  title="Baixar PDF"
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
