@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState, useRef } from "react"
+import Link from "next/link"
 import { Bell, Check } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -155,6 +155,14 @@ export function NotificationBell() {
               ))
             )}
           </div>
+
+          <Link
+            href="/notifications"
+            onClick={() => setOpen(false)}
+            className="block text-center text-xs text-primary hover:underline py-2.5 border-t"
+          >
+            Ver todas as notificações
+          </Link>
         </div>
       )}
     </div>

@@ -24,6 +24,7 @@ import {
   Mail,
   Zap,
   CreditCard,
+  Bell,
   BarChart3,
   Star,
   UserCog,
@@ -41,6 +42,7 @@ const mainItems = [
   { href: "/conversations", label: "Conversas", icon: MessageSquare },
   { href: "/appointments", label: "Agendamentos", icon: CalendarDays },
   { href: "/patients", label: "Pacientes", icon: Users },
+  { href: "/notifications", label: "Notificações", icon: Bell },
 ]
 
 const clinicItems = [

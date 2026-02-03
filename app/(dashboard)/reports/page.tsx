@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
-import { Loader2, DollarSign, Users, Calendar, TrendingUp, Download, BarChart3 } from "lucide-react"
+import { Loader2, DollarSign, Users, Calendar, TrendingUp, Download, BarChart3, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface RevenueData {
@@ -84,6 +84,20 @@ export default function ReportsPage() {
       const a = document.createElement("a")
       a.href = url
       a.download = `relatorio-${type}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleExportPdf(type: string) {
+    try {
+      const res = await api.get(`/reports/export-pdf?type=${type}&start=${startDate}&end=${endDate}`, { responseType: "blob" })
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `relatorio-${type}.pdf`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch {
@@ -195,9 +209,14 @@ export default function ReportsPage() {
                 <div className="bg-card border rounded-xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Receita por dentista</p>
-                    <Button variant="ghost" size="sm" onClick={() => handleExport("revenue")} className="gap-1 text-xs">
-                      <Download className="h-3 w-3" /> CSV
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleExport("revenue")} className="gap-1 text-xs">
+                        <Download className="h-3 w-3" /> CSV
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleExportPdf("revenue")} className="gap-1 text-xs">
+                        <FileText className="h-3 w-3" /> PDF
+                      </Button>
+                    </div>
                   </div>
                   <div className="divide-y">
                     {revenue.by_dentist.map((d, i) => (
@@ -254,9 +273,14 @@ export default function ReportsPage() {
               <div className="bg-card border rounded-xl p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium">Resumo por status</p>
-                  <Button variant="ghost" size="sm" onClick={() => handleExport("appointments")} className="gap-1 text-xs">
-                    <Download className="h-3 w-3" /> CSV
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleExport("appointments")} className="gap-1 text-xs">
+                      <Download className="h-3 w-3" /> CSV
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleExportPdf("appointments")} className="gap-1 text-xs">
+                      <FileText className="h-3 w-3" /> PDF
+                    </Button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {[
@@ -297,9 +321,14 @@ export default function ReportsPage() {
                 <div className="bg-card border rounded-xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Novos pacientes por m&ecirc;s</p>
-                    <Button variant="ghost" size="sm" onClick={() => handleExport("patients")} className="gap-1 text-xs">
-                      <Download className="h-3 w-3" /> CSV
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => handleExport("patients")} className="gap-1 text-xs">
+                        <Download className="h-3 w-3" /> CSV
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleExportPdf("patients")} className="gap-1 text-xs">
+                        <FileText className="h-3 w-3" /> PDF
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     {patients.by_month.map((m) => {

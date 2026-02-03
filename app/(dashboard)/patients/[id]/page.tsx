@@ -2,7 +2,7 @@
 import { useParams } from "next/navigation"
 import { useEffect, useState, useCallback } from "react"
 import { api } from "@/lib/api"
-import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles, ClipboardList, Pill } from "lucide-react"
+import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles, ClipboardList, Pill, DollarSign, History } from "lucide-react"
 import { PatientSummaryCard } from "@/components/ai/patient-summary-card"
 import { TreatmentPlanAi } from "@/components/ai/treatment-plan-ai"
 import { ClinicalNotesGenerator } from "@/components/ai/clinical-notes-generator"
@@ -10,6 +10,8 @@ import { OdontogramViewer } from "@/components/odontogram/odontogram-viewer"
 import { PrescriptionForm } from "@/components/prescriptions/prescription-form"
 import { PrescriptionList } from "@/components/prescriptions/prescription-list"
 import { AnamnesisForm } from "@/components/ai/anamnesis-form"
+import { PatientFinancial } from "@/components/patients/patient-financial"
+import { PatientTimeline } from "@/components/patients/patient-timeline"
 import { useDentists } from "@/hooks/useDentists"
 
 interface Patient {
@@ -26,7 +28,7 @@ interface Patient {
   created_at: string
 }
 
-type TabKey = "resumo" | "odontograma" | "prontuario" | "tratamento" | "receitas" | "anamnese"
+type TabKey = "resumo" | "odontograma" | "prontuario" | "tratamento" | "receitas" | "anamnese" | "financeiro" | "historico"
 
 export default function PatientDetailPage() {
   const params = useParams()
@@ -83,6 +85,8 @@ export default function PatientDetailPage() {
     { key: "tratamento", label: "Plano de Tratamento", icon: Calendar },
     { key: "receitas", label: "Receitas", icon: Pill },
     { key: "anamnese", label: "Anamnese", icon: ClipboardList },
+    { key: "financeiro", label: "Financeiro", icon: DollarSign },
+    { key: "historico", label: "Histórico", icon: History },
   ]
 
   return (
@@ -261,6 +265,14 @@ export default function PatientDetailPage() {
 
         {activeTab === "anamnese" && (
           <AnamnesisForm patientId={id} />
+        )}
+
+        {activeTab === "financeiro" && (
+          <PatientFinancial patientId={id} />
+        )}
+
+        {activeTab === "historico" && (
+          <PatientTimeline patientId={id} />
         )}
       </div>
     </div>
