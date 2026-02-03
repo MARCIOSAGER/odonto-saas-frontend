@@ -4,6 +4,9 @@ import { Check, X, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { useSession } from "next-auth/react"
+import { api } from "@/lib/api"
+import { toast } from "sonner"
 
 interface PlanFeatures {
   has_whatsapp?: boolean
@@ -200,9 +203,29 @@ const fallbackPlans: Plan[] = [
 ]
 
 export function PricingTable() {
+  const { data: session } = useSession()
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly")
+
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+
+  const handleCheckout = async (planId: string, billingCycle: string) => {
+    setCheckoutLoading(planId)
+    try {
+      const res = await api.post("/billing/checkout", { plan_id: planId, billing_cycle: billingCycle })
+      const data = res.data?.data || res.data
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url
+      } else {
+        toast.error("Erro ao criar sessão de checkout")
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Erro ao processar checkout")
+    } finally {
+      setCheckoutLoading(null)
+    }
+  }
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
@@ -320,14 +343,27 @@ export function PricingTable() {
                   )}
                 </div>
 
-                <Link href="/register" className="mb-6">
-                  <Button
-                    className="w-full"
-                    variant={isPopular ? "default" : "outline"}
-                  >
-                    {price === 0 ? "Começar grátis" : "Começar teste grátis"}
-                  </Button>
-                </Link>
+                <div className="mb-6">
+                  {session ? (
+                    <Button
+                      className="w-full"
+                      variant={isPopular ? "default" : "outline"}
+                      disabled={price === 0 || checkoutLoading === plan.id}
+                      onClick={() => price > 0 && handleCheckout(plan.id, billing)}
+                    >
+                      {checkoutLoading === plan.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : null}
+                      {price === 0 ? "Plano atual" : "Assinar agora"}
+                    </Button>
+                  ) : (
+                    <Link href="/register">
+                      <Button className="w-full" variant={isPopular ? "default" : "outline"}>
+                        {price === 0 ? "Começar grátis" : "Começar teste grátis"}
+                      </Button>
+                    </Link>
+                  )}
+                </div>
 
                 <div className="space-y-3 flex-1">
                   {featureRows.map((row) => {

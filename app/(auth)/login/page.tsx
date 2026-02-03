@@ -15,11 +15,13 @@ import { api, getUploadUrl } from "@/lib/api"
 import { Suspense } from "react"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
+import { useTranslations } from "next-intl"
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { branding } = usePlatformBranding()
+  const t = useTranslations("auth")
   const [showPassword, setShowPassword] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const {
@@ -45,8 +47,8 @@ function LoginContent() {
       // Check if 2FA is required
       if (result?.requires_2fa) {
         if (result?.code_sent === false) {
-          setApiError("Não foi possível enviar o código de verificação. Tente novamente mais tarde.")
-          toast.error("Erro ao enviar código 2FA")
+          setApiError(t("twoFaError"))
+          toast.error(t("twoFaError"))
           return
         }
         const deliveryMethod = result.code_delivery_method || result.two_factor_method || "whatsapp"
@@ -54,7 +56,7 @@ function LoginContent() {
         sessionStorage.setItem("2fa_token", result.two_factor_token)
         sessionStorage.setItem("2fa_method", deliveryMethod)
         if (deliveryMethod === "email" && result.two_factor_method === "whatsapp") {
-          toast.info("WhatsApp indisponível. Código enviado por e-mail.")
+          toast.info(t("twoFaFallback"))
         }
         router.push("/login/verify-2fa")
         return
@@ -67,11 +69,11 @@ function LoginContent() {
         redirect: false
       })
       if (res?.ok) {
-        toast.success("Login realizado com sucesso")
+        toast.success(t("loginSuccess"))
         setTimeout(() => { window.location.href = "/home" }, 300)
       } else {
-        setApiError("E-mail ou senha inválidos")
-        toast.error("Falha na autenticação")
+        setApiError(t("invalidCredentials"))
+        toast.error(t("authFailed"))
       }
     } catch (error: any) {
       const msg = error?.response?.data?.message || "E-mail ou senha inválidos"
@@ -120,18 +122,17 @@ function LoginContent() {
 
         <div className="relative z-10 space-y-6">
           <h1 className="text-5xl font-bold leading-tight text-white">
-            Gestão moderna para o seu consultório.
+            {t("heroTitle")}
           </h1>
           <p className="text-xl text-white/90 max-w-lg">
-            A plataforma completa para dentistas que buscam eficiência,
-            organização e crescimento.
+            {t("heroSubtitle")}
           </p>
 
           <div className="space-y-3 pt-2">
             {[
-              "Agendamento inteligente com IA via WhatsApp",
-              "Prontuário digital e odontograma interativo",
-              "Relatórios financeiros e NPS automático",
+              t("feature1"),
+              t("feature2"),
+              t("feature3"),
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3">
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
@@ -159,13 +160,13 @@ function LoginContent() {
               ))}
             </div>
             <p className="text-sm font-medium text-white/90">
-              +2.000 profissionais já usam
+              {t("socialProof")}
             </p>
           </div>
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
+          {t("copyright", { year: new Date().getFullYear(), name: branding.name })}
         </div>
       </div>
 
@@ -173,9 +174,9 @@ function LoginContent() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center lg:text-left animate-fade-in-up">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Bem-vindo de volta</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("loginTitle")}</h2>
             <p className="text-muted-foreground">
-              Entre com suas credenciais para acessar o painel.
+              {t("loginSubtitle")}
             </p>
           </div>
 
@@ -184,12 +185,12 @@ function LoginContent() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-foreground">
-                    E-mail profissional
+                    {t("professionalEmail")}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="nome@clinica.com"
+                      placeholder={t("emailPlaceholder")}
                       className="pl-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                       {...register("email")}
                     />
@@ -199,9 +200,9 @@ function LoginContent() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium leading-none text-foreground">Senha</label>
+                    <label className="text-sm font-medium leading-none text-foreground">{t("password")}</label>
                     <Link href={`/forgot-password${clinicParam}`} className="text-xs text-primary hover:underline font-medium">
-                      Esqueceu a senha?
+                      {t("forgotPassword")}
                     </Link>
                   </div>
                   <div className="relative">
@@ -233,7 +234,7 @@ function LoginContent() {
                   className="w-full h-12 text-base font-semibold group"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Autenticando..." : "Entrar no sistema"}
+                  {isSubmitting ? t("authenticating") : t("signIn")}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </form>
@@ -243,7 +244,7 @@ function LoginContent() {
                   <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground lg:bg-card">ou continue com</span>
+                  <span className="bg-background px-2 text-muted-foreground lg:bg-card">{t("orContinueWith")}</span>
                 </div>
               </div>
 
@@ -259,15 +260,15 @@ function LoginContent() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-                {googleLoading ? "Conectando..." : "Entrar com Google"}
+                {googleLoading ? t("connecting") : t("signInGoogle")}
               </Button>
             </CardContent>
           </Card>
 
           <p className="text-center text-sm text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "200ms" }}>
-            Ainda não tem uma conta?{" "}
+            {t("noAccount")}{" "}
             <Link href={`/register${clinicParam}`} className="font-semibold text-primary hover:underline">
-              Começar teste grátis
+              {t("startFreeTrial")}
             </Link>
           </p>
         </div>

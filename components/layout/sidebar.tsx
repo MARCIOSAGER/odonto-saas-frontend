@@ -4,6 +4,9 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { signOut, useSession } from "next-auth/react"
+import { usePermissions } from "@/hooks/usePermissions"
+import { useTranslations } from "next-intl"
+import { LanguageSelector } from "@/components/language-selector"
 import {
   LayoutDashboard,
   Hospital,
@@ -38,52 +41,58 @@ import { useClinic } from "@/hooks/useClinic"
 import { getUploadUrl } from "@/lib/api"
 
 const mainItems = [
-  { href: "/home", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/conversations", label: "Conversas", icon: MessageSquare },
-  { href: "/appointments", label: "Agendamentos", icon: CalendarDays },
-  { href: "/patients", label: "Pacientes", icon: Users },
-  { href: "/notifications", label: "Notificações", icon: Bell },
+  { href: "/home", labelKey: "dashboard", icon: LayoutDashboard },
+  { href: "/conversations", labelKey: "conversations", icon: MessageSquare, permission: "conversations:manage" },
+  { href: "/appointments", labelKey: "appointments", icon: CalendarDays, permission: "appointments:manage" },
+  { href: "/patients", labelKey: "patients", icon: Users, permission: "patients:read" },
+  { href: "/notifications", labelKey: "notifications", icon: Bell },
 ]
 
 const clinicItems = [
-  { href: "/dentists", label: "Dentistas", icon: User },
-  { href: "/services", label: "Servi\u00e7os", icon: Wallet },
-  { href: "/reports", label: "Relat\u00f3rios", icon: BarChart3 },
+  { href: "/dentists", labelKey: "dentists", icon: User, permission: "dentists:manage" },
+  { href: "/services", labelKey: "services", icon: Wallet, permission: "services:manage" },
+  { href: "/reports", labelKey: "reports", icon: BarChart3, permission: "reports:view" },
 ]
 
 const adminItems = [
-  { href: "/clinics", label: "Cl\u00ednicas", icon: Hospital },
-  { href: "/admin/users", label: "Usu\u00e1rios", icon: UserCog },
-  { href: "/admin/plans", label: "Planos", icon: Package },
-  { href: "/admin/billing", label: "Faturamento", icon: DollarSign },
-  { href: "/admin/branding", label: "Branding", icon: Palette },
-  { href: "/admin/settings", label: "Config. Plataforma", icon: Settings2 },
+  { href: "/clinics", labelKey: "clinics", icon: Hospital },
+  { href: "/admin/users", labelKey: "users", icon: UserCog },
+  { href: "/admin/plans", labelKey: "plans", icon: Package },
+  { href: "/admin/billing", labelKey: "billing", icon: DollarSign },
+  { href: "/admin/branding", labelKey: "branding", icon: Palette },
+  { href: "/admin/settings", labelKey: "platformSettings", icon: Settings2 },
 ]
 
 const settingsSubmenu = [
-  { href: "/settings/clinic", label: "Minha Cl\u00ednica", icon: Hospital },
-  { href: "/settings/whatsapp", label: "WhatsApp", icon: Smartphone },
-  { href: "/settings/whatsapp/automations", label: "Automa\u00e7\u00f5es", icon: Zap },
-  { href: "/settings/email", label: "E-mail", icon: Mail },
-  { href: "/settings/ai", label: "Assistente IA", icon: Bot },
-  { href: "/settings/nps", label: "NPS", icon: Star },
-  { href: "/settings/billing", label: "Faturamento", icon: CreditCard },
-  { href: "/settings/security", label: "Seguran\u00e7a", icon: ShieldCheck },
-  { href: "/settings", label: "Minha Conta", icon: UserCircle },
+  { href: "/settings/clinic", labelKey: "myClinic", icon: Hospital },
+  { href: "/settings/whatsapp", labelKey: "whatsapp", icon: Smartphone },
+  { href: "/settings/whatsapp/automations", labelKey: "automations", icon: Zap },
+  { href: "/settings/email", labelKey: "emailSettings", icon: Mail },
+  { href: "/settings/ai", labelKey: "aiAssistant", icon: Bot },
+  { href: "/settings/nps", labelKey: "nps", icon: Star },
+  { href: "/settings/billing", labelKey: "billing", icon: CreditCard },
+  { href: "/settings/security", labelKey: "security", icon: ShieldCheck },
+  { href: "/settings", labelKey: "myAccount", icon: UserCircle },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const { clinic } = useClinic()
+  const { hasPermission } = usePermissions()
+  const t = useTranslations("nav")
+  const tc = useTranslations("common")
   const [isCollapsed, setIsCollapsed] = useState(false)
+
+  const filteredMainItems = mainItems.filter(item => !item.permission || hasPermission(item.permission))
+  const filteredClinicItems = clinicItems.filter(item => !item.permission || hasPermission(item.permission))
   const [settingsOpen, setSettingsOpen] = useState(pathname.includes("/settings"))
 
   const user = session?.user
   const isAdmin = (user as any)?.role === "superadmin"
   const userInitials = user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "US"
 
-  const renderNavItem = (item: { href: string; label: string; icon: any }, useStartsWith = false) => {
+  const renderNavItem = (item: { href: string; labelKey: string; icon: any; permission?: string }, useStartsWith = false) => {
     const Icon = item.icon
     const active = useStartsWith
       ? pathname === item.href || pathname.startsWith(item.href + "/")
@@ -100,7 +109,7 @@ export function Sidebar() {
           )}
         >
           <Icon size={18} className={cn("shrink-0 transition-colors", active ? "text-primary" : "group-hover:text-primary")} />
-          {!isCollapsed && <span>{item.label}</span>}
+          {!isCollapsed && <span>{t(item.labelKey)}</span>}
         </Link>
       </li>
     )
@@ -161,7 +170,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         {/* Main items — no label needed */}
         <ul className="space-y-1">
-          {mainItems.map((item) => renderNavItem(item))}
+          {filteredMainItems.map((item) => renderNavItem(item))}
         </ul>
 
         {/* Divider + Gestão Clínica */}
@@ -169,11 +178,11 @@ export function Sidebar() {
         <div>
           {!isCollapsed && (
             <p className="px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70 mb-2">
-              Gest&atilde;o Cl&iacute;nica
+              {t("clinicManagement")}
             </p>
           )}
           <ul className="space-y-1">
-            {clinicItems.map((item) => renderNavItem(item))}
+            {filteredClinicItems.map((item) => renderNavItem(item))}
           </ul>
         </div>
 
@@ -184,7 +193,7 @@ export function Sidebar() {
             <div>
               {!isCollapsed && (
                 <p className="px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70 mb-2">
-                  Administra&ccedil;&atilde;o
+                  {t("administration")}
                 </p>
               )}
               <ul className="space-y-1">
@@ -209,7 +218,7 @@ export function Sidebar() {
             <Settings size={18} className={cn("shrink-0", pathname.includes("/settings") ? "text-primary" : "group-hover:text-primary")} />
             {!isCollapsed && (
               <>
-                <span className="flex-1 text-left">Configura&ccedil;&otilde;es</span>
+                <span className="flex-1 text-left">{t("settings")}</span>
                 <ChevronDown size={14} className={cn("transition-transform duration-200", settingsOpen && "rotate-180")} />
               </>
             )}
@@ -241,7 +250,7 @@ export function Sidebar() {
                       )}
                     >
                       <SubIcon size={14} />
-                      <span>{sub.label}</span>
+                      <span>{t(sub.labelKey)}</span>
                     </Link>
                   </li>
                 )
@@ -264,21 +273,25 @@ export function Sidebar() {
                 <p className="text-[11px] text-muted-foreground truncate">{user?.email || "dr@clinica.com"}</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-            >
-              <LogOut size={16} className="mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9"
+                onClick={() => signOut({ callbackUrl: "/login" })}
+              >
+                <LogOut size={16} className="mr-2" />
+                {tc("logout")}
+              </Button>
+              <LanguageSelector />
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
               {userInitials}
             </div>
+            <LanguageSelector />
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               className="text-muted-foreground hover:text-destructive transition-colors"

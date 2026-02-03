@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Background -->
+  <rect width="192" height="192" rx="32" fill="#0284c7"/>
+  <!-- Tooth icon -->
+  <g transform="translate(96, 88) scale(1)">
+    <path d="M-36,-40 C-36,-40 -36,-56 -18,-56 C-8,-56 -4,-48 0,-48 C4,-48 8,-56 18,-56 C36,-56 36,-40 36,-40 C36,-24 28,-16 24,4 C22,14 20,48 14,48 C8,48 8,28 0,28 C-8,28 -8,48 -14,48 C-20,48 -22,14 -24,4 C-28,-16 -36,-24 -36,-40 Z" fill="white" stroke="white" stroke-width="1" stroke-linejoin="round"/>
+  </g>
+  <!-- Sparkle/cross accent top-right -->
+  <g transform="translate(140, 40)" fill="rgba(255,255,255,0.5)">
+    <rect x="-1.5" y="-6" width="3" height="12" rx="1.5"/>
+    <rect x="-6" y="-1.5" width="12" height="3" rx="1.5"/>
+  </g>
+  <!-- Small sparkle -->
+  <g transform="translate(52, 44)" fill="rgba(255,255,255,0.35)">
+    <rect x="-1" y="-4" width="2" height="8" rx="1"/>
+    <rect x="-4" y="-1" width="8" height="2" rx="1"/>
+  </g>
+</svg>

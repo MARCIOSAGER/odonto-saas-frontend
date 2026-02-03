@@ -7,7 +7,8 @@ import { useSession } from "next-auth/react"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { 
+import { useTranslations } from "next-intl"
+import {
   AreaChart,
   Area,
   CartesianGrid,
@@ -33,6 +34,7 @@ import { ptBR } from "date-fns/locale"
 
 export default function DashboardHome() {
   const { data: session } = useSession()
+  const t = useTranslations("dashboard")
 
   // Buscar Estatísticas
   const { data: stats, isLoading: loadingStats } = useQuery({
@@ -145,16 +147,16 @@ export default function DashboardHome() {
           <div className="flex-1">
             <p className={cn("text-sm font-medium", trialDaysLeft <= 1 ? "text-red-800 dark:text-red-200" : "text-amber-800 dark:text-amber-200")}>
               {trialDaysLeft === 0
-                ? "Seu per\u00edodo de teste expira hoje!"
-                : `Seu per\u00edodo de teste expira em ${trialDaysLeft} dia${trialDaysLeft > 1 ? "s" : ""}.`}
+                ? t("trialBannerToday")
+                : t("trialBanner", { days: trialDaysLeft })}
             </p>
             <p className={cn("text-xs mt-0.5", trialDaysLeft <= 1 ? "text-red-600 dark:text-red-300" : "text-amber-600 dark:text-amber-300")}>
-              Assine um plano para continuar usando todos os recursos.
+              {t("trialSubscribeHint")}
             </p>
           </div>
           <Link href="/settings/billing">
             <Button size="sm" variant={trialDaysLeft <= 1 ? "destructive" : "default"}>
-              Assinar agora
+              {t("subscribeNow")}
             </Button>
           </Link>
         </div>
@@ -164,41 +166,41 @@ export default function DashboardHome() {
         <div className="flex items-center gap-3 p-4 rounded-xl border bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800">
           <AlertTriangle className="h-5 w-5 shrink-0 text-red-600" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800 dark:text-red-200">Seu per&iacute;odo de teste expirou</p>
-            <p className="text-xs mt-0.5 text-red-600 dark:text-red-300">O acesso est&aacute; em modo somente leitura. Assine para desbloquear todos os recursos.</p>
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">{t("trialExpired")}</p>
+            <p className="text-xs mt-0.5 text-red-600 dark:text-red-300">{t("trialExpiredDesc")}</p>
           </div>
           <Link href="/settings/billing">
-            <Button size="sm" variant="destructive">Assinar agora</Button>
+            <Button size="sm" variant="destructive">{t("subscribeNow")}</Button>
           </Link>
         </div>
       )}
 
       <div className="flex flex-col gap-1 animate-fade-in-up">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Ol&aacute;, {session?.user?.name || "Doutor"}</h1>
-        <p className="text-gray-500 dark:text-gray-400">Aqui est&aacute; o que est&aacute; acontecendo na sua cl&iacute;nica hoje.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("greeting", { name: session?.user?.name || "Doctor" })}</h1>
+        <p className="text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title="Total de Pacientes"
+          title={t("totalPatients")}
           value={stats?.total_patients || 0}
           icon={<Users className="text-primary" size={20} />}
           delay={0}
         />
         <MetricCard
-          title="Confirmados Hoje"
+          title={t("confirmedToday")}
           value={stats?.confirmed_today || 0}
           icon={<CalendarCheck className="text-success" size={20} />}
           delay={75}
         />
         <MetricCard
-          title="Agendamentos Pendentes"
+          title={t("pendingAppointments")}
           value={stats?.pending_appointments || 0}
           icon={<CalendarClock className="text-amber-500" size={20} />}
           delay={150}
         />
         <MetricCard
-          title="Faturamento Mensal"
+          title={t("monthlyRevenue")}
           value={`R$ ${stats?.monthly_revenue?.toLocaleString('pt-BR') || '0,00'}`}
           icon={<TrendingUp className="text-primary" size={20} />}
           delay={225}
@@ -209,8 +211,8 @@ export default function DashboardHome() {
         <Card className="lg:col-span-4 overflow-hidden border-border bg-card shadow-sm animate-fade-in-up opacity-0" style={{ animationDelay: "300ms" }}>
           <CardHeader className="flex flex-row items-center justify-between pb-8">
             <div className="space-y-1">
-              <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Fluxo de Pacientes</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Desempenho da clínica nesta semana.</p>
+              <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">{t("patientFlow")}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("weeklyFlow")}</p>
             </div>
           </CardHeader>
           <CardContent>
@@ -260,7 +262,7 @@ export default function DashboardHome() {
 
         <Card className="lg:col-span-3 border-border bg-card shadow-sm animate-fade-in-up opacity-0" style={{ animationDelay: "375ms" }}>
           <CardHeader className="flex flex-row items-center justify-between">
-            <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">Próximos Hoje</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">{t("upcomingToday")}</h3>
             <Button variant="ghost" size="icon" className="text-gray-500 hover:text-gray-900 dark:hover:text-gray-100">
               <MoreHorizontal size={20} />
             </Button>
@@ -268,7 +270,7 @@ export default function DashboardHome() {
           <CardContent>
             <div className="space-y-6">
               {!Array.isArray(todayAppointments) || todayAppointments.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Nenhum agendamento para hoje.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">{t("noAppointmentsToday")}</p>
               ) : (
                 todayAppointments.slice(0, 5).map((a: any) => (
                   <div key={a.id} className="flex items-center justify-between group">
@@ -297,7 +299,7 @@ export default function DashboardHome() {
               )}
             </div>
             <Button variant="outline" className="w-full mt-6 h-10 font-medium text-gray-900 dark:text-gray-100 hover:bg-accent" onClick={() => window.location.href="/appointments"}>
-              Ver agenda completa
+              {t("viewAll")}
             </Button>
           </CardContent>
         </Card>

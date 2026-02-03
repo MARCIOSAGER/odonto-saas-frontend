@@ -129,6 +129,7 @@ export const authOptions: NextAuthOptions = {
         token.id = (user as any).id
         token.role = (user as any).role
         token.clinic_id = (user as any).clinic_id
+        token.permissions = (user as any).permissions || []
       }
       return token
     },
@@ -138,6 +139,7 @@ export const authOptions: NextAuthOptions = {
         ;(session as any).user.id = token.id
         ;(session as any).user.role = token.role
         ;(session as any).user.clinic_id = token.clinic_id
+        ;(session as any).user.permissions = token.permissions as string[]
       }
       return session
     }
