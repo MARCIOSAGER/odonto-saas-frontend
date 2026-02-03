@@ -1,6 +1,6 @@
 "use client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useState, useMemo, useEffect, Suspense } from "react"
+import { useState, useMemo, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -8,6 +8,8 @@ import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { useAppointments } from "@/hooks/useAppointments"
 import { Calendar, dateFnsLocalizer } from "react-big-calendar"
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop"
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css"
 import { format, parse, startOfWeek, getDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { LayoutList, Calendar as CalendarIcon, Plus, Loader2, CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react"
@@ -25,6 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+
+const DnDCalendar = withDragAndDrop(Calendar)
 
 const locales = { "pt-BR": ptBR }
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales })
@@ -73,7 +77,9 @@ function AppointmentsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
-  const { appointments, isLoading, isError, createAppointment, confirmAppointment, cancelAppointment, updateAppointment } = useAppointments()
+  const [dragEvent, setDragEvent] = useState<{ id: string; date: string; time: string; label: string } | null>(null)
+  const [prefillDateTime, setPrefillDateTime] = useState<{ date: string; time: string } | null>(null)
+  const { appointments, isLoading, isError, createAppointment, confirmAppointment, cancelAppointment, updateAppointment, rescheduleAppointment } = useAppointments()
 
   const safeAppointments = useMemo(() => {
     if (!appointments) return []
@@ -90,6 +96,7 @@ function AppointmentsContent() {
 
   const handleCreate = () => {
     setEditingItem(null)
+    setPrefillDateTime(null)
     setIsModalOpen(true)
   }
 
@@ -130,6 +137,41 @@ function AppointmentsContent() {
       setDeleteId(null)
     }
   }
+
+  const handleEventDrop = useCallback(({ event, start }: { event: any; start: any }) => {
+    const newDate = format(new Date(start), "yyyy-MM-dd")
+    const newTime = format(new Date(start), "HH:mm")
+    const label = `${format(new Date(start), "dd/MM/yyyy")} às ${newTime}`
+    setDragEvent({ id: event.id, date: newDate, time: newTime, label })
+  }, [])
+
+  const handleConfirmDrag = async () => {
+    if (!dragEvent) return
+    try {
+      await rescheduleAppointment.mutateAsync({
+        id: dragEvent.id,
+        date: dragEvent.date,
+        time: dragEvent.time,
+      })
+    } catch {
+      // Error handled in hook
+    } finally {
+      setDragEvent(null)
+    }
+  }
+
+  const handleSelectSlot = useCallback(({ start }: { start: Date }) => {
+    const date = format(start, "yyyy-MM-dd")
+    const time = format(start, "HH:mm")
+    setPrefillDateTime({ date, time })
+    setEditingItem(null)
+    setIsModalOpen(true)
+  }, [])
+
+  const draggableAccessor = useCallback((event: any) => {
+    const status = event.resource?.status?.toLowerCase() || ""
+    return status !== "cancelled" && status !== "completed" && status !== "cancelado" && status !== "concluido" && status !== "realizado"
+  }, [])
 
   const events = useMemo(
     () =>
@@ -219,6 +261,7 @@ function AppointmentsContent() {
           <div className="p-6 pt-0">
             <AppointmentForm
               initialData={editingItem}
+              prefillDateTime={prefillDateTime}
               onSubmit={handleFormSubmit}
               onCancel={() => setIsModalOpen(false)}
               loading={createAppointment.isPending || updateAppointment.isPending}
@@ -239,6 +282,24 @@ function AppointmentsContent() {
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Confirmar Cancelamento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!dragEvent} onOpenChange={() => setDragEvent(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reagendar Consulta</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deseja mover esta consulta para <strong>{dragEvent?.label}</strong>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDrag} disabled={rescheduleAppointment.isPending}>
+              {rescheduleAppointment.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -339,14 +400,20 @@ function AppointmentsContent() {
             </div>
           ) : (
             <div className={cn("font-sans", isMobile ? "h-[450px]" : "h-[700px]")}>
-              <Calendar
+              <DnDCalendar
                 localizer={localizer}
                 culture="pt-BR"
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
                 defaultView={isMobile ? "day" : "week"}
-                views={isMobile ? ["day", "month"] : ["week", "month"]}
+                views={isMobile ? ["day", "month"] : ["day", "week", "month"]}
+                selectable
+                onSelectSlot={handleSelectSlot}
+                onEventDrop={handleEventDrop}
+                onEventResize={() => {}}
+                resizable={false}
+                draggableAccessor={draggableAccessor}
                 messages={{
                   day: "Dia",
                   week: "Semana",
@@ -395,6 +462,7 @@ function AppointmentsContent() {
                       fontSize: '12px',
                       padding: '2px 6px',
                       opacity,
+                      cursor: draggableAccessor({ resource: event.resource } as any) ? 'grab' : 'default',
                       textDecoration: (status === "cancelled" || status === "cancelado") ? 'line-through' : 'none',
                     }
                   }

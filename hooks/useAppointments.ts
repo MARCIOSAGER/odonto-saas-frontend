@@ -108,6 +108,20 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     }
   })
 
+  const rescheduleMutation = useMutation({
+    mutationFn: async ({ id, date, time }: { id: string; date: string; time: string }) => {
+      const res = await api.put(`/appointments/${id}`, { date, time })
+      return res.data?.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["appointments"] })
+      toast.success("Agendamento reagendado com sucesso")
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao reagendar agendamento")
+    }
+  })
+
   return {
     appointments,
     meta,
@@ -117,6 +131,7 @@ export function useAppointments(filters?: { date?: string; range?: number; statu
     createAppointment: createMutation,
     confirmAppointment: confirmMutation,
     cancelAppointment: cancelMutation,
-    updateAppointment: updateMutation
+    updateAppointment: updateMutation,
+    rescheduleAppointment: rescheduleMutation
   }
 }

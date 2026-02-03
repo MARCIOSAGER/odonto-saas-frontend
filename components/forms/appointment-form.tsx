@@ -16,12 +16,13 @@ import { toast } from "sonner"
 
 interface AppointmentFormProps {
   initialData?: any | null
+  prefillDateTime?: { date: string; time: string } | null
   onSubmit: (data: any) => void
   onCancel: () => void
   loading?: boolean
 }
 
-export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: AppointmentFormProps) {
+export function AppointmentForm({ initialData, prefillDateTime, onSubmit, onCancel, loading }: AppointmentFormProps) {
   const isEditing = !!initialData
   const [patients, setPatients] = useState([])
   const [dentists, setDentists] = useState([])
@@ -39,8 +40,8 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
       patient_id: initialData?.patient_id || "",
       dentist_id: initialData?.dentist_id || "",
       service_id: initialData?.service_id || "",
-      date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : "",
-      time: initialData?.time || "",
+      date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : (prefillDateTime?.date || ""),
+      time: initialData?.time || (prefillDateTime?.time || ""),
       notes: initialData?.notes || ""
     }
   })
@@ -55,8 +56,17 @@ export function AppointmentForm({ initialData, onSubmit, onCancel, loading }: Ap
         time: initialData.time || "",
         notes: initialData.notes || ""
       })
+    } else if (prefillDateTime) {
+      reset({
+        patient_id: "",
+        dentist_id: "",
+        service_id: "",
+        date: prefillDateTime.date,
+        time: prefillDateTime.time,
+        notes: ""
+      })
     }
-  }, [initialData, reset])
+  }, [initialData, prefillDateTime, reset])
 
   useEffect(() => {
     const fetchData = async () => {
