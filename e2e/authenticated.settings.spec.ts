@@ -81,12 +81,12 @@ test.describe("Settings - Security", () => {
   test("renders security page", async ({ page }) => {
     await page.goto("/settings/security");
     await expect(page.getByRole("heading", { name: /seguran[cç]a/i })).toBeVisible();
-    await expect(page.getByText(/autentica[cç][aã]o de dois fatores/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /autentica[cç][aã]o de dois fatores/i })).toBeVisible();
   });
 
   test("shows 2FA setup options", async ({ page }) => {
     await page.goto("/settings/security");
     await expect(page.getByText("WhatsApp")).toBeVisible();
-    await expect(page.getByText(/app autenticador/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /app autenticador/i })).toBeVisible();
   });
 });
