@@ -305,30 +305,24 @@ Plus Jakarta Sans — geometrica com terminais arredondados, ideal para saude.
 - **PWA:** Service worker registrado, manifest.json, offline page
 - **Security headers:** CSP, HSTS, X-Frame-Options, etc. via `next.config.mjs`
 
-### Workflow de deploy (OBRIGATORIO)
+### Workflow de deploy
 
-Apos concluir qualquer alteracao de codigo, SEMPRE executar na seguinte ordem:
+O deploy e automatico via **webhook do Coolify**. Basta fazer push para `main`:
 
 1. **Commit** — `git add <arquivos> && git commit -m "mensagem"`
 2. **Push** — `git push origin main`
-3. **Deploy** — Disparar deploy via API Coolify:
+3. **Deploy** — Automatico! O webhook do GitHub notifica o Coolify, que inicia o build e deploy.
+
+> **Nota:** O webhook esta configurado no GitHub (Settings > Webhooks) apontando para o Coolify. Nao e necessario disparar manualmente.
+
+### Deploy manual (fallback)
+
+Se precisar disparar deploy manual sem push, use a API do Coolify com o token salvo em `.coolify-token` (arquivo gitignored):
 
 ```bash
-# Frontend
+TOKEN=$(cat .coolify-token)
 curl -s -X POST "https://coolify.marciosager.com/api/v1/deploy" \
-  -H "Authorization: Bearer 3|C9chzr4uPsVPFcei9qSQV2v50r4cWew93AyHwtk7164addd0" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"uuid":"tc08w80kccws48osw48woswo","force":false}'
-
-# Backend (quando houver alteracoes no backend)
-curl -s -X POST "https://coolify.marciosager.com/api/v1/deploy" \
-  -H "Authorization: Bearer 3|C9chzr4uPsVPFcei9qSQV2v50r4cWew93AyHwtk7164addd0" \
-  -H "Content-Type: application/json" \
-  -d '{"uuid":"o480kk4sk4444c04kocswcog","force":false}'
 ```
-
-### UUIDs Coolify
-| Servico | UUID |
-|---|---|
-| Frontend | `tc08w80kccws48osw48woswo` |
-| Backend | `o480kk4sk4444c04kocswcog` |
