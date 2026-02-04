@@ -2,11 +2,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Shield, Zap, Users } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 
 export function Hero() {
   const { branding } = usePlatformBranding()
+  const t = useTranslations("marketing")
 
   return (
     <section className="relative overflow-hidden">
@@ -33,7 +35,7 @@ export function Hero() {
             style={{ backgroundColor: `${branding.primaryColor}15`, color: branding.primaryColor }}
           >
             <Zap className="h-3.5 w-3.5" />
-            14 dias grátis &mdash; sem cartão de crédito
+            {t("trialBadge")}
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight">
@@ -47,13 +49,13 @@ export function Hero() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/register">
               <Button size="lg" className="h-12 px-8 text-base font-semibold group">
-                Começar teste grátis
+                {t("startFreeTrial")}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link href="/pricing">
               <Button variant="outline" size="lg" className="h-12 px-8 text-base">
-                Ver planos e preços
+                {t("viewPlans")}
               </Button>
             </Link>
           </div>
@@ -62,15 +64,15 @@ export function Hero() {
           <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Shield className="h-4 w-4 text-green-600" />
-              <span>Dados criptografados</span>
+              <span>{t("encryptedData")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Users className="h-4 w-4 text-primary" />
-              <span>+2.000 profissionais</span>
+              <span>{t("professionals")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Zap className="h-4 w-4 text-amber-500" />
-              <span>Setup em 5 minutos</span>
+              <span>{t("quickSetup")}</span>
             </div>
           </div>
         </div>

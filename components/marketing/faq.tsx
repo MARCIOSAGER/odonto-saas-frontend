@@ -1,50 +1,8 @@
 "use client"
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-
-const faqs = [
-  {
-    question: "Preciso instalar algum software?",
-    answer:
-      "Não. O nossa plataforma é 100% online e funciona em qualquer navegador. Você também pode instalar como app no celular (PWA) diretamente pelo navegador, sem precisar de loja de aplicativos.",
-  },
-  {
-    question: "O plano grátis tem limitação de tempo?",
-    answer:
-      "O plano Básico é gratuito para sempre com até 50 pacientes e 2 dentistas. Para funcionalidades avançadas como WhatsApp, IA e relatórios completos, você pode fazer upgrade a qualquer momento.",
-  },
-  {
-    question: "Meus dados ficam seguros?",
-    answer:
-      "Sim. Utilizamos criptografia em trânsito (HTTPS/TLS) e em repouso. Autenticação com 2FA, controle de acesso por perfil e conformidade com a LGPD. Seus dados são seus — você pode exportar ou excluir a qualquer momento.",
-  },
-  {
-    question: "Posso cancelar a qualquer momento?",
-    answer:
-      "Sim. Não há fidelidade ou multa de cancelamento. Você pode fazer downgrade ou cancelar quando quiser. Seus dados ficam disponíveis por 30 dias após o cancelamento.",
-  },
-  {
-    question: "Como funciona a integração com WhatsApp?",
-    answer:
-      "Utilizamos a Z-API para integração com WhatsApp. Você conecta seu número na área de configurações e pode enviar lembretes, confirmações e mensagens automáticas para seus pacientes.",
-  },
-  {
-    question: "A inteligência artificial substitui o dentista?",
-    answer:
-      "De forma alguma. A IA é uma ferramenta de apoio que ajuda a gerar prontuários a partir de anotações, sugerir planos de tratamento e criar resumos de pacientes. Toda decisão clínica é sempre do profissional.",
-  },
-  {
-    question: "Posso migrar dados de outro sistema?",
-    answer:
-      "Sim. Oferecemos importação via CSV/Excel para pacientes, dentistas e serviços. Para migrações mais complexas, entre em contato com nosso suporte.",
-  },
-  {
-    question: "Quantas pessoas podem usar ao mesmo tempo?",
-    answer:
-      "Não há limite de usuários simultâneos. Cada membro da equipe tem seu próprio login com permissões configuráveis (admin, dentista, recepcionista).",
-  },
-]
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false)
@@ -73,15 +31,28 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export function Faq() {
+  const t = useTranslations("faq")
+
+  const faqs = [
+    { question: t("q1"), answer: t("a1") },
+    { question: t("q2"), answer: t("a2") },
+    { question: t("q3"), answer: t("a3") },
+    { question: t("q4"), answer: t("a4") },
+    { question: t("q5"), answer: t("a5") },
+    { question: t("q6"), answer: t("a6") },
+    { question: t("q7"), answer: t("a7") },
+    { question: t("q8"), answer: t("a8") },
+  ]
+
   return (
     <section id="faq" className="py-20 md:py-28 bg-muted/30">
       <div className="container max-w-3xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Perguntas frequentes
+            {t("title")}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Tudo que você precisa saber antes de começar.
+            {t("subtitle")}
           </p>
         </div>
 

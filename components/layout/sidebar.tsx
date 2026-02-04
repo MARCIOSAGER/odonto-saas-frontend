@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { signOut, useSession } from "next-auth/react"
 import { usePermissions } from "@/hooks/usePermissions"
 import { useTranslations } from "next-intl"
-import { LanguageSelector } from "@/components/language-selector"
+import { LanguageSelector } from "@/components/layout/language-selector"
 import {
   LayoutDashboard,
   Hospital,

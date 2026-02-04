@@ -1,7 +1,8 @@
 import axios from "axios"
 import { getSession } from "next-auth/react"
+import { env } from "@/lib/env"
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+const baseURL = env.apiUrl
 
 export const api = axios.create({
   baseURL
@@ -40,7 +41,7 @@ export type ApiError = {
 export function getUploadUrl(path: string | null | undefined): string {
   if (!path) return ''
   if (path.startsWith('http')) return path
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+  const apiUrl = env.apiUrl
   try {
     const url = new URL(apiUrl)
     const backendBase = url.origin // "https://api-odonto.marciosager.com"

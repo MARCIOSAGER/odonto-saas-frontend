@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { Command } from "cmdk"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { api } from "@/lib/api"
 import {
   CalendarDays,
@@ -24,28 +25,30 @@ interface SearchResult {
   subtitle?: string
 }
 
-const NAVIGATION_ITEMS = [
-  { label: "Início", href: "/home", icon: Home, group: "Navegação" },
-  { label: "Agendamentos", href: "/appointments", icon: CalendarDays, group: "Navegação" },
-  { label: "Pacientes", href: "/patients", icon: Users, group: "Navegação" },
-  { label: "Dentistas", href: "/dentists", icon: Stethoscope, group: "Navegação" },
-  { label: "Serviços", href: "/services", icon: FileText, group: "Navegação" },
-  { label: "Conversas", href: "/conversations", icon: MessageSquare, group: "Navegação" },
-  { label: "Configurações", href: "/settings", icon: Settings, group: "Navegação" },
-  { label: "Faturamento", href: "/settings/billing", icon: CreditCard, group: "Navegação" },
-]
-
-const ACTION_ITEMS = [
-  { label: "Novo paciente", href: "/patients?new=true", icon: UserPlus, group: "Ações" },
-  { label: "Novo agendamento", href: "/appointments?new=true", icon: CalendarDays, group: "Ações" },
-]
-
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const t = useTranslations("commandPalette")
+  const tNav = useTranslations("nav")
+
+  const NAVIGATION_ITEMS = [
+    { label: tNav("dashboard"), href: "/home", icon: Home },
+    { label: tNav("appointments"), href: "/appointments", icon: CalendarDays },
+    { label: tNav("patients"), href: "/patients", icon: Users },
+    { label: tNav("dentists"), href: "/dentists", icon: Stethoscope },
+    { label: tNav("services"), href: "/services", icon: FileText },
+    { label: tNav("conversations"), href: "/conversations", icon: MessageSquare },
+    { label: tNav("settings"), href: "/settings", icon: Settings },
+    { label: tNav("billing"), href: "/settings/billing", icon: CreditCard },
+  ]
+
+  const ACTION_ITEMS = [
+    { label: t("newPatient"), href: "/patients?new=true", icon: UserPlus },
+    { label: t("newAppointment"), href: "/appointments?new=true", icon: CalendarDays },
+  ]
 
   // Global keyboard shortcut
   useEffect(() => {
@@ -142,7 +145,7 @@ export function CommandPalette() {
             <Command.Input
               value={search}
               onValueChange={setSearch}
-              placeholder="Buscar pacientes, navegar, executar ações..."
+              placeholder={t("placeholder")}
               className="flex h-12 w-full rounded-md bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
             <kbd className="ml-2 shrink-0 text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
@@ -153,17 +156,17 @@ export function CommandPalette() {
           <Command.List className="max-h-80 overflow-y-auto p-2">
             {loading && (
               <Command.Loading>
-                <div className="px-3 py-2 text-sm text-muted-foreground">Buscando...</div>
+                <div className="px-3 py-2 text-sm text-muted-foreground">{t("searching")}</div>
               </Command.Loading>
             )}
 
             <Command.Empty className="px-3 py-6 text-center text-sm text-muted-foreground">
-              Nenhum resultado encontrado.
+              {t("noResults")}
             </Command.Empty>
 
             {/* Search results */}
             {results.length > 0 && (
-              <Command.Group heading="Resultados">
+              <Command.Group heading={t("results")}>
                 {results.map((r) => (
                   <Command.Item
                     key={`${r.type}-${r.id}`}
@@ -195,7 +198,7 @@ export function CommandPalette() {
 
             {/* Actions */}
             {!search && (
-              <Command.Group heading="Ações rápidas">
+              <Command.Group heading={t("quickActions")}>
                 {ACTION_ITEMS.map((item) => (
                   <Command.Item
                     key={item.href}
@@ -211,7 +214,7 @@ export function CommandPalette() {
             )}
 
             {/* Navigation */}
-            <Command.Group heading="Navegação">
+            <Command.Group heading={t("navigation")}>
               {NAVIGATION_ITEMS.map((item) => (
                 <Command.Item
                   key={item.href}

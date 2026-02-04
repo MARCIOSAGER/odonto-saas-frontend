@@ -1,10 +1,12 @@
 "use client"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { getUploadUrl } from "@/lib/api"
 
 export function Footer() {
   const { branding } = usePlatformBranding()
+  const t = useTranslations("marketing")
 
   return (
     <footer className="border-t bg-muted/30">
@@ -25,41 +27,41 @@ export function Footer() {
               <span>{branding.name}</span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
-              {branding.description || "A plataforma completa para gestão de clínicas odontológicas."}
+              {branding.description || t("footerDescription")}
             </p>
           </div>
 
           {/* Produto */}
           <div>
-            <h4 className="text-sm font-semibold mb-3">Produto</h4>
+            <h4 className="text-sm font-semibold mb-3">{t("footerProduct")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/#features" className="hover:text-foreground transition-colors">Funcionalidades</Link></li>
-              <li><Link href="/pricing" className="hover:text-foreground transition-colors">Preços</Link></li>
-              <li><Link href="/#faq" className="hover:text-foreground transition-colors">FAQ</Link></li>
+              <li><Link href="/#features" className="hover:text-foreground transition-colors">{t("features")}</Link></li>
+              <li><Link href="/pricing" className="hover:text-foreground transition-colors">{t("prices")}</Link></li>
+              <li><Link href="/#faq" className="hover:text-foreground transition-colors">{t("faq")}</Link></li>
             </ul>
           </div>
 
           {/* Legal */}
           <div>
-            <h4 className="text-sm font-semibold mb-3">Legal</h4>
+            <h4 className="text-sm font-semibold mb-3">{t("footerLegal")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/terms" className="hover:text-foreground transition-colors">Termos de Uso</Link></li>
-              <li><Link href="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link></li>
+              <li><Link href="/terms" className="hover:text-foreground transition-colors">{t("footerTerms")}</Link></li>
+              <li><Link href="/privacy" className="hover:text-foreground transition-colors">{t("footerPrivacy")}</Link></li>
             </ul>
           </div>
 
           {/* Conta */}
           <div>
-            <h4 className="text-sm font-semibold mb-3">Conta</h4>
+            <h4 className="text-sm font-semibold mb-3">{t("footerAccount")}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/login" className="hover:text-foreground transition-colors">Entrar</Link></li>
-              <li><Link href="/register" className="hover:text-foreground transition-colors">Criar conta</Link></li>
+              <li><Link href="/login" className="hover:text-foreground transition-colors">{t("footerSignIn")}</Link></li>
+              <li><Link href="/register" className="hover:text-foreground transition-colors">{t("footerCreateAccount")}</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
+          &copy; {new Date().getFullYear()} {branding.name}. {t("footerRights")}
         </div>
       </div>
     </footer>

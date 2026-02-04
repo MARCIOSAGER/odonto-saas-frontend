@@ -12,7 +12,7 @@ import Link from "next/link"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 import { useTranslations } from "next-intl"
-import { LanguageSelector } from "@/components/language-selector"
+import { LanguageSelector } from "@/components/layout/language-selector"
 
 function Verify2faContent() {
   const searchParams = useSearchParams()

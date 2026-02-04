@@ -3,12 +3,14 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Menu, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { getUploadUrl } from "@/lib/api"
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { branding } = usePlatformBranding()
+  const t = useTranslations("marketing")
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,22 +31,22 @@ export function Navbar() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Funcionalidades
+            {t("features")}
           </Link>
           <Link href="/pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Preços
+            {t("prices")}
           </Link>
           <Link href="/#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            FAQ
+            {t("faq")}
           </Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
           <Link href="/login">
-            <Button variant="ghost" size="sm">Entrar</Button>
+            <Button variant="ghost" size="sm">{t("signIn")}</Button>
           </Link>
           <Link href="/register">
-            <Button size="sm">Começar grátis</Button>
+            <Button size="sm">{t("startFree")}</Button>
           </Link>
         </div>
 
@@ -65,28 +67,28 @@ export function Navbar() {
             className="block text-sm font-medium text-muted-foreground"
             onClick={() => setMobileOpen(false)}
           >
-            Funcionalidades
+            {t("features")}
           </Link>
           <Link
             href="/pricing"
             className="block text-sm font-medium text-muted-foreground"
             onClick={() => setMobileOpen(false)}
           >
-            Preços
+            {t("prices")}
           </Link>
           <Link
             href="/#faq"
             className="block text-sm font-medium text-muted-foreground"
             onClick={() => setMobileOpen(false)}
           >
-            FAQ
+            {t("faq")}
           </Link>
           <div className="flex gap-2 pt-2">
             <Link href="/login" className="flex-1">
-              <Button variant="outline" className="w-full" size="sm">Entrar</Button>
+              <Button variant="outline" className="w-full" size="sm">{t("signIn")}</Button>
             </Link>
             <Link href="/register" className="flex-1">
-              <Button className="w-full" size="sm">Começar grátis</Button>
+              <Button className="w-full" size="sm">{t("startFree")}</Button>
             </Link>
           </div>
         </div>

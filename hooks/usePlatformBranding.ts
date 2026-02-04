@@ -2,10 +2,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams } from "next/navigation"
 import axios from "axios"
+import { env } from "@/lib/env"
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
-
-const publicApi = axios.create({ baseURL: API_BASE })
+const publicApi = axios.create({ baseURL: env.apiUrl })
 
 export interface ResolvedBranding {
   name: string

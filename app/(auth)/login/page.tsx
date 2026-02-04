@@ -16,7 +16,7 @@ import { Suspense } from "react"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 import { useTranslations } from "next-intl"
-import { LanguageSelector } from "@/components/language-selector"
+import { LanguageSelector } from "@/components/layout/language-selector"
 
 function LoginContent() {
   const router = useRouter()

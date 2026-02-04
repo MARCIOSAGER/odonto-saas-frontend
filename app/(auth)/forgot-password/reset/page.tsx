@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle, Loader2 } from "lucide-react"
 import { api } from "@/lib/api"
 import { useTranslations } from "next-intl"
-import { LanguageSelector } from "@/components/language-selector"
+import { LanguageSelector } from "@/components/layout/language-selector"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 

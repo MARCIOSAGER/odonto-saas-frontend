@@ -13,7 +13,9 @@ export const viewport: Viewport = {
   themeColor: "#0284c7",
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://odontosaas.com.br"
+import { env } from "@/lib/env"
+
+const siteUrl = env.siteUrl
 const description = "Software odontológico completo: agenda, odontograma digital, prontuário com IA, WhatsApp integrado, receituário e relatórios. Teste grátis por 14 dias."
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@
 import { Suspense } from "react"
 import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
-import { BrandingCSSInjector } from "@/components/branding-css-injector"
+import { BrandingCSSInjector } from "@/components/providers/branding-css-injector"
 
 const organizationJsonLd = {
   "@context": "https://schema.org",

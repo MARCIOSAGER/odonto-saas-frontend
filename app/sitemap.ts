@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next"
+import { env } from "@/lib/env"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://odontosaas.com.br"
+  const baseUrl = env.siteUrl
 
   return [
     {

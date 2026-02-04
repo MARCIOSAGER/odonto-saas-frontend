@@ -2,11 +2,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 
 export function Cta() {
   const { branding } = usePlatformBranding()
+  const t = useTranslations("marketing")
 
   return (
     <section className="py-20 md:py-28">
@@ -22,11 +24,10 @@ export function Cta() {
 
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
             <h2 className="text-3xl md:text-4xl font-bold">
-              Pronto para modernizar sua clínica?
+              {t("ctaTitle")}
             </h2>
             <p className="text-lg text-white/90">
-              Junte-se a milhares de profissionais que já simplificaram sua gestão.
-              Comece seu teste grátis de 14 dias agora.
+              {t("ctaDescription")}
             </p>
             <Link href="/register">
               <Button
@@ -34,7 +35,7 @@ export function Cta() {
                 className="h-12 px-8 text-base font-semibold bg-white hover:bg-white/90 group"
                 style={{ color: branding.primaryColor }}
               >
-                Criar minha conta grátis
+                {t("ctaButton")}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
