@@ -307,24 +307,10 @@ Plus Jakarta Sans — geometrica com terminais arredondados, ideal para saude.
 
 ### Workflow de deploy
 
-O deploy e automatico via **webhook do Coolify**. Basta fazer push para `main`:
+O deploy e automatico via **GitHub App do Coolify** (auto-deploy ativado). Basta fazer push para `main`:
 
 1. **Commit** — `git add <arquivos> && git commit -m "mensagem"`
 2. **Push** — `git push origin main`
-3. **Deploy** — Automatico! O webhook do GitHub notifica o Coolify, que inicia o build e deploy.
+3. **Deploy** — Automatico! A GitHub App do Coolify detecta o push e inicia o build.
 
-> **Nota:** O webhook esta configurado no GitHub (Settings > Webhooks) apontando para o Coolify. Nao e necessario disparar manualmente.
-
-### Deploy manual (fallback)
-
-Se precisar disparar deploy manual sem push, use a API do Coolify com o token salvo em `.coolify-token` (arquivo gitignored):
-
-```bash
-TOKEN=$(cat .coolify-token)
-curl -s -X POST "https://coolify.marciosager.com/api/v1/deploy" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"uuid":"tc08w80kccws48osw48woswo","force":false}'
-```
-
-> Webhook configurado em 04/02/2026 (Content-Type: application/json).
+> **Nota:** Nao e necessario webhook manual nem API token. A integracao e feita pela GitHub App oficial do Coolify com auto-deploy ativado.
