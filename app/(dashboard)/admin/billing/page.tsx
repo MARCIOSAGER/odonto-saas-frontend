@@ -12,6 +12,7 @@ import {
   Loader2,
   Receipt,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface Overview {
   mrr: number
@@ -37,6 +38,7 @@ interface Invoice {
 }
 
 export default function AdminBillingPage() {
+  const t = useTranslations("adminBilling")
   const [overview, setOverview] = useState<Overview | null>(null)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,9 +77,9 @@ export default function AdminBillingPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Painel Financeiro</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Visão geral de receita, assinaturas e faturamento.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -90,7 +92,7 @@ export default function AdminBillingPage() {
                 <DollarSign className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">MRR</p>
+                <p className="text-sm text-muted-foreground">{t("mrr")}</p>
                 <p className="text-2xl font-bold">
                   R$ {overview?.mrr?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "0,00"}
                 </p>
@@ -106,7 +108,7 @@ export default function AdminBillingPage() {
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Assinaturas ativas</p>
+                <p className="text-sm text-muted-foreground">{t("activeSubscriptions")}</p>
                 <p className="text-2xl font-bold">{overview?.active_subscriptions || 0}</p>
               </div>
             </div>
@@ -120,7 +122,7 @@ export default function AdminBillingPage() {
                 <TrendingUp className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Em trial</p>
+                <p className="text-sm text-muted-foreground">{t("trialing")}</p>
                 <p className="text-2xl font-bold">{overview?.trialing_subscriptions || 0}</p>
               </div>
             </div>
@@ -134,7 +136,7 @@ export default function AdminBillingPage() {
                 <AlertTriangle className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pagamento pendente</p>
+                <p className="text-sm text-muted-foreground">{t("pastDue")}</p>
                 <p className="text-2xl font-bold">{overview?.past_due_subscriptions || 0}</p>
               </div>
             </div>
@@ -149,7 +151,7 @@ export default function AdminBillingPage() {
             <div className="flex items-center gap-3">
               <Receipt className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Receita do mês</p>
+                <p className="text-sm text-muted-foreground">{t("monthlyRevenue")}</p>
                 <p className="text-xl font-bold">
                   R$ {overview?.monthly_revenue?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "0,00"}
                 </p>
@@ -162,7 +164,7 @@ export default function AdminBillingPage() {
             <div className="flex items-center gap-3">
               <DollarSign className="h-5 w-5 text-muted-foreground" />
               <div>
-                <p className="text-sm text-muted-foreground">Receita total</p>
+                <p className="text-sm text-muted-foreground">{t("totalRevenue")}</p>
                 <p className="text-xl font-bold">
                   R$ {overview?.total_revenue?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "0,00"}
                 </p>
@@ -175,7 +177,7 @@ export default function AdminBillingPage() {
       {/* Latest invoices */}
       <Card>
         <CardContent className="pt-6">
-          <h3 className="font-semibold mb-4">Últimas faturas</h3>
+          <h3 className="font-semibold mb-4">{t("latestInvoices")}</h3>
           <InvoiceTable invoices={invoices} />
         </CardContent>
       </Card>

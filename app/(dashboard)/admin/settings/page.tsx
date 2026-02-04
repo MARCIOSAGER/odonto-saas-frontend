@@ -1,5 +1,6 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import { useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -31,6 +32,7 @@ interface ConfigItem {
 }
 
 export default function AdminSettingsPage() {
+  const t = useTranslations("adminSettings")
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
@@ -67,11 +69,11 @@ export default function AdminSettingsPage() {
       setSmtpConfigs(toMap(smtpRes))
       setGeneralConfigs(toMap(generalRes))
     } catch {
-      toast.error("Erro ao carregar configurações")
+      toast.error(t("loadError"))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     loadData()
@@ -87,9 +89,9 @@ export default function AdminSettingsPage() {
       const payload = Object.entries(configs).map(([key, value]) => ({ key, value }))
       await api.put("/system-config/bulk", { configs: payload })
       await queryClient.invalidateQueries({ queryKey: ["platform-branding"] })
-      toast.success("Configurações salvas com sucesso!")
+      toast.success(t("saveSuccess"))
     } catch {
-      toast.error("Erro ao salvar configurações")
+      toast.error(t("saveError"))
     } finally {
       setSaving(null)
     }
@@ -109,10 +111,10 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Settings2 className="h-6 w-6" /> Configurações da Plataforma
+          <Settings2 className="h-6 w-6" /> {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Gerencie gateways de pagamento, SMTP e configurações gerais.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -125,19 +127,19 @@ export default function AdminSettingsPage() {
                 <CreditCard className="h-5 w-5 text-violet-600" />
               </div>
               <div>
-                <CardTitle>Gateway de Pagamento</CardTitle>
-                <CardDescription>Configure Stripe ou Asaas para cobranças.</CardDescription>
+                <CardTitle>{t("gatewayTitle")}</CardTitle>
+                <CardDescription>{t("gatewayDesc")}</CardDescription>
               </div>
             </div>
             <Badge variant={activeGateway !== "none" ? "default" : "secondary"}>
-              {activeGateway === "none" ? "Nenhum" : activeGateway === "stripe" ? "Stripe" : "Asaas"}
+              {activeGateway === "none" ? t("none") : activeGateway === "stripe" ? "Stripe" : "Asaas"}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Gateway selector */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Gateway ativo</label>
+            <label className="text-sm font-medium text-foreground">{t("activeGateway")}</label>
             <div className="flex gap-2">
               {["none", "stripe", "asaas"].map((gw) => (
                 <Button
@@ -146,7 +148,7 @@ export default function AdminSettingsPage() {
                   size="sm"
                   onClick={() => setGatewayConfigs((p) => ({ ...p, payment_gateway_active: gw }))}
                 >
-                  {gw === "none" ? "Nenhum" : gw === "stripe" ? "Stripe" : "Asaas"}
+                  {gw === "none" ? t("none") : gw === "stripe" ? "Stripe" : "Asaas"}
                 </Button>
               ))}
             </div>
@@ -161,7 +163,7 @@ export default function AdminSettingsPage() {
               </h4>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Secret Key</label>
+                  <label className="text-sm font-medium text-foreground">{t("secretKey")}</label>
                   <div className="relative">
                     <Input
                       type={visibleFields.stripe_secret_key ? "text" : "password"}
@@ -179,7 +181,7 @@ export default function AdminSettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Publishable Key</label>
+                  <label className="text-sm font-medium text-foreground">{t("publishableKey")}</label>
                   <Input
                     value={gatewayConfigs.stripe_publishable_key || ""}
                     onChange={(e) => setGatewayConfigs((p) => ({ ...p, stripe_publishable_key: e.target.value }))}
@@ -187,7 +189,7 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-foreground">Webhook Secret</label>
+                  <label className="text-sm font-medium text-foreground">{t("webhookSecret")}</label>
                   <div className="relative">
                     <Input
                       type={visibleFields.stripe_webhook_secret ? "text" : "password"}
@@ -214,7 +216,7 @@ export default function AdminSettingsPage() {
               <h4 className="text-sm font-semibold">Asaas</h4>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">API Key</label>
+                  <label className="text-sm font-medium text-foreground">{t("apiKey")}</label>
                   <div className="relative">
                     <Input
                       type={visibleFields.asaas_api_key ? "text" : "password"}
@@ -232,13 +234,13 @@ export default function AdminSettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Webhook Token</label>
+                  <label className="text-sm font-medium text-foreground">{t("webhookToken")}</label>
                   <div className="relative">
                     <Input
                       type={visibleFields.asaas_webhook_token ? "text" : "password"}
                       value={gatewayConfigs.asaas_webhook_token || ""}
                       onChange={(e) => setGatewayConfigs((p) => ({ ...p, asaas_webhook_token: e.target.value }))}
-                      placeholder="Token do webhook"
+                      placeholder={t("webhookTokenPlaceholder")}
                     />
                     <button
                       type="button"
@@ -251,8 +253,8 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="flex items-center justify-between sm:col-span-2 rounded-lg border border-border p-3">
                   <div>
-                    <p className="text-sm font-medium text-foreground">Modo Sandbox</p>
-                    <p className="text-xs text-muted-foreground">Usar ambiente de testes do Asaas</p>
+                    <p className="text-sm font-medium text-foreground">{t("sandboxMode")}</p>
+                    <p className="text-xs text-muted-foreground">{t("sandboxDesc")}</p>
                   </div>
                   <Switch
                     checked={gatewayConfigs.asaas_sandbox === "true"}
@@ -266,7 +268,7 @@ export default function AdminSettingsPage() {
           <div className="flex justify-end">
             <Button onClick={() => saveCategory("payment_gateway", gatewayConfigs)} disabled={saving === "payment_gateway"}>
               {saving === "payment_gateway" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              Salvar gateway
+              {t("saveGateway")}
             </Button>
           </div>
         </CardContent>
@@ -280,15 +282,15 @@ export default function AdminSettingsPage() {
               <Mail className="h-5 w-5 text-blue-600" />
             </div>
             <div>
-              <CardTitle>SMTP Padrão</CardTitle>
-              <CardDescription>Servidor de e-mail padrão para clínicas sem SMTP próprio.</CardDescription>
+              <CardTitle>{t("smtpTitle")}</CardTitle>
+              <CardDescription>{t("smtpDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Host SMTP</label>
+              <label className="text-sm font-medium text-foreground">{t("smtpHost")}</label>
               <Input
                 value={smtpConfigs.smtp_default_host || ""}
                 onChange={(e) => setSmtpConfigs((p) => ({ ...p, smtp_default_host: e.target.value }))}
@@ -296,7 +298,7 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Porta</label>
+              <label className="text-sm font-medium text-foreground">{t("port")}</label>
               <Input
                 value={smtpConfigs.smtp_default_port || ""}
                 onChange={(e) => setSmtpConfigs((p) => ({ ...p, smtp_default_port: e.target.value }))}
@@ -304,21 +306,21 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Usuário</label>
+              <label className="text-sm font-medium text-foreground">{t("user")}</label>
               <Input
                 value={smtpConfigs.smtp_default_user || ""}
                 onChange={(e) => setSmtpConfigs((p) => ({ ...p, smtp_default_user: e.target.value }))}
-                placeholder="noreply@seudominio.com"
+                placeholder={t("smtpUserPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Senha</label>
+              <label className="text-sm font-medium text-foreground">{t("password")}</label>
               <div className="relative">
                 <Input
                   type={visibleFields.smtp_default_pass ? "text" : "password"}
                   value={smtpConfigs.smtp_default_pass || ""}
                   onChange={(e) => setSmtpConfigs((p) => ({ ...p, smtp_default_pass: e.target.value }))}
-                  placeholder="Senha do SMTP"
+                  placeholder={t("smtpPasswordPlaceholder")}
                 />
                 <button
                   type="button"
@@ -330,18 +332,18 @@ export default function AdminSettingsPage() {
               </div>
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-medium text-foreground">E-mail remetente (From)</label>
+              <label className="text-sm font-medium text-foreground">{t("senderEmail")}</label>
               <Input
                 value={smtpConfigs.smtp_default_from || ""}
                 onChange={(e) => setSmtpConfigs((p) => ({ ...p, smtp_default_from: e.target.value }))}
-                placeholder="noreply@seudominio.com"
+                placeholder={t("senderPlaceholder")}
               />
             </div>
           </div>
           <div className="flex justify-end">
             <Button onClick={() => saveCategory("smtp", smtpConfigs)} disabled={saving === "smtp"}>
               {saving === "smtp" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              Salvar SMTP
+              {t("saveSmtp")}
             </Button>
           </div>
         </CardContent>
@@ -355,23 +357,23 @@ export default function AdminSettingsPage() {
               <Globe className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <CardTitle>Configurações Gerais</CardTitle>
-              <CardDescription>Contatos de suporte e links institucionais.</CardDescription>
+              <CardTitle>{t("generalTitle")}</CardTitle>
+              <CardDescription>{t("generalDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">E-mail de suporte</label>
+              <label className="text-sm font-medium text-foreground">{t("supportEmail")}</label>
               <Input
                 value={generalConfigs.platform_support_email || ""}
                 onChange={(e) => setGeneralConfigs((p) => ({ ...p, platform_support_email: e.target.value }))}
-                placeholder="suporte@seudominio.com"
+                placeholder={t("supportEmailPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">WhatsApp de suporte</label>
+              <label className="text-sm font-medium text-foreground">{t("supportWhatsapp")}</label>
               <Input
                 value={generalConfigs.platform_support_whatsapp || ""}
                 onChange={(e) => setGeneralConfigs((p) => ({ ...p, platform_support_whatsapp: e.target.value }))}
@@ -379,26 +381,26 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">URL Termos de uso</label>
+              <label className="text-sm font-medium text-foreground">{t("termsUrl")}</label>
               <Input
                 value={generalConfigs.platform_terms_url || ""}
                 onChange={(e) => setGeneralConfigs((p) => ({ ...p, platform_terms_url: e.target.value }))}
-                placeholder="https://seudominio.com/termos"
+                placeholder={t("termsUrlPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">URL Política de privacidade</label>
+              <label className="text-sm font-medium text-foreground">{t("privacyUrl")}</label>
               <Input
                 value={generalConfigs.platform_privacy_url || ""}
                 onChange={(e) => setGeneralConfigs((p) => ({ ...p, platform_privacy_url: e.target.value }))}
-                placeholder="https://seudominio.com/privacidade"
+                placeholder={t("privacyUrlPlaceholder")}
               />
             </div>
           </div>
           <div className="flex justify-end">
             <Button onClick={() => saveCategory("general", generalConfigs)} disabled={saving === "general"}>
               {saving === "general" ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              Salvar geral
+              {t("saveGeneral")}
             </Button>
           </div>
         </CardContent>

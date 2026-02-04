@@ -15,8 +15,10 @@ import {
   Image as ImageIcon,
   Upload,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function AdminBrandingPage() {
+  const t = useTranslations("adminBranding")
   const queryClient = useQueryClient()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -52,11 +54,11 @@ export default function AdminBrandingPage() {
         }))
       }
     } catch {
-      toast.error("Erro ao carregar configurações de branding")
+      toast.error(t("loadError"))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     loadData()
@@ -68,9 +70,9 @@ export default function AdminBrandingPage() {
       const configs = Object.entries(form).map(([key, value]) => ({ key, value }))
       await api.put("/system-config/bulk", { configs })
       await queryClient.invalidateQueries({ queryKey: ["platform-branding"] })
-      toast.success("Branding salvo com sucesso!")
+      toast.success(t("saveSuccess"))
     } catch {
-      toast.error("Erro ao salvar branding")
+      toast.error(t("saveError"))
     } finally {
       setSaving(false)
     }
@@ -92,9 +94,9 @@ export default function AdminBrandingPage() {
       } else {
         setForm((p) => ({ ...p, platform_favicon_url: url }))
       }
-      toast.success(`${type === "logo" ? "Logo" : "Favicon"} enviado!`)
+      toast.success(type === "logo" ? t("logoSent") : t("faviconSent"))
     } catch {
-      toast.error(`Erro ao enviar ${type === "logo" ? "logo" : "favicon"}`)
+      toast.error(type === "logo" ? t("uploadLogoError") : t("uploadFaviconError"))
     } finally {
       setUploading(false)
     }
@@ -112,10 +114,10 @@ export default function AdminBrandingPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <Palette className="h-6 w-6" /> Branding da Plataforma
+          <Palette className="h-6 w-6" /> {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Personalize o nome, logo, cores e textos exibidos na landing page e telas de login.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -127,27 +129,27 @@ export default function AdminBrandingPage() {
               <Type className="h-5 w-5 text-sky-600" />
             </div>
             <div>
-              <CardTitle>Identidade</CardTitle>
-              <CardDescription>Nome e descrição exibidos no site.</CardDescription>
+              <CardTitle>{t("identityTitle")}</CardTitle>
+              <CardDescription>{t("identityDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Nome da plataforma</label>
+              <label className="text-sm font-medium text-foreground">{t("platformName")}</label>
               <Input
                 value={form.platform_name}
                 onChange={(e) => setForm((p) => ({ ...p, platform_name: e.target.value }))}
-                placeholder="Odonto SaaS"
+                placeholder={t("platformNamePlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Descrição</label>
+              <label className="text-sm font-medium text-foreground">{t("description")}</label>
               <Input
                 value={form.platform_description}
                 onChange={(e) => setForm((p) => ({ ...p, platform_description: e.target.value }))}
-                placeholder="Sistema completo para gestão de clínicas"
+                placeholder={t("descriptionPlaceholder")}
               />
             </div>
           </div>
@@ -162,8 +164,8 @@ export default function AdminBrandingPage() {
               <ImageIcon className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <CardTitle>Logo & Favicon</CardTitle>
-              <CardDescription>Imagens exibidas na navbar, login e aba do navegador.</CardDescription>
+              <CardTitle>{t("logoFaviconTitle")}</CardTitle>
+              <CardDescription>{t("logoFaviconDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -171,7 +173,7 @@ export default function AdminBrandingPage() {
           <div className="grid gap-6 sm:grid-cols-2">
             {/* Logo */}
             <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground">Logo</label>
+              <label className="text-sm font-medium text-foreground">{t("logo")}</label>
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-lg border border-border flex items-center justify-center bg-muted/50 overflow-hidden">
                   {form.platform_logo_url ? (
@@ -198,16 +200,16 @@ export default function AdminBrandingPage() {
                     disabled={uploadingLogo}
                   >
                     {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                    Enviar logo
+                    {t("uploadLogo")}
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-1">PNG, JPG ou SVG. Max 5MB.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("logoHint")}</p>
                 </div>
               </div>
             </div>
 
             {/* Favicon */}
             <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground">Favicon</label>
+              <label className="text-sm font-medium text-foreground">{t("favicon")}</label>
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-lg border border-border flex items-center justify-center bg-muted/50 overflow-hidden">
                   {form.platform_favicon_url ? (
@@ -234,9 +236,9 @@ export default function AdminBrandingPage() {
                     disabled={uploadingFavicon}
                   >
                     {uploadingFavicon ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
-                    Enviar favicon
+                    {t("uploadFavicon")}
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-1">ICO, PNG ou SVG. Max 1MB.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("faviconHint")}</p>
                 </div>
               </div>
             </div>
@@ -252,15 +254,15 @@ export default function AdminBrandingPage() {
               <Palette className="h-5 w-5 text-violet-600" />
             </div>
             <div>
-              <CardTitle>Cores</CardTitle>
-              <CardDescription>Cores primária e secundária da plataforma.</CardDescription>
+              <CardTitle>{t("colorsTitle")}</CardTitle>
+              <CardDescription>{t("colorsDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Cor primária</label>
+              <label className="text-sm font-medium text-foreground">{t("primaryColor")}</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -277,7 +279,7 @@ export default function AdminBrandingPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Cor secundária</label>
+              <label className="text-sm font-medium text-foreground">{t("secondaryColor")}</label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -305,26 +307,26 @@ export default function AdminBrandingPage() {
               <Type className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <CardTitle>Landing Page</CardTitle>
-              <CardDescription>Textos exibidos na seção hero da página inicial.</CardDescription>
+              <CardTitle>{t("landingPageTitle")}</CardTitle>
+              <CardDescription>{t("landingPageDesc")}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Título hero</label>
+            <label className="text-sm font-medium text-foreground">{t("heroTitle")}</label>
             <Input
               value={form.platform_hero_title}
               onChange={(e) => setForm((p) => ({ ...p, platform_hero_title: e.target.value }))}
-              placeholder="Gestão completa para sua clínica odontológica"
+              placeholder={t("heroTitlePlaceholder")}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Subtítulo hero</label>
+            <label className="text-sm font-medium text-foreground">{t("heroSubtitle")}</label>
             <Textarea
               value={form.platform_hero_subtitle}
               onChange={(e) => setForm((p) => ({ ...p, platform_hero_subtitle: e.target.value }))}
-              placeholder="Agenda, prontuários, financeiro, WhatsApp e inteligência artificial..."
+              placeholder={t("heroSubtitlePlaceholder")}
               rows={3}
             />
           </div>
@@ -335,7 +337,7 @@ export default function AdminBrandingPage() {
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving} size="lg">
           {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          Salvar todas as alterações
+          {t("saveAll")}
         </Button>
       </div>
     </div>

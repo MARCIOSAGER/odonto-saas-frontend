@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: loop infinito na página de WhatsApp\n\nRemove chamada automática de testWhatsApp no useEffect que causava\nrequisições infinitas \\(429 Too Many Requests\\). Teste agora só executa\nquando o usuário clica no botão \"Testar Conexão\".\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)"
+    ]
+  }
+}

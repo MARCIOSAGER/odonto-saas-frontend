@@ -32,6 +32,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface User {
   id: string
@@ -47,6 +48,7 @@ interface User {
 type ActionType = "toggle_status" | "change_role" | "reset_password"
 
 export default function AdminUsersPage() {
+  const t = useTranslations("adminUsers")
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -78,11 +80,11 @@ export default function AdminUsersPage() {
       setTotalPages(body?.meta?.totalPages || 1)
       setTotal(body?.meta?.total || 0)
     } catch {
-      toast.error("Erro ao carregar usuários")
+      toast.error(t("loadError"))
     } finally {
       setLoading(false)
     }
-  }, [page, search, roleFilter, statusFilter])
+  }, [page, search, roleFilter, statusFilter, t])
 
   useEffect(() => {
     loadData()
@@ -110,11 +112,11 @@ export default function AdminUsersPage() {
     const newStatus = actionUser.status === "active" ? "inactive" : "active"
     try {
       await api.patch(`/admin/users/${actionUser.id}/status`, { status: newStatus })
-      toast.success(`Usuário ${newStatus === "active" ? "ativado" : "desativado"}`)
+      toast.success(newStatus === "active" ? t("userActivated") : t("userDeactivated"))
       closeAction()
       loadData()
     } catch {
-      toast.error("Erro ao alterar status")
+      toast.error(t("statusError"))
     } finally {
       setActing(false)
     }
@@ -125,11 +127,11 @@ export default function AdminUsersPage() {
     setActing(true)
     try {
       await api.patch(`/admin/users/${actionUser.id}/role`, { role: newRole })
-      toast.success("Role atualizada")
+      toast.success(t("roleUpdated"))
       closeAction()
       loadData()
     } catch {
-      toast.error("Erro ao alterar role")
+      toast.error(t("roleError"))
     } finally {
       setActing(false)
     }
@@ -140,10 +142,10 @@ export default function AdminUsersPage() {
     setActing(true)
     try {
       await api.post(`/admin/users/${actionUser.id}/reset-password`)
-      toast.success("Email de redefinição enviado")
+      toast.success(t("resetEmailSent"))
       closeAction()
     } catch {
-      toast.error("Erro ao enviar email de reset")
+      toast.error(t("resetError"))
     } finally {
       setActing(false)
     }
@@ -151,9 +153,9 @@ export default function AdminUsersPage() {
 
   const roleBadge = (role: string) => {
     const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      superadmin: { label: "Superadmin", variant: "destructive" },
-      admin: { label: "Admin", variant: "default" },
-      user: { label: "Usuário", variant: "secondary" },
+      superadmin: { label: t("roleSuperadmin"), variant: "destructive" },
+      admin: { label: t("roleAdmin"), variant: "default" },
+      user: { label: t("roleUser"), variant: "secondary" },
     }
     const r = map[role] || { label: role, variant: "outline" as const }
     return <Badge variant={r.variant}>{r.label}</Badge>
@@ -161,8 +163,8 @@ export default function AdminUsersPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      active: { label: "Ativo", variant: "default" },
-      inactive: { label: "Inativo", variant: "secondary" },
+      active: { label: t("statusActive"), variant: "default" },
+      inactive: { label: t("statusInactive"), variant: "secondary" },
     }
     const s = map[status] || { label: status, variant: "outline" as const }
     return <Badge variant={s.variant}>{s.label}</Badge>
@@ -172,10 +174,10 @@ export default function AdminUsersPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <UserCog className="h-6 w-6" /> Usuários
+          <UserCog className="h-6 w-6" /> {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Gerencie os usuários de todas as clínicas ({total} total)
+          {t("subtitle", { total })}
         </p>
       </div>
 
@@ -185,7 +187,7 @@ export default function AdminUsersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome ou email..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm bg-background"
@@ -196,19 +198,19 @@ export default function AdminUsersPage() {
           onChange={(e) => setRoleFilter(e.target.value)}
           className="px-3 py-2 border rounded-lg text-sm bg-background"
         >
-          <option value="">Todas as roles</option>
-          <option value="superadmin">Superadmin</option>
-          <option value="admin">Admin</option>
-          <option value="user">Usuário</option>
+          <option value="">{t("allRoles")}</option>
+          <option value="superadmin">{t("roleSuperadmin")}</option>
+          <option value="admin">{t("roleAdmin")}</option>
+          <option value="user">{t("roleUser")}</option>
         </select>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 border rounded-lg text-sm bg-background"
         >
-          <option value="">Todos os status</option>
-          <option value="active">Ativo</option>
-          <option value="inactive">Inativo</option>
+          <option value="">{t("allStatuses")}</option>
+          <option value="active">{t("statusActive")}</option>
+          <option value="inactive">{t("statusInactive")}</option>
         </select>
       </div>
 
@@ -219,7 +221,7 @@ export default function AdminUsersPage() {
         </div>
       ) : users.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
-          Nenhum usuário encontrado
+          {t("noUsers")}
         </div>
       ) : (
         <div className="bg-card border rounded-xl overflow-hidden">
@@ -227,13 +229,13 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left py-3 px-4 font-medium">Usuário</th>
-                  <th className="text-left py-3 px-4 font-medium">Clínica</th>
-                  <th className="text-left py-3 px-4 font-medium">Role</th>
-                  <th className="text-left py-3 px-4 font-medium">Status</th>
-                  <th className="text-center py-3 px-4 font-medium">2FA</th>
-                  <th className="text-left py-3 px-4 font-medium">Criado em</th>
-                  <th className="text-right py-3 px-4 font-medium">Ações</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colUser")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colClinic")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colRole")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colStatus")}</th>
+                  <th className="text-center py-3 px-4 font-medium">{t("col2fa")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colCreatedAt")}</th>
+                  <th className="text-right py-3 px-4 font-medium">{t("colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -265,7 +267,7 @@ export default function AdminUsersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          title={u.status === "active" ? "Desativar" : "Ativar"}
+                          title={u.status === "active" ? t("tooltipDeactivate") : t("tooltipActivate")}
                           onClick={() => openAction(u, "toggle_status")}
                         >
                           <Users className="h-4 w-4" />
@@ -273,7 +275,7 @@ export default function AdminUsersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          title="Alterar role"
+                          title={t("tooltipChangeRole")}
                           onClick={() => openAction(u, "change_role")}
                         >
                           <Shield className="h-4 w-4" />
@@ -281,7 +283,7 @@ export default function AdminUsersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          title="Resetar senha"
+                          title={t("tooltipResetPassword")}
                           onClick={() => openAction(u, "reset_password")}
                         >
                           <KeyRound className="h-4 w-4" />
@@ -301,7 +303,7 @@ export default function AdminUsersPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-xs text-muted-foreground">
-                Página {page} de {totalPages}
+                {t("pageOf", { page, totalPages })}
               </span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
                 <ChevronRight className="h-4 w-4" />
@@ -316,19 +318,19 @@ export default function AdminUsersPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {actionUser?.status === "active" ? "Desativar" : "Ativar"} usuário
+              {actionUser?.status === "active" ? t("deactivateUserTitle") : t("activateUserTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionUser?.status === "active"
-                ? `Deseja desativar "${actionUser?.name}"? O usuário não conseguirá fazer login.`
-                : `Deseja reativar "${actionUser?.name}"?`}
+                ? t("deactivateMessage", { name: actionUser?.name || "" })
+                : t("activateMessage", { name: actionUser?.name || "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleToggleStatus} disabled={acting}>
               {acting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirmar
+              {t("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -338,27 +340,27 @@ export default function AdminUsersPage() {
       <Dialog open={actionType === "change_role"} onOpenChange={() => closeAction()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Alterar role de {actionUser?.name}</DialogTitle>
+            <DialogTitle>{t("changeRoleTitle", { name: actionUser?.name || "" })}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-4">
             <p className="text-sm text-muted-foreground">
-              Role atual: {actionUser?.role}
+              {t("currentRole", { role: actionUser?.role || "" })}
             </p>
             <select
               value={newRole}
               onChange={(e) => setNewRole(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg text-sm bg-background"
             >
-              <option value="user">Usuário</option>
-              <option value="admin">Admin</option>
-              <option value="superadmin">Superadmin</option>
+              <option value="user">{t("roleUser")}</option>
+              <option value="admin">{t("roleAdmin")}</option>
+              <option value="superadmin">{t("roleSuperadmin")}</option>
             </select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={closeAction}>Cancelar</Button>
+            <Button variant="outline" onClick={closeAction}>{t("cancel")}</Button>
             <Button onClick={handleChangeRole} disabled={acting || newRole === actionUser?.role}>
               {acting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Salvar
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -368,16 +370,16 @@ export default function AdminUsersPage() {
       <AlertDialog open={actionType === "reset_password"} onOpenChange={() => closeAction()}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Resetar senha</AlertDialogTitle>
+            <AlertDialogTitle>{t("resetPasswordTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Um email de redefinição de senha será enviado para {actionUser?.email}.
+              {t("resetPasswordMessage", { email: actionUser?.email || "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleResetPassword} disabled={acting}>
               {acting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Enviar email
+              {t("sendEmail")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
