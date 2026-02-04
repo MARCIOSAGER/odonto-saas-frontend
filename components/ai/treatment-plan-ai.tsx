@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { Sparkles, Loader2, ChevronDown, ChevronUp, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface Procedure {
   tooth: number
@@ -42,6 +43,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 }
 
 export function TreatmentPlanAi({ patientId }: Props) {
+  const t = useTranslations("treatmentPlan")
   const [plan, setPlan] = useState<TreatmentPlan | null>(null)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -59,15 +61,15 @@ export function TreatmentPlanAi({ patientId }: Props) {
       const status = err?.response?.status
       const msg = err?.response?.data?.message
       if (status === 500) {
-        toast.error(msg || "Erro interno do servidor. Verifique se a chave de IA está configurada.")
+        toast.error(msg || t("serverError"))
       } else if (status === 401 || status === 403) {
-        toast.error("Sessão expirada. Faça login novamente.")
+        toast.error(t("sessionExpired"))
       } else if (status === 429) {
-        toast.error("Muitas requisições. Aguarde um momento e tente novamente.")
+        toast.error(t("tooManyRequests"))
       } else if (!err?.response) {
-        toast.error("Sem conexão com o servidor. Verifique sua internet.")
+        toast.error(t("noConnection"))
       } else {
-        toast.error(msg || "Erro ao gerar plano de tratamento.")
+        toast.error(msg || t("generateError"))
       }
     } finally {
       setLoading(false)
@@ -86,11 +88,11 @@ export function TreatmentPlanAi({ patientId }: Props) {
         total_sessions: plan.totalSessions || null,
         recommendations: plan.recommendations || null,
       })
-      toast.success("Plano de tratamento salvo com sucesso")
+      toast.success(t("saveSuccess"))
       setSaved(true)
     } catch (err: any) {
       const msg = err?.response?.data?.message
-      toast.error(msg || "Erro ao salvar plano de tratamento.")
+      toast.error(msg || t("saveError"))
     } finally {
       setSaving(false)
     }
@@ -109,9 +111,9 @@ export function TreatmentPlanAi({ patientId }: Props) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold">Plano de Tratamento IA</h3>
+          <h3 className="font-semibold">{t("title")}</h3>
           <p className="text-xs text-muted-foreground">
-            Baseado no odontograma e histórico do paciente
+            {t("subtitle")}
           </p>
         </div>
         <Button onClick={generate} disabled={loading} size="sm" className="gap-2">
@@ -120,7 +122,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
           ) : (
             <Sparkles className="h-4 w-4" />
           )}
-          {plan ? "Regenerar" : "Gerar plano"}
+          {plan ? t("regenerate") : t("generate")}
         </Button>
       </div>
 
@@ -149,7 +151,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span>R$ {phase.totalCost?.toFixed(2)}</span>
-                  <span>{phase.estimatedSessions} sessões</span>
+                  <span>{t("sessionsLabel", { count: phase.estimatedSessions })}</span>
                   {expandedPhases.has(i) ? (
                     <ChevronUp className="h-4 w-4" />
                   ) : (
@@ -166,7 +168,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
                       className="flex items-center justify-between py-2 border-b last:border-b-0 text-sm"
                     >
                       <div>
-                        <span className="font-medium">Dente {proc.tooth}</span>
+                        <span className="font-medium">{t("tooth", { number: proc.tooth })}</span>
                         <span className="mx-2 text-muted-foreground">-</span>
                         <span>{proc.procedure}</span>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -178,7 +180,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
                           R$ {proc.estimatedCost?.toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {proc.sessions} sessão(ões)
+                          {t("sessions", { count: proc.sessions })}
                         </div>
                       </div>
                     </div>
@@ -189,13 +191,13 @@ export function TreatmentPlanAi({ patientId }: Props) {
           ))}
 
           <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
-            <span className="font-semibold">Total estimado</span>
+            <span className="font-semibold">{t("totalEstimated")}</span>
             <div className="text-right">
               <div className="text-lg font-bold">
                 R$ {plan.totalCost?.toFixed(2)}
               </div>
               <div className="text-xs text-muted-foreground">
-                {plan.totalSessions} sessões
+                {t("sessionsLabel", { count: plan.totalSessions ?? 0 })}
               </div>
             </div>
           </div>
@@ -203,7 +205,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
           {plan.recommendations && (
             <div className="bg-muted/30 p-3 rounded-lg">
               <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
-                Recomendações
+                {t("recommendationsLabel")}
               </h5>
               <p className="text-sm">{plan.recommendations}</p>
             </div>
@@ -220,7 +222,7 @@ export function TreatmentPlanAi({ patientId }: Props) {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            {saved ? "Salvo" : "Salvar Plano"}
+            {saved ? t("saved") : t("savePlan")}
           </Button>
         </div>
       )}

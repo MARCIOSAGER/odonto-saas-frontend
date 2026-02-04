@@ -4,8 +4,9 @@ import Link from "next/link"
 import { Bell, Check } from "lucide-react"
 import { api } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { ptBR, enUS } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { useTranslations, useLocale } from "next-intl"
 
 interface Notification {
   id: string
@@ -18,6 +19,8 @@ interface Notification {
 }
 
 export function NotificationBell() {
+  const t = useTranslations("notificationBell")
+  const locale = useLocale()
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -86,6 +89,8 @@ export function NotificationBell() {
     } catch {}
   }
 
+  const dateLocale = locale === "pt-BR" ? ptBR : enUS
+
   return (
     <div className="relative" ref={panelRef}>
       <button
@@ -103,14 +108,14 @@ export function NotificationBell() {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-xl border bg-popover shadow-lg z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b">
-            <h3 className="font-semibold text-sm">Notificações</h3>
+            <h3 className="font-semibold text-sm">{t("title")}</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
                 className="text-xs text-primary hover:underline flex items-center gap-1"
               >
                 <Check className="h-3 w-3" />
-                Marcar todas como lidas
+                {t("markAllAsRead")}
               </button>
             )}
           </div>
@@ -118,11 +123,11 @@ export function NotificationBell() {
           <div className="max-h-80 overflow-y-auto">
             {loading ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                Carregando...
+                {t("loading")}
               </div>
             ) : notifications.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                Nenhuma notificação.
+                {t("noNotifications")}
               </div>
             ) : (
               notifications.map((n) => (
@@ -146,7 +151,7 @@ export function NotificationBell() {
                       <p className="text-xs text-muted-foreground mt-1">
                         {formatDistanceToNow(new Date(n.created_at), {
                           addSuffix: true,
-                          locale: ptBR,
+                          locale: dateLocale,
                         })}
                       </p>
                     </div>
@@ -161,7 +166,7 @@ export function NotificationBell() {
             onClick={() => setOpen(false)}
             className="block text-center text-xs text-primary hover:underline py-2.5 border-t"
           >
-            Ver todas as notificações
+            {t("viewAll")}
           </Link>
         </div>
       )}

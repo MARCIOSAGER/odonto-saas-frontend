@@ -5,21 +5,22 @@ import { toast } from "sonner"
 import { Sparkles, Loader2, AlertTriangle, Shield, Pill, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
-const ANAMNESIS_QUESTIONS = [
-  { key: "allergies", label: "Possui alguma alergia? (medicamentos, materiais, alimentos)" },
-  { key: "medications", label: "Está tomando algum medicamento atualmente? Quais?" },
-  { key: "diseases", label: "Possui alguma doença sistêmica? (diabetes, hipertensão, cardiopatia, etc.)" },
-  { key: "surgeries", label: "Já fez alguma cirurgia? Qual e quando?" },
-  { key: "bleeding", label: "Tem problemas de sangramento ou coagulação?" },
-  { key: "pregnant", label: "Está grávida ou amamentando?" },
-  { key: "smoking", label: "Fuma ou já fumou? Há quanto tempo?" },
-  { key: "dental_history", label: "Já teve alguma reação adversa a anestesia odontológica?" },
-  { key: "bruxism", label: "Range ou aperta os dentes? (bruxismo)" },
-  { key: "breathing", label: "Respira mais pela boca ou pelo nariz?" },
-  { key: "habits", label: "Possui algum hábito (roer unhas, morder objetos, etc.)?" },
-  { key: "complaints", label: "Qual sua queixa principal ou motivo da consulta?" },
-]
+const ANAMNESIS_KEYS = [
+  "allergies",
+  "medications",
+  "diseases",
+  "surgeries",
+  "bleeding",
+  "pregnant",
+  "smoking",
+  "dentalHistory",
+  "bruxism",
+  "breathing",
+  "habits",
+  "complaints",
+] as const
 
 interface AnamnesisResult {
   riskClassification?: string
@@ -47,6 +48,7 @@ const ASA_COLORS: Record<string, string> = {
 }
 
 export function AnamnesisForm({ patientId, onCompleted }: Props) {
+  const t = useTranslations("anamnesis")
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [result, setResult] = useState<AnamnesisResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -55,13 +57,13 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
 
   async function processWithAi() {
     const filledAnswers: Record<string, string> = {}
-    for (const q of ANAMNESIS_QUESTIONS) {
-      const answer = answers[q.key]?.trim()
-      if (answer) filledAnswers[q.label] = answer
+    for (const key of ANAMNESIS_KEYS) {
+      const answer = answers[key]?.trim()
+      if (answer) filledAnswers[t(key)] = answer
     }
 
     if (Object.keys(filledAnswers).length < 3) {
-      toast.error("Preencha pelo menos 3 questões para processar com IA")
+      toast.error(t("minQuestions"))
       return
     }
 
@@ -78,15 +80,15 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
       const status = err?.response?.status
       const msg = err?.response?.data?.message
       if (status === 500) {
-        toast.error(msg || "Erro interno do servidor. Verifique se a chave de IA está configurada.")
+        toast.error(msg || t("serverError"))
       } else if (status === 401 || status === 403) {
-        toast.error("Sessão expirada. Faça login novamente.")
+        toast.error(t("sessionExpired"))
       } else if (status === 429) {
-        toast.error("Muitas requisições. Aguarde um momento e tente novamente.")
+        toast.error(t("tooManyRequests"))
       } else if (!err?.response) {
-        toast.error("Sem conexão com o servidor. Verifique sua internet.")
+        toast.error(t("noConnection"))
       } else {
-        toast.error(msg || "Erro ao processar anamnese com IA.")
+        toast.error(msg || t("processError"))
       }
     } finally {
       setLoading(false)
@@ -117,11 +119,11 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
         ai_recommendations: result.recommendations || null,
         raw_answers: answers,
       })
-      toast.success("Anamnese salva com sucesso")
+      toast.success(t("saveSuccess"))
       setSaved(true)
     } catch (err: any) {
       const msg = err?.response?.data?.message
-      toast.error(msg || "Erro ao salvar anamnese.")
+      toast.error(msg || t("saveError"))
     } finally {
       setSaving(false)
     }
@@ -131,17 +133,17 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
     <div className="space-y-6">
       {/* Questions */}
       <div className="space-y-4">
-        <h3 className="font-semibold">Anamnese</h3>
-        {ANAMNESIS_QUESTIONS.map((q) => (
-          <div key={q.key}>
-            <label className="text-sm font-medium block mb-1">{q.label}</label>
+        <h3 className="font-semibold">{t("title")}</h3>
+        {ANAMNESIS_KEYS.map((key) => (
+          <div key={key}>
+            <label className="text-sm font-medium block mb-1">{t(key)}</label>
             <input
               type="text"
-              value={answers[q.key] || ""}
+              value={answers[key] || ""}
               onChange={(e) =>
-                setAnswers((prev) => ({ ...prev, [q.key]: e.target.value }))
+                setAnswers((prev) => ({ ...prev, [key]: e.target.value }))
               }
-              placeholder="Resposta do paciente..."
+              placeholder={t("placeholder")}
               className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -154,14 +156,14 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
         ) : (
           <Sparkles className="h-4 w-4" />
         )}
-        Processar com IA
+        {t("processWithAi")}
       </Button>
 
       {/* Result */}
       {result && !result.raw && (
         <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm">Relatório da Anamnese</h4>
+            <h4 className="font-semibold text-sm">{t("reportTitle")}</h4>
             {result.riskClassification && (
               <span
                 className={cn(
@@ -201,7 +203,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
           {/* Allergies */}
           {result.allergies && result.allergies.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">Alergias</h5>
+              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">{t("allergiesLabel")}</h5>
               <div className="flex flex-wrap gap-1.5">
                 {result.allergies.map((a, i) => (
                   <span key={i} className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded">
@@ -216,7 +218,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
           {result.medications && result.medications.length > 0 && (
             <div>
               <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                <Pill className="h-3 w-3" /> Medicamentos em uso
+                <Pill className="h-3 w-3" /> {t("medicationsLabel")}
               </h5>
               <div className="flex flex-wrap gap-1.5">
                 {result.medications.map((m, i) => (
@@ -231,7 +233,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
           {/* Conditions */}
           {result.conditions && result.conditions.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">Condições médicas</h5>
+              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">{t("conditionsLabel")}</h5>
               <ul className="text-sm space-y-0.5">
                 {result.conditions.map((c, i) => (
                   <li key={i}>• {c}</li>
@@ -243,7 +245,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
           {/* Contraindications */}
           {result.contraindications && result.contraindications.length > 0 && (
             <div>
-              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">Contraindicações</h5>
+              <h5 className="text-xs font-semibold text-muted-foreground uppercase mb-1">{t("contraindicationsLabel")}</h5>
               <ul className="text-sm space-y-0.5 text-orange-700">
                 {result.contraindications.map((c, i) => (
                   <li key={i}>⚠ {c}</li>
@@ -258,7 +260,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
           )}
           {result.recommendations && (
             <div className="bg-primary/5 p-3 rounded-lg">
-              <h5 className="text-xs font-semibold uppercase mb-1">Recomendações</h5>
+              <h5 className="text-xs font-semibold uppercase mb-1">{t("recommendationsLabel")}</h5>
               <p className="text-sm">{result.recommendations}</p>
             </div>
           )}
@@ -275,7 +277,7 @@ export function AnamnesisForm({ patientId, onCompleted }: Props) {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {saved ? "Salvo" : "Salvar Anamnese"}
+              {saved ? t("saved") : t("saveAnamnesis")}
             </Button>
           )}
         </div>
