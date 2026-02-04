@@ -6,32 +6,7 @@ import { toast } from "sonner"
 import { Loader2, Building2, User, Briefcase, Clock, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useClinic } from "@/hooks/useClinic"
-
-const STEPS = [
-  { key: "clinic", label: "Cl\u00ednica", icon: Building2 },
-  { key: "dentist", label: "Dentista", icon: User },
-  { key: "services", label: "Servi\u00e7os", icon: Briefcase },
-  { key: "schedule", label: "Hor\u00e1rios", icon: Clock },
-  { key: "done", label: "Pronto!", icon: CheckCircle2 },
-]
-
-const DAYS = [
-  { key: "monday", label: "Segunda" },
-  { key: "tuesday", label: "Ter\u00e7a" },
-  { key: "wednesday", label: "Quarta" },
-  { key: "thursday", label: "Quinta" },
-  { key: "friday", label: "Sexta" },
-  { key: "saturday", label: "S\u00e1bado" },
-]
-
-const COMMON_SERVICES = [
-  { name: "Consulta", price: "150", duration: "30" },
-  { name: "Limpeza", price: "200", duration: "45" },
-  { name: "Restaura\u00e7\u00e3o", price: "250", duration: "60" },
-  { name: "Extra\u00e7\u00e3o", price: "300", duration: "45" },
-  { name: "Canal", price: "800", duration: "90" },
-  { name: "Clareamento", price: "600", duration: "60" },
-]
+import { useTranslations } from "next-intl"
 
 interface DentistForm {
   name: string
@@ -57,8 +32,36 @@ interface ScheduleDay {
 export default function OnboardingPage() {
   const router = useRouter()
   const { clinic, refreshClinic } = useClinic()
+  const t = useTranslations("onboarding")
+  const tc = useTranslations("common")
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
+
+  const STEPS = [
+    { key: "clinic", label: t("clinic"), icon: Building2 },
+    { key: "dentist", label: t("dentist"), icon: User },
+    { key: "services", label: t("services"), icon: Briefcase },
+    { key: "schedule", label: t("schedule"), icon: Clock },
+    { key: "done", label: t("done"), icon: CheckCircle2 },
+  ]
+
+  const DAYS = [
+    { key: "monday", label: t("monday") },
+    { key: "tuesday", label: t("tuesday") },
+    { key: "wednesday", label: t("wednesday") },
+    { key: "thursday", label: t("thursday") },
+    { key: "friday", label: t("friday") },
+    { key: "saturday", label: t("saturday") },
+  ]
+
+  const COMMON_SERVICES = [
+    { name: t("consultation"), price: "150", duration: "30" },
+    { name: t("cleaning"), price: "200", duration: "45" },
+    { name: t("restoration"), price: "250", duration: "60" },
+    { name: t("extraction"), price: "300", duration: "45" },
+    { name: t("rootCanal"), price: "800", duration: "90" },
+    { name: t("whitening"), price: "600", duration: "60" },
+  ]
 
   // Clinic info
   const [clinicForm, setClinicForm] = useState({
@@ -112,7 +115,7 @@ export default function OnboardingPage() {
 
   async function handleClinicSave() {
     if (!clinicForm.name || !clinicForm.phone) {
-      toast.error("Preencha nome e telefone da cl\u00ednica")
+      toast.error(t("fillClinicNamePhone"))
       return
     }
     setLoading(true)
@@ -120,7 +123,7 @@ export default function OnboardingPage() {
       await api.put("/clinics/my/profile", clinicForm)
       setStep(1)
     } catch (error: any) {
-      toast.error(getErrorMessage(error, "Erro ao salvar dados da cl\u00ednica"))
+      toast.error(getErrorMessage(error, t("errorSavingClinic")))
     } finally {
       setLoading(false)
     }
@@ -128,7 +131,7 @@ export default function OnboardingPage() {
 
   async function handleDentistSave() {
     if (!dentist.name || !dentist.cro) {
-      toast.error("Preencha nome e CRO do dentista")
+      toast.error(t("fillDentistNameCro"))
       return
     }
     setLoading(true)
@@ -137,10 +140,10 @@ export default function OnboardingPage() {
       setStep(2)
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        toast.info("Dentista j\u00e1 cadastrado, continuando...")
+        toast.info(t("dentistAlreadyRegistered"))
         setStep(2)
       } else {
-        toast.error(getErrorMessage(error, "Erro ao cadastrar dentista"))
+        toast.error(getErrorMessage(error, t("errorRegisteringDentist")))
       }
     } finally {
       setLoading(false)
@@ -150,7 +153,7 @@ export default function OnboardingPage() {
   async function handleServicesSave() {
     const selected = services.filter((s) => s.selected)
     if (selected.length === 0 && !customService.name) {
-      toast.error("Selecione ou adicione pelo menos um servi\u00e7o")
+      toast.error(t("selectAtLeastOneService"))
       return
     }
     setLoading(true)
@@ -178,11 +181,11 @@ export default function OnboardingPage() {
         }
       }
       if (skipped > 0 && created === 0) {
-        toast.info("Servi\u00e7os j\u00e1 cadastrados anteriormente")
+        toast.info(t("servicesAlreadyRegistered"))
       }
       setStep(3)
     } catch (error: any) {
-      toast.error(getErrorMessage(error, "Erro ao cadastrar servi\u00e7os"))
+      toast.error(getErrorMessage(error, t("errorRegisteringServices")))
     } finally {
       setLoading(false)
     }
@@ -202,7 +205,7 @@ export default function OnboardingPage() {
       await refreshClinic()
       setStep(4)
     } catch (error: any) {
-      toast.error(getErrorMessage(error, "Erro ao salvar hor\u00e1rios"))
+      toast.error(getErrorMessage(error, t("errorSavingSchedule")))
     } finally {
       setLoading(false)
     }
@@ -214,8 +217,8 @@ export default function OnboardingPage() {
       <div className="border-b bg-card">
         <div className="max-w-3xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-lg font-bold">Configura&ccedil;&atilde;o inicial</h1>
-            <span className="text-sm text-muted-foreground">Passo {Math.min(step + 1, 5)} de 5</span>
+            <h1 className="text-lg font-bold">{t("initialSetup")}</h1>
+            <span className="text-sm text-muted-foreground">{t("stepOf", { current: Math.min(step + 1, 5), total: 5 })}</span>
           </div>
           <div className="flex gap-2">
             {STEPS.map((s, i) => (
@@ -247,48 +250,48 @@ export default function OnboardingPage() {
         {step === 0 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold">Dados da cl&iacute;nica</h2>
-              <p className="text-sm text-muted-foreground mt-1">Preencha as informa&ccedil;&otilde;es b&aacute;sicas</p>
+              <h2 className="text-xl font-bold">{t("clinicData")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("fillBasicInfo")}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Nome da cl&iacute;nica *</label>
+                <label className="text-sm font-medium">{t("clinicName")}</label>
                 <input
                   value={clinicForm.name}
                   onChange={(e) => setClinicForm({ ...clinicForm, name: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Ex: Cl&iacute;nica Odonto Smile"
+                  placeholder={t("clinicNamePlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Telefone *</label>
+                <label className="text-sm font-medium">{t("phone")}</label>
                 <input
                   value={clinicForm.phone}
                   onChange={(e) => setClinicForm({ ...clinicForm, phone: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="(00) 00000-0000"
+                  placeholder={t("phonePlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">CEP</label>
+                <label className="text-sm font-medium">{t("zipCode")}</label>
                 <input
                   value={clinicForm.cep}
                   onChange={(e) => setClinicForm({ ...clinicForm, cep: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="00000-000"
+                  placeholder={t("zipCodePlaceholder")}
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Endere&ccedil;o</label>
+                <label className="text-sm font-medium">{t("address")}</label>
                 <input
                   value={clinicForm.address}
                   onChange={(e) => setClinicForm({ ...clinicForm, address: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Rua, n&uacute;mero, bairro"
+                  placeholder={t("addressPlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Cidade</label>
+                <label className="text-sm font-medium">{t("city")}</label>
                 <input
                   value={clinicForm.city}
                   onChange={(e) => setClinicForm({ ...clinicForm, city: e.target.value })}
@@ -296,12 +299,12 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Estado</label>
+                <label className="text-sm font-medium">{t("state")}</label>
                 <input
                   value={clinicForm.state}
                   onChange={(e) => setClinicForm({ ...clinicForm, state: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="SP"
+                  placeholder={t("statePlaceholder")}
                   maxLength={2}
                 />
               </div>
@@ -309,7 +312,7 @@ export default function OnboardingPage() {
             <div className="flex justify-end">
               <Button onClick={handleClinicSave} disabled={loading} className="gap-2">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                Pr&oacute;ximo
+                {tc("next")}
               </Button>
             </div>
           </div>
@@ -319,39 +322,39 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold">Cadastre o primeiro dentista</h2>
-              <p className="text-sm text-muted-foreground mt-1">Voc&ecirc; pode adicionar mais depois</p>
+              <h2 className="text-xl font-bold">{t("registerFirstDentist")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("canAddMoreLater")}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Nome completo *</label>
+                <label className="text-sm font-medium">{t("fullName")}</label>
                 <input
                   value={dentist.name}
                   onChange={(e) => setDentist({ ...dentist, name: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Dr(a). Nome Completo"
+                  placeholder={t("fullNamePlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">CRO *</label>
+                <label className="text-sm font-medium">{t("cro")}</label>
                 <input
                   value={dentist.cro}
                   onChange={(e) => setDentist({ ...dentist, cro: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="CRO-SP 12345"
+                  placeholder={t("croPlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Especialidade</label>
+                <label className="text-sm font-medium">{t("specialty")}</label>
                 <input
                   value={dentist.specialty}
                   onChange={(e) => setDentist({ ...dentist, specialty: e.target.value })}
                   className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="Ortodontia, Endodontia..."
+                  placeholder={t("specialtyPlaceholder")}
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Telefone</label>
+                <label className="text-sm font-medium">{tc("phone")}</label>
                 <input
                   value={dentist.phone}
                   onChange={(e) => setDentist({ ...dentist, phone: e.target.value })}
@@ -359,7 +362,7 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">E-mail</label>
+                <label className="text-sm font-medium">{t("email")}</label>
                 <input
                   value={dentist.email}
                   onChange={(e) => setDentist({ ...dentist, email: e.target.value })}
@@ -369,11 +372,11 @@ export default function OnboardingPage() {
             </div>
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(0)} className="gap-2">
-                <ArrowLeft className="h-4 w-4" /> Voltar
+                <ArrowLeft className="h-4 w-4" /> {tc("back")}
               </Button>
               <Button onClick={handleDentistSave} disabled={loading} className="gap-2">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                Pr&oacute;ximo
+                {tc("next")}
               </Button>
             </div>
           </div>
@@ -383,8 +386,8 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold">Selecione os servi&ccedil;os</h2>
-              <p className="text-sm text-muted-foreground mt-1">Escolha os servi&ccedil;os que sua cl&iacute;nica oferece</p>
+              <h2 className="text-xl font-bold">{t("selectServices")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("selectServicesDesc")}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {services.map((s, i) => (
@@ -406,25 +409,25 @@ export default function OnboardingPage() {
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-sm font-medium mb-3">Adicionar servi&ccedil;o personalizado</p>
+              <p className="text-sm font-medium mb-3">{t("addCustomService")}</p>
               <div className="flex gap-2">
                 <input
                   value={customService.name}
                   onChange={(e) => setCustomService({ ...customService, name: e.target.value })}
-                  placeholder="Nome do servi&ccedil;o"
+                  placeholder={t("serviceNamePlaceholder")}
                   className="flex-1 px-3 py-2 border rounded-lg text-sm"
                 />
                 <input
                   value={customService.price}
                   onChange={(e) => setCustomService({ ...customService, price: e.target.value })}
-                  placeholder="Pre&ccedil;o"
+                  placeholder={t("pricePlaceholder")}
                   type="number"
                   className="w-24 px-3 py-2 border rounded-lg text-sm"
                 />
                 <input
                   value={customService.duration}
                   onChange={(e) => setCustomService({ ...customService, duration: e.target.value })}
-                  placeholder="Min"
+                  placeholder={t("minPlaceholder")}
                   type="number"
                   className="w-20 px-3 py-2 border rounded-lg text-sm"
                 />
@@ -433,11 +436,11 @@ export default function OnboardingPage() {
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
-                <ArrowLeft className="h-4 w-4" /> Voltar
+                <ArrowLeft className="h-4 w-4" /> {tc("back")}
               </Button>
               <Button onClick={handleServicesSave} disabled={loading} className="gap-2">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-                Pr&oacute;ximo
+                {tc("next")}
               </Button>
             </div>
           </div>
@@ -447,8 +450,8 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold">Hor&aacute;rio de funcionamento</h2>
-              <p className="text-sm text-muted-foreground mt-1">Configure os dias e hor&aacute;rios da cl&iacute;nica</p>
+              <h2 className="text-xl font-bold">{t("businessHours")}</h2>
+              <p className="text-sm text-muted-foreground mt-1">{t("businessHoursDesc")}</p>
             </div>
             <div className="space-y-3">
               {DAYS.map((d) => {
@@ -472,7 +475,7 @@ export default function OnboardingPage() {
                           onChange={(e) => setSchedule({ ...schedule, [d.key]: { ...daySchedule, start: e.target.value } })}
                           className="px-2 py-1 border rounded text-sm"
                         />
-                        <span className="text-muted-foreground text-sm">at&eacute;</span>
+                        <span className="text-muted-foreground text-sm">{t("until")}</span>
                         <input
                           type="time"
                           value={daySchedule.end}
@@ -482,7 +485,7 @@ export default function OnboardingPage() {
                       </div>
                     )}
                     {!daySchedule.enabled && (
-                      <span className="text-sm text-muted-foreground">Fechado</span>
+                      <span className="text-sm text-muted-foreground">{t("closed")}</span>
                     )}
                   </div>
                 )
@@ -490,11 +493,11 @@ export default function OnboardingPage() {
             </div>
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(2)} className="gap-2">
-                <ArrowLeft className="h-4 w-4" /> Voltar
+                <ArrowLeft className="h-4 w-4" /> {tc("back")}
               </Button>
               <Button onClick={handleScheduleSave} disabled={loading} className="gap-2">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                Concluir
+                {t("finish")}
               </Button>
             </div>
           </div>
@@ -507,17 +510,17 @@ export default function OnboardingPage() {
               <CheckCircle2 className="h-10 w-10 text-green-600" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Tudo pronto!</h2>
+              <h2 className="text-2xl font-bold">{t("allDone")}</h2>
               <p className="text-muted-foreground mt-2">
-                Sua cl&iacute;nica est&aacute; configurada e pronta para uso.
+                {t("clinicReady")}
               </p>
             </div>
             <div className="flex justify-center gap-3">
               <Button variant="outline" onClick={() => router.push("/patients")}>
-                Cadastrar pacientes
+                {t("registerPatients")}
               </Button>
               <Button onClick={() => router.push("/home")} className="gap-2">
-                Ir para o Dashboard <ArrowRight className="h-4 w-4" />
+                {t("goToDashboard")} <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           </div>

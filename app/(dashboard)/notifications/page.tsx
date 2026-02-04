@@ -5,7 +5,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { formatDistanceToNow, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { enUS } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { Bell, Check, CheckCheck, Filter, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -38,16 +41,6 @@ interface NotificationsResponse {
   }
 }
 
-const typeLabels: Record<string, string> = {
-  appointment: "Agendamento",
-  patient: "Paciente",
-  reminder: "Lembrete",
-  system: "Sistema",
-  nps: "NPS",
-  billing: "Faturamento",
-  whatsapp: "WhatsApp",
-}
-
 const typeColors: Record<string, string> = {
   appointment: "bg-blue-500",
   patient: "bg-green-500",
@@ -62,6 +55,21 @@ export default function NotificationsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [filter, setFilter] = useState<string>("all")
+  const t = useTranslations("notifications")
+  const tc = useTranslations("common")
+  const locale = useLocale()
+  const dateLocale = locale === "pt-BR" ? ptBR : enUS
+
+  const typeLabels: Record<string, string> = {
+    appointment: t("typeAppointment"),
+    patient: t("typePatient"),
+    reminder: t("typeReminder"),
+    system: t("typeSystem"),
+    nps: t("typeNps"),
+    billing: t("typeBilling"),
+    whatsapp: t("typeWhatsapp"),
+  }
+
   const limit = 20
 
   const { data, isLoading } = useQuery<NotificationsResponse>({
@@ -93,7 +101,7 @@ export default function NotificationsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
       queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
-      toast.success("Todas as notificações marcadas como lidas")
+      toast.success(t("allMarkedAsRead"))
     },
   })
 
@@ -115,11 +123,9 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Notificações</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground text-sm">
-            {unreadCount > 0
-              ? `Você tem ${unreadCount} notificação${unreadCount > 1 ? "ões" : ""} não lida${unreadCount > 1 ? "s" : ""}`
-              : "Todas as notificações foram lidas"}
+            {unreadCount > 0 ? t("unreadCount", { count: unreadCount }) : t("allRead")}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -135,7 +141,7 @@ export default function NotificationsPage() {
               ) : (
                 <CheckCheck className="h-4 w-4 mr-2" />
               )}
-              Marcar todas como lidas
+              {t("markAllAsRead")}
             </Button>
           )}
         </div>
@@ -146,11 +152,11 @@ export default function NotificationsPage() {
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={filter} onValueChange={setFilter}>
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Filtrar por tipo" />
+            <SelectValue placeholder={t("filterByType")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            <SelectItem value="unread">Não lidas</SelectItem>
+            <SelectItem value="all">{t("all")}</SelectItem>
+            <SelectItem value="unread">{t("unread")}</SelectItem>
             {uniqueTypes.map((type) => (
               <SelectItem key={type} value={type}>
                 {typeLabels[type] || type}
@@ -165,7 +171,7 @@ export default function NotificationsPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Bell className="h-4 w-4" />
-            {meta ? `${meta.total} notificações` : "Notificações"}
+            {meta ? t("totalNotifications", { count: meta.total }) : t("title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -178,8 +184,8 @@ export default function NotificationsPage() {
               <Bell className="h-12 w-12 mb-3 opacity-20" />
               <p className="text-sm">
                 {filter !== "all"
-                  ? "Nenhuma notificação encontrada com este filtro"
-                  : "Nenhuma notificação"}
+                  ? t("noNotificationsFilter")
+                  : t("noNotifications")}
               </p>
             </div>
           ) : (
@@ -227,7 +233,7 @@ export default function NotificationsPage() {
                         <p className="text-xs text-muted-foreground mt-1.5">
                           {formatDistanceToNow(new Date(notification.created_at), {
                             addSuffix: true,
-                            locale: ptBR,
+                            locale: dateLocale,
                           })}
                           {" · "}
                           {format(new Date(notification.created_at), "dd/MM/yyyy HH:mm")}
@@ -257,7 +263,7 @@ export default function NotificationsPage() {
           {meta && meta.totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-6 py-3">
               <p className="text-sm text-muted-foreground">
-                Página {meta.page} de {meta.totalPages}
+                {t("pageOf", { page: meta.page, totalPages: meta.totalPages })}
               </p>
               <div className="flex gap-2">
                 <Button
@@ -266,7 +272,7 @@ export default function NotificationsPage() {
                   disabled={page <= 1}
                   onClick={() => setPage((p) => p - 1)}
                 >
-                  Anterior
+                  {t("previous")}
                 </Button>
                 <Button
                   variant="outline"
@@ -274,7 +280,7 @@ export default function NotificationsPage() {
                   disabled={page >= meta.totalPages}
                   onClick={() => setPage((p) => p + 1)}
                 >
-                  Próxima
+                  {t("nextPage")}
                 </Button>
               </div>
             </div>

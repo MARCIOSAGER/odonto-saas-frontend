@@ -8,6 +8,7 @@ import { useServices } from "@/hooks/useServices"
 import { Plus, Loader2, Trash2, Clock, Settings2, Pencil } from "lucide-react"
 import { ServiceForm } from "@/components/forms/service-form"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function ServicesPage() {
+  const t = useTranslations("services")
+  const tc = useTranslations("common")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -60,9 +63,9 @@ export default function ServicesPage() {
     if (!deleteId) return
     try {
       await deleteService.mutateAsync(deleteId)
-      toast.success("Serviço excluído com sucesso!")
+      toast.success(t("deleteSuccess"))
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao excluir serviço")
+      toast.error(error.response?.data?.message || t("deleteError"))
     } finally {
       setDeleteId(null)
     }
@@ -79,9 +82,9 @@ export default function ServicesPage() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-destructive font-medium">Erro ao carregar serviços</div>
+        <div className="text-destructive font-medium">{t("loadError")}</div>
         <Button onClick={() => window.location.reload()} variant="outline">
-          Tentar novamente
+          {tc("tryAgain")}
         </Button>
       </div>
     )
@@ -91,12 +94,12 @@ export default function ServicesPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Serviços</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Configure os procedimentos e valores da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
         <Button className="gap-2" onClick={handleCreate}>
           <Plus size={18} />
-          Novo Serviço
+          {t("newService")}
         </Button>
       </div>
 
@@ -104,16 +107,16 @@ export default function ServicesPage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-100">
-              {editingItem ? "Editar Serviço" : "Novo Serviço"}
+              {editingItem ? t("editService") : t("newService")}
             </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              {editingItem 
-                ? "Atualize as informações do procedimento selecionado." 
-                : "Cadastre um novo procedimento com nome, duração e preço."}
+              {editingItem
+                ? t("formSubtitleEdit")
+                : t("formSubtitleNew")}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
-            <ServiceForm 
+            <ServiceForm
               initialData={editingItem}
               onSubmit={handleFormSubmit}
               onCancel={() => setIsModalOpen(false)}
@@ -126,15 +129,15 @@ export default function ServicesPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>{tc("deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+              {tc("deleteConfirmMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Excluir
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -151,17 +154,17 @@ export default function ServicesPage() {
               <Table className="min-w-[500px]">
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Procedimento</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-center">Duração</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-right">Preço</TH>
-                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("procedure")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-center">{t("duration")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100 text-right">{t("price")}</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">{tc("actions")}</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {safeServices.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum serviço cadastrado.
+                        {t("noServices")}
                       </TD>
                     </TR>
                   ) : (
@@ -189,17 +192,17 @@ export default function ServicesPage() {
                         </TD>
                         <TD className="text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                               onClick={() => handleEdit(s)}
                             >
                               <Pencil size={14} />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                               onClick={() => setDeleteId(s.id)}
                             >

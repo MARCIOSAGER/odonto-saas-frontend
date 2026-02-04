@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 import { useClinic } from "@/hooks/useClinic"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,6 +13,7 @@ import {
 
 export default function EmailSettingsPage() {
   const { emailSettings, isLoadingEmail, updateEmailSettings, testEmail } = useClinic()
+  const t = useTranslations("emailSettings")
 
   const [form, setForm] = useState({
     smtp_host: "",
@@ -55,7 +57,7 @@ export default function EmailSettingsPage() {
       const result = await testEmail.mutateAsync()
       setTestResult(result)
     } catch {
-      setTestResult({ success: false, message: "Erro ao testar e-mail" })
+      setTestResult({ success: false, message: t("testError") })
     }
   }
 
@@ -70,8 +72,8 @@ export default function EmailSettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configurações de E-mail</h1>
-        <p className="text-muted-foreground">Configure o servidor SMTP para envio de e-mails da clínica.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* SMTP Configuration */}
@@ -79,16 +81,16 @@ export default function EmailSettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Server className="h-5 w-5" />
-            Servidor SMTP
+            {t("smtpServer")}
           </CardTitle>
           <CardDescription>
-            Configure as credenciais do servidor de e-mail para envio de notificações, lembretes e recuperação de senha.
+            {t("smtpServerDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Servidor SMTP</label>
+              <label className="text-sm font-medium">{t("smtpHost")}</label>
               <Input
                 placeholder="smtp.gmail.com"
                 value={form.smtp_host}
@@ -96,7 +98,7 @@ export default function EmailSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Porta</label>
+              <label className="text-sm font-medium">{t("port")}</label>
               <Input
                 type="number"
                 placeholder="465"
@@ -108,7 +110,7 @@ export default function EmailSettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Usuário / E-mail</label>
+              <label className="text-sm font-medium">{t("userEmail")}</label>
               <Input
                 placeholder="seu-email@provedor.com"
                 value={form.smtp_user}
@@ -116,11 +118,11 @@ export default function EmailSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Senha</label>
+              <label className="text-sm font-medium">{t("password")}</label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder={emailSettings?.smtp_pass_set ? "Senha configurada (********)" : "Senha SMTP"}
+                  placeholder={emailSettings?.smtp_pass_set ? t("passwordConfigured") : t("smtpPassword")}
                   value={form.smtp_pass}
                   onChange={(e) => setForm({ ...form, smtp_pass: e.target.value })}
                   className="pr-10"
@@ -137,14 +139,14 @@ export default function EmailSettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">E-mail Remetente (From)</label>
+            <label className="text-sm font-medium">{t("senderEmail")}</label>
             <Input
-              placeholder="Clínica Odonto <noreply@suaclinica.com>"
+              placeholder={t("senderPlaceholder")}
               value={form.smtp_from}
               onChange={(e) => setForm({ ...form, smtp_from: e.target.value })}
             />
             <p className="text-xs text-muted-foreground">
-              Formato: Nome &lt;email@dominio.com&gt; ou apenas email@dominio.com
+              {t("senderHint")}
             </p>
           </div>
 
@@ -153,7 +155,7 @@ export default function EmailSettingsPage() {
               checked={form.smtp_secure}
               onCheckedChange={(checked) => setForm({ ...form, smtp_secure: checked })}
             />
-            <label className="text-sm font-medium">Usar SSL/TLS (recomendado para porta 465)</label>
+            <label className="text-sm font-medium">{t("useSsl")}</label>
           </div>
 
           <Button
@@ -166,7 +168,7 @@ export default function EmailSettingsPage() {
             ) : (
               <Save className="h-4 w-4 mr-2" />
             )}
-            Salvar Configurações
+            {t("saveSettings")}
           </Button>
         </CardContent>
       </Card>
@@ -176,10 +178,10 @@ export default function EmailSettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Send className="h-5 w-5" />
-            Testar Envio
+            {t("testSend")}
           </CardTitle>
           <CardDescription>
-            Salva as configurações e envia um e-mail de teste para o seu endereço cadastrado.
+            {t("testSendDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -193,7 +195,7 @@ export default function EmailSettingsPage() {
             ) : (
               <Mail className="h-4 w-4 mr-2" />
             )}
-            Enviar E-mail de Teste
+            {t("sendTestEmail")}
           </Button>
 
           {testResult && (
@@ -219,15 +221,15 @@ export default function EmailSettingsPage() {
           <div className="flex gap-3">
             <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
             <div className="space-y-3 text-sm">
-              <p className="font-medium text-foreground">Provedores SMTP comuns:</p>
+              <p className="font-medium text-foreground">{t("commonProviders")}</p>
               <div className="grid gap-2 text-muted-foreground">
-                <div><strong>Gmail:</strong> smtp.gmail.com, porta 465 (SSL) - requer Senha de App</div>
-                <div><strong>Outlook:</strong> smtp.office365.com, porta 587 (desativar SSL)</div>
-                <div><strong>Hostinger:</strong> smtp.hostinger.com, porta 465 (SSL)</div>
-                <div><strong>Zoho:</strong> smtp.zoho.com, porta 465 (SSL)</div>
+                <div>{t("gmailInfo")}</div>
+                <div>{t("outlookInfo")}</div>
+                <div>{t("hostingerInfo")}</div>
+                <div>{t("zohoInfo")}</div>
               </div>
               <p className="text-xs text-muted-foreground">
-                Se nenhum SMTP for configurado, o sistema usará as configurações padrão do servidor.
+                {t("defaultSmtpNote")}
               </p>
             </div>
           </div>

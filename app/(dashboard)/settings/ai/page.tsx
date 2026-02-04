@@ -11,6 +11,7 @@ import {
   MousePointer, Stethoscope, MapPin, Bell
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 const providers = [
   { id: "anthropic", name: "Claude", subtitle: "Anthropic", color: "bg-orange-500" },
@@ -49,21 +50,29 @@ const modelOptions: Record<string, ModelOption[]> = {
   ],
 }
 
-const badgeStyles: Record<string, { label: string; className: string }> = {
-  economico: { label: "Econômico", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  recomendado: { label: "Recomendado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  premium: { label: "Premium", className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  gratis: { label: "Grátis", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-}
-
-const providerInfo: Record<string, string> = {
-  anthropic: "Excelente compreensão de contexto e tom profissional. Ideal para atendimento ao paciente.",
-  openai: "Grande variedade de modelos. GPT-4o Mini é a opção mais econômica do mercado.",
-  google: "Modelos Flash são muito rápidos e econômicos. Gemini 2.5 Flash tem tier gratuito generoso.",
+const badgeStyles: Record<string, { className: string }> = {
+  economico: { className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
+  recomendado: { className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
+  premium: { className: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
+  gratis: { className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
 }
 
 export default function AISettingsPage() {
   const { aiSettings, isLoadingAI, updateAISettings, testAI } = useClinic()
+  const t = useTranslations("aiSettings")
+
+  const badgeLabels: Record<string, string> = {
+    economico: t("badgeEconomic"),
+    recomendado: t("badgeRecommended"),
+    premium: t("badgePremium"),
+    gratis: t("badgeFree"),
+  }
+
+  const providerInfo: Record<string, string> = {
+    anthropic: t("providerInfoAnthropic"),
+    openai: t("providerInfoOpenai"),
+    google: t("providerInfoGoogle"),
+  }
 
   const [settings, setSettings] = useState<any>({
     ai_enabled: true,
@@ -190,8 +199,8 @@ export default function AISettingsPage() {
     <div className="max-w-4xl space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Assistente de IA</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Configure a inteligência artificial que atende seus pacientes via WhatsApp.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
         <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5">
           <Switch
@@ -199,7 +208,7 @@ export default function AISettingsPage() {
             onCheckedChange={(v: boolean) => setSettings({ ...settings, ai_enabled: v })}
             className="scale-75"
           />
-          {settings.ai_enabled ? "IA Ativa" : "IA Inativa"}
+          {settings.ai_enabled ? t("aiActive") : t("aiInactive")}
         </div>
       </div>
 
@@ -209,10 +218,10 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Cpu size={20} className="text-primary" />
-              Provedor e Modelo
+              {t("providerAndModel")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Escolha qual provedor de IA será usado para gerar as respostas.
+              {t("providerAndModelDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -250,7 +259,7 @@ export default function AISettingsPage() {
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Key size={14} />
-                API Key - {providers.find(p => p.id === settings.ai_provider)?.name}
+                {`${t("apiKey")} - ${providers.find(p => p.id === settings.ai_provider)?.name}`}
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -260,8 +269,8 @@ export default function AISettingsPage() {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, ai_api_key: e.target.value })}
                     placeholder={
                       aiSettings?.ai_api_key_set
-                        ? `Chave configurada (${aiSettings.ai_api_key_masked || "****"})`
-                        : "Cole sua API Key aqui..."
+                        ? t("apiKeyConfigured", { mask: aiSettings.ai_api_key_masked || "****" })
+                        : t("apiKeyPlaceholder")
                     }
                     className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100 pr-10 font-mono text-sm"
                   />
@@ -277,19 +286,19 @@ export default function AISettingsPage() {
               {aiSettings?.ai_api_key_set && !settings.ai_api_key && (
                 <p className="text-xs text-green-600 flex items-center gap-1">
                   <CheckCircle size={12} />
-                  Chave API configurada. Deixe em branco para manter a atual.
+                  {t("apiKeyConfiguredHint")}
                 </p>
               )}
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {settings.ai_provider === "anthropic" && "Obtenha sua chave em console.anthropic.com"}
-                {settings.ai_provider === "openai" && "Obtenha sua chave em platform.openai.com"}
-                {settings.ai_provider === "google" && "Obtenha sua chave em aistudio.google.com"}
+                {settings.ai_provider === "anthropic" && t("apiKeyHintAnthropic")}
+                {settings.ai_provider === "openai" && t("apiKeyHintOpenai")}
+                {settings.ai_provider === "google" && t("apiKeyHintGoogle")}
               </p>
             </div>
 
             {/* Modelo */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Modelo</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("model")}</label>
               <div className="grid gap-2">
                 {currentModels.map((m) => (
                   <button
@@ -317,7 +326,7 @@ export default function AISettingsPage() {
                           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{m.label}</span>
                           {m.badge && badgeStyles[m.badge] && (
                             <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", badgeStyles[m.badge].className)}>
-                              {badgeStyles[m.badge].label}
+                              {badgeLabels[m.badge]}
                             </span>
                           )}
                         </div>
@@ -327,12 +336,12 @@ export default function AISettingsPage() {
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-gray-400">Preços: entrada / saída por 1 milhão de tokens. Uma conversa típica consome ~500-2000 tokens.</p>
+              <p className="text-[10px] text-gray-400">{t("pricingNote")}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Temperatura ({settings.ai_temperature})
+                  {t("temperature", { value: settings.ai_temperature })}
                 </label>
                 <input
                   type="range"
@@ -344,8 +353,8 @@ export default function AISettingsPage() {
                   className="w-full h-11 accent-primary"
                 />
                 <div className="flex justify-between text-[10px] text-gray-400">
-                  <span>Preciso</span>
-                  <span>Criativo</span>
+                  <span>{t("precise")}</span>
+                  <span>{t("creative")}</span>
                 </div>
               </div>
             </div>
@@ -364,18 +373,18 @@ export default function AISettingsPage() {
                 ) : (
                   <Zap size={14} />
                 )}
-                Testar Conexão
+                {t("testConnection")}
               </Button>
               {testStatus === "success" && (
                 <span className="text-sm text-green-600 flex items-center gap-1">
                   <CheckCircle size={14} />
-                  Conexão funcionando!
+                  {t("connectionSuccess")}
                 </span>
               )}
               {testStatus === "error" && (
                 <span className="text-sm text-red-600 flex items-center gap-1">
                   <XCircle size={14} />
-                  Falha na conexão. Verifique a API Key.
+                  {t("connectionError")}
                 </span>
               )}
             </div>
@@ -387,55 +396,55 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Bot size={20} className="text-primary" />
-              Identidade e Personalidade
+              {t("identityTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Assistente</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("assistantName")}</label>
                 <Input
                   value={settings.assistant_name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, assistant_name: e.target.value })}
-                  placeholder="Ex: Sofia"
+                  placeholder={t("assistantNamePlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Personalidade</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("personality")}</label>
                 <Input
                   value={settings.assistant_personality || ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, assistant_personality: e.target.value })}
-                  placeholder="Amigável, profissional e prestativa"
+                  placeholder={t("personalityPlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem de Boas-vindas</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("welcomeMessage")}</label>
               <textarea
                 className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={settings.welcome_message || ""}
                 onChange={(e) => setSettings({ ...settings, welcome_message: e.target.value })}
-                placeholder="Mensagem enviada quando o paciente inicia uma conversa..."
+                placeholder={t("welcomeMessagePlaceholder")}
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem de Fallback</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("fallbackMessage")}</label>
                 <Input
                   value={settings.fallback_message || ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, fallback_message: e.target.value })}
-                  placeholder="Quando a IA não entende..."
+                  placeholder={t("fallbackPlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Fora do Horário</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("outOfHours")}</label>
                 <Input
                   value={settings.out_of_hours_message || ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, out_of_hours_message: e.target.value })}
-                  placeholder="Mensagem fora do expediente..."
+                  placeholder={t("outOfHoursPlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
@@ -448,45 +457,45 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Shield size={20} className="text-primary" />
-              Capacidades e Permissões
+              {t("capabilitiesTitle")}
             </CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Defina o que a IA tem autonomia para fazer no sistema.</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-gray-400">{t("capabilitiesDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <PermissionToggle
-              label="Agendar Consultas"
-              description="Permitir que a IA crie novos agendamentos."
+              label={t("autoSchedule")}
+              description={t("autoScheduleDesc")}
               checked={settings.auto_schedule}
               onChange={(v) => setSettings({ ...settings, auto_schedule: v })}
             />
             <PermissionToggle
-              label="Confirmar Consultas"
-              description="A IA pode confirmar agendamentos automaticamente."
+              label={t("autoConfirm")}
+              description={t("autoConfirmDesc")}
               checked={settings.auto_confirm}
               onChange={(v) => setSettings({ ...settings, auto_confirm: v })}
             />
             <PermissionToggle
-              label="Cancelar Consultas"
-              description="Permitir cancelamentos via chat."
+              label={t("autoCancel")}
+              description={t("autoCancelDesc")}
               checked={settings.auto_cancel}
               onChange={(v) => setSettings({ ...settings, auto_cancel: v })}
             />
             <PermissionToggle
-              label="Notificar Transferência"
-              description="Avisar quando transferir para humano."
+              label={t("notifyTransfer")}
+              description={t("notifyTransferDesc")}
               checked={settings.notify_on_transfer}
               onChange={(v) => setSettings({ ...settings, notify_on_transfer: v })}
             />
             <PermissionToggle
-              label="Só Horário Comercial"
-              description="A IA só responde durante o horário de funcionamento."
+              label={t("workingHoursOnly")}
+              description={t("workingHoursOnlyDesc")}
               checked={settings.working_hours_only}
               onChange={(v) => setSettings({ ...settings, working_hours_only: v })}
             />
             <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-border bg-muted/10">
               <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Mensagens de Contexto</p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400">Quantas mensagens anteriores enviar para a IA.</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t("contextMessages")}</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">{t("contextMessagesDesc")}</p>
               </div>
               <Input
                 type="number"
@@ -505,46 +514,46 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <MessageSquare size={20} className="text-primary" />
-              Instruções Avançadas
+              {t("advancedTitle")}
             </CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Dê diretrizes específicas sobre o atendimento da sua clínica.</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-gray-400">{t("advancedDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instruções Customizadas</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("customInstructions")}</label>
               <textarea
                 className="flex min-h-[120px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={settings.custom_instructions || ""}
                 onChange={(e) => setSettings({ ...settings, custom_instructions: e.target.value })}
-                placeholder={"Exemplos:\n- Sempre mencione que temos estacionamento gratuito\n- Aceitamos cartão de crédito em até 12x\n- Priorize agendamentos para o período da manhã\n- Ofereça 10% de desconto para pacientes novos\n- Nosso diferencial é o atendimento humanizado"}
+                placeholder={t("customInstructionsPlaceholder")}
               />
-              <p className="text-[10px] text-gray-400">Máximo 2000 caracteres. Use para regras específicas do seu atendimento.</p>
+              <p className="text-[10px] text-gray-400">{t("customInstructionsHint")}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Transferência para Humano</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("transferKeywords")}</label>
                 <Input
                   value={settings.transfer_keywords}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, transfer_keywords: e.target.value })}
-                  placeholder="reclamação, humano, atendente, gerente, insatisfeito"
+                  placeholder={t("transferKeywordsPlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
-                <p className="text-[10px] text-gray-400">Separadas por vírgula. Quando o paciente usar essas palavras, a IA encerra e transfere para atendente humano.</p>
+                <p className="text-[10px] text-gray-400">{t("transferKeywordsHint")}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Tópicos que a IA não deve abordar</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("blockedTopics")}</label>
                 <Input
                   value={settings.blocked_topics}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSettings({ ...settings, blocked_topics: e.target.value })}
-                  placeholder="política, religião, concorrentes, diagnóstico"
+                  placeholder={t("blockedTopicsPlaceholder")}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
-                <p className="text-[10px] text-gray-400">Separados por vírgula. A IA recusará educadamente falar sobre esses assuntos.</p>
+                <p className="text-[10px] text-gray-400">{t("blockedTopicsHint")}</p>
               </div>
             </div>
             <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
               <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
-              <p><strong>Dica:</strong> A IA já tem acesso automático aos seus serviços, preços, dentistas e horários disponíveis. Você não precisa repetir essas informações nas instruções customizadas. Use este campo apenas para regras específicas da sua clínica.</p>
+              <p><strong>{t("tip")}:</strong> {t("advancedTip")}</p>
             </div>
           </CardContent>
         </Card>
@@ -554,40 +563,40 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <MousePointer size={20} className="text-primary" />
-              Mensagens Interativas
+              {t("interactiveTitle")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Configure menus, botões e pesquisas interativas no WhatsApp para uma experiência mais rica.
+              {t("interactiveDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <PermissionToggle
-              label="Menu de Boas-vindas"
-              description="Lista de opções quando o paciente inicia conversa."
+              label={t("welcomeMenu")}
+              description={t("welcomeMenuDesc")}
               checked={settings.use_welcome_menu}
               onChange={(v) => setSettings({ ...settings, use_welcome_menu: v })}
             />
             <PermissionToggle
-              label="Botões de Confirmação"
-              description="Botões interativos para confirmar/remarcar/cancelar."
+              label={t("confirmationButtons")}
+              description={t("confirmationButtonsDesc")}
               checked={settings.use_confirmation_buttons}
               onChange={(v) => setSettings({ ...settings, use_confirmation_buttons: v })}
             />
             <PermissionToggle
-              label="Lista de Horários"
-              description="Horários disponíveis em lista selecionável."
+              label={t("timeslotList")}
+              description={t("timeslotListDesc")}
               checked={settings.use_timeslot_list}
               onChange={(v) => setSettings({ ...settings, use_timeslot_list: v })}
             />
             <PermissionToggle
-              label="Pesquisa de Satisfação"
-              description="Enquete automática após consulta realizada."
+              label={t("satisfactionPoll")}
+              description={t("satisfactionPollDesc")}
               checked={settings.use_satisfaction_poll}
               onChange={(v) => setSettings({ ...settings, use_satisfaction_poll: v })}
             />
             <PermissionToggle
-              label="Enviar Localização"
-              description="Enviar mapa da clínica quando perguntarem o endereço."
+              label={t("sendLocation")}
+              description={t("sendLocationDesc")}
               checked={settings.use_send_location}
               onChange={(v) => setSettings({ ...settings, use_send_location: v })}
             />
@@ -595,7 +604,7 @@ export default function AISettingsPage() {
               <div className="sm:col-span-2 flex items-start gap-2 p-3 rounded-lg bg-muted/20 border border-border">
                 <MapPin size={16} className="shrink-0 mt-1 text-primary" />
                 <div className="flex-1 space-y-2">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Configure latitude e longitude da clínica nas configurações gerais da clínica.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t("sendLocationHint")}</p>
                 </div>
               </div>
             )}
@@ -607,16 +616,16 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Stethoscope size={20} className="text-primary" />
-              Dentista via WhatsApp
+              {t("dentistWhatsappTitle")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Permita que os dentistas interajam com a IA pelo WhatsApp para consultar agenda, cancelar e reagendar.
+              {t("dentistWhatsappDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <PermissionToggle
-              label="Ativar IA para Dentistas"
-              description="Dentistas podem consultar agenda, cancelar e reagendar via WhatsApp."
+              label={t("enableDentistAi")}
+              description={t("enableDentistAiDesc")}
               checked={settings.dentist_ai_enabled}
               onChange={(v) => setSettings({ ...settings, dentist_ai_enabled: v })}
             />
@@ -624,14 +633,14 @@ export default function AISettingsPage() {
               <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                 <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
                 <div>
-                  <p><strong>Como funciona:</strong> O dentista envia mensagem pelo WhatsApp e a IA reconhece automaticamente pelo número cadastrado. Funcionalidades:</p>
+                  <p><strong>{t("howItWorks")}:</strong> {t("dentistAiHow")}</p>
                   <ul className="mt-1 space-y-0.5 list-disc list-inside">
-                    <li>Consultar agenda do dia ou semana</li>
-                    <li>Ver próximos pacientes</li>
-                    <li>Cancelar consultas de pacientes</li>
-                    <li>Reagendar consultas</li>
+                    <li>{t("dentistAiFeature1")}</li>
+                    <li>{t("dentistAiFeature2")}</li>
+                    <li>{t("dentistAiFeature3")}</li>
+                    <li>{t("dentistAiFeature4")}</li>
                   </ul>
-                  <p className="mt-1 text-[10px] opacity-75">Os dentistas precisam ter o número de telefone cadastrado no sistema.</p>
+                  <p className="mt-1 text-[10px] opacity-75">{t("dentistAiNote")}</p>
                 </div>
               </div>
             )}
@@ -643,16 +652,16 @@ export default function AISettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Bell size={20} className="text-primary" />
-              Lembretes Automáticos
+              {t("remindersTitle")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Envie lembretes automáticos via WhatsApp antes das consultas agendadas.
+              {t("remindersDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <PermissionToggle
-              label="Ativar Lembretes"
-              description="Enviar lembretes automáticos antes das consultas."
+              label={t("enableReminders")}
+              description={t("enableRemindersDesc")}
               checked={settings.reminder_enabled}
               onChange={(v) => setSettings({ ...settings, reminder_enabled: v })}
             />
@@ -660,45 +669,45 @@ export default function AISettingsPage() {
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <PermissionToggle
-                    label="Lembrete 24h antes"
-                    description="Envia mensagem um dia antes da consulta."
+                    label={t("reminder24h")}
+                    description={t("reminder24hDesc")}
                     checked={settings.reminder_24h}
                     onChange={(v) => setSettings({ ...settings, reminder_24h: v })}
                   />
                   <PermissionToggle
-                    label="Lembrete 1h antes"
-                    description="Envia mensagem uma hora antes da consulta."
+                    label={t("reminder1h")}
+                    description={t("reminder1hDesc")}
                     checked={settings.reminder_1h}
                     onChange={(v) => setSettings({ ...settings, reminder_1h: v })}
                   />
                 </div>
                 {settings.reminder_24h && (
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem 24h (opcional)</label>
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("reminderMessage24h")}</label>
                     <textarea
                       className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       value={settings.reminder_message_24h || ""}
                       onChange={(e) => setSettings({ ...settings, reminder_message_24h: e.target.value })}
-                      placeholder={"Deixe vazio para usar a mensagem padrão.\n\nVariáveis: {patientName}, {date}, {time}, {service}, {dentist}, {clinicName}"}
+                      placeholder={t("reminderMessagePlaceholder")}
                     />
                   </div>
                 )}
                 {settings.reminder_1h && (
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Mensagem 1h (opcional)</label>
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("reminderMessage1h")}</label>
                     <textarea
                       className="flex min-h-[80px] w-full rounded-md border-none bg-muted/30 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 ring-offset-background placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       value={settings.reminder_message_1h || ""}
                       onChange={(e) => setSettings({ ...settings, reminder_message_1h: e.target.value })}
-                      placeholder={"Deixe vazio para usar a mensagem padrão.\n\nVariáveis: {patientName}, {date}, {time}, {service}, {dentist}, {clinicName}"}
+                      placeholder={t("reminderMessagePlaceholder")}
                     />
                   </div>
                 )}
                 <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
                   <Info size={14} className="shrink-0 mt-0.5 text-blue-500" />
                   <div>
-                    <p><strong>Como funciona:</strong> O sistema verifica automaticamente a cada 5 minutos as consultas próximas e envia os lembretes via WhatsApp.</p>
-                    <p className="mt-1">O paciente recebe uma mensagem pedindo para confirmar com SIM ou NÃO. A resposta é processada pela IA normalmente.</p>
+                    <p><strong>{t("howItWorks")}:</strong> {t("reminderHow")}</p>
+                    <p className="mt-1">{t("reminderConfirmNote")}</p>
                   </div>
                 </div>
               </>
@@ -714,7 +723,7 @@ export default function AISettingsPage() {
             disabled={updateAISettings.isPending}
           >
             {updateAISettings.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}
-            Salvar Todas as Configurações
+            {t("saveAll")}
           </Button>
         </div>
       </div>

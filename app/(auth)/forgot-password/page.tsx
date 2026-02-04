@@ -12,9 +12,12 @@ import { Mail, ArrowLeft, CheckCircle } from "lucide-react"
 import { api, getUploadUrl } from "@/lib/api"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
+import { useTranslations } from "next-intl"
+import { LanguageSelector } from "@/components/language-selector"
 
 function ForgotPasswordContent() {
   const { branding } = usePlatformBranding()
+  const t = useTranslations("auth")
   const [sent, setSent] = useState(false)
   const {
     register,
@@ -29,7 +32,7 @@ function ForgotPasswordContent() {
       await api.post("/auth/forgot-password", { email: data.email })
       setSent(true)
     } catch {
-      toast.error("Erro ao enviar email. Tente novamente.")
+      toast.error(t("forgotPasswordError"))
     }
   }
 
@@ -66,20 +69,23 @@ function ForgotPasswordContent() {
 
         <div className="relative z-10 space-y-6">
           <h1 className="text-5xl font-bold leading-tight text-white">
-            Recupere seu acesso.
+            {t("forgotHeroTitle")}
           </h1>
           <p className="text-xl text-white/90 max-w-lg">
-            Enviaremos um link para o seu e-mail para criar uma nova senha.
+            {t("forgotHeroSubtitle")}
           </p>
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
+          {t("copyright", { year: new Date().getFullYear(), name: branding.name })}
         </div>
       </div>
 
       {/* Lado Direito */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
         <div className="w-full max-w-md space-y-8">
           {sent ? (
             <div className="space-y-6 text-center">
@@ -89,24 +95,24 @@ function ForgotPasswordContent() {
                 </div>
               </div>
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground">E-mail enviado!</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("emailSentTitle")}</h2>
                 <p className="text-muted-foreground">
-                  Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha. Verifique também a pasta de spam.
+                  {t("emailSentMessage")}
                 </p>
               </div>
               <Link href={`/login${clinicParam}`}>
                 <Button variant="outline" className="gap-2">
                   <ArrowLeft className="h-4 w-4" />
-                  Voltar ao login
+                  {t("backToLogin")}
                 </Button>
               </Link>
             </div>
           ) : (
             <>
               <div className="space-y-2 text-center lg:text-left">
-                <h2 className="text-3xl font-bold tracking-tight text-foreground">Esqueceu a senha?</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("forgotPasswordTitle")}</h2>
                 <p className="text-muted-foreground">
-                  Informe seu e-mail e enviaremos um link para redefinir sua senha.
+                  {t("forgotPasswordSubtitle")}
                 </p>
               </div>
 
@@ -115,12 +121,12 @@ function ForgotPasswordContent() {
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-foreground">
-                        E-mail cadastrado
+                        {t("registeredEmail")}
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                          placeholder="nome@clinica.com"
+                          placeholder={t("emailPlaceholder")}
                           className="pl-10 h-12 bg-white dark:bg-gray-900 text-foreground"
                           {...register("email")}
                         />
@@ -133,7 +139,7 @@ function ForgotPasswordContent() {
                       className="w-full h-12 text-base font-semibold"
                       disabled={isSubmitting}
                     >
-                      {isSubmitting ? "Enviando..." : "Enviar link de redefinição"}
+                      {isSubmitting ? t("sending") : t("sendResetLink")}
                     </Button>
                   </form>
                 </CardContent>
@@ -142,7 +148,7 @@ function ForgotPasswordContent() {
               <p className="text-center text-sm text-muted-foreground">
                 <Link href={`/login${clinicParam}`} className="font-semibold text-primary hover:underline inline-flex items-center gap-1">
                   <ArrowLeft className="h-3 w-3" />
-                  Voltar ao login
+                  {t("backToLogin")}
                 </Link>
               </p>
             </>

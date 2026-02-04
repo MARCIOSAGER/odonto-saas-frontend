@@ -16,6 +16,7 @@ import { Suspense } from "react"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
 import { useTranslations } from "next-intl"
+import { LanguageSelector } from "@/components/language-selector"
 
 function LoginContent() {
   const router = useRouter()
@@ -76,9 +77,9 @@ function LoginContent() {
         toast.error(t("authFailed"))
       }
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "E-mail ou senha inválidos"
+      const msg = error?.response?.data?.message || t("invalidCredentials")
       setApiError(msg)
-      toast.error("Falha na autenticação")
+      toast.error(t("authFailed"))
     }
   }
 
@@ -172,6 +173,9 @@ function LoginContent() {
 
       {/* Lado Direito - Formulário */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-2 text-center lg:text-left animate-fade-in-up">
             <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("loginTitle")}</h2>

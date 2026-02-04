@@ -1,5 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { api } from "@/lib/api"
 import { Loader2, TrendingUp, TrendingDown, Minus, Send, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -31,6 +33,9 @@ export default function NpsSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+
+  const t = useTranslations("nps")
+  const locale = useLocale()
 
   const loadData = useCallback(async () => {
     try {
@@ -69,40 +74,40 @@ export default function NpsSettingsPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">NPS &amp; Avalia&ccedil;&otilde;es</h1>
-        <p className="text-sm text-muted-foreground mt-1">Acompanhe a satisfa&ccedil;&atilde;o dos seus pacientes</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
       {/* Score cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card border rounded-xl p-5 space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">NPS Score</p>
+          <p className="text-xs text-muted-foreground font-medium">{t("npsScore")}</p>
           <div className="flex items-center gap-2">
             <span className={`text-3xl font-bold ${npsColor}`}>{stats?.nps_score ?? 0}</span>
             <NpsIcon className={`h-5 w-5 ${npsColor}`} />
           </div>
         </div>
         <div className="bg-card border rounded-xl p-5 space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">Promotores (9-10)</p>
+          <p className="text-xs text-muted-foreground font-medium">{t("promoters")}</p>
           <p className="text-2xl font-bold text-green-600">{stats?.promoter_pct ?? 0}%</p>
-          <p className="text-xs text-muted-foreground">{stats?.promoters ?? 0} respostas</p>
+          <p className="text-xs text-muted-foreground">{stats?.promoters ?? 0} {t("responses")}</p>
         </div>
         <div className="bg-card border rounded-xl p-5 space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">Neutros (7-8)</p>
+          <p className="text-xs text-muted-foreground font-medium">{t("passives")}</p>
           <p className="text-2xl font-bold text-amber-600">{stats?.passive_pct ?? 0}%</p>
-          <p className="text-xs text-muted-foreground">{stats?.passives ?? 0} respostas</p>
+          <p className="text-xs text-muted-foreground">{stats?.passives ?? 0} {t("responses")}</p>
         </div>
         <div className="bg-card border rounded-xl p-5 space-y-1">
-          <p className="text-xs text-muted-foreground font-medium">Detratores (0-6)</p>
+          <p className="text-xs text-muted-foreground font-medium">{t("detractors")}</p>
           <p className="text-2xl font-bold text-red-600">{stats?.detractor_pct ?? 0}%</p>
-          <p className="text-xs text-muted-foreground">{stats?.detractors ?? 0} respostas</p>
+          <p className="text-xs text-muted-foreground">{stats?.detractors ?? 0} {t("responses")}</p>
         </div>
       </div>
 
       {/* NPS bar */}
       {stats && stats.total_responses > 0 && (
         <div className="bg-card border rounded-xl p-5 space-y-3">
-          <p className="text-sm font-medium">Distribui&ccedil;&atilde;o</p>
+          <p className="text-sm font-medium">{t("distribution")}</p>
           <div className="flex h-6 rounded-full overflow-hidden">
             {stats.promoter_pct > 0 && (
               <div className="bg-green-500 flex items-center justify-center text-white text-xs font-medium" style={{ width: `${stats.promoter_pct}%` }}>
@@ -121,9 +126,9 @@ export default function NpsSettingsPage() {
             )}
           </div>
           <div className="flex gap-6 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> Promotores</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> Neutros</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Detratores</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> {t("legendPromoters")}</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" /> {t("legendPassives")}</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> {t("legendDetractors")}</span>
           </div>
         </div>
       )}
@@ -131,7 +136,7 @@ export default function NpsSettingsPage() {
       {/* Monthly evolution */}
       {stats && stats.monthly.length > 0 && (
         <div className="bg-card border rounded-xl p-5 space-y-3">
-          <p className="text-sm font-medium">Evolu&ccedil;&atilde;o mensal</p>
+          <p className="text-sm font-medium">{t("monthlyEvolution")}</p>
           <div className="overflow-x-auto">
             <div className="flex gap-4 min-w-max">
               {stats.monthly.map((m) => (
@@ -139,7 +144,7 @@ export default function NpsSettingsPage() {
                   <div className={`text-lg font-bold ${m.nps >= 50 ? "text-green-600" : m.nps >= 0 ? "text-amber-600" : "text-red-600"}`}>
                     {m.nps}
                   </div>
-                  <div className="text-xs text-muted-foreground">{m.responses} resp.</div>
+                  <div className="text-xs text-muted-foreground">{m.responses} {t("respAbbrev")}</div>
                   <div className="text-xs font-medium">{m.month}</div>
                 </div>
               ))}
@@ -152,12 +157,12 @@ export default function NpsSettingsPage() {
       <div className="bg-card border rounded-xl overflow-hidden">
         <div className="p-5 border-b">
           <p className="text-sm font-medium flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" /> Respostas ({stats?.total_responses ?? 0})
+            <MessageSquare className="h-4 w-4" /> {t("responsesCount", { count: stats?.total_responses ?? 0 })}
           </p>
         </div>
         {responses.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
-            Nenhuma pesquisa enviada ainda
+            {t("noSurveys")}
           </div>
         ) : (
           <div className="divide-y">
@@ -179,12 +184,12 @@ export default function NpsSettingsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{r.patient.name}</span>
-                    {!r.answered_at && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Pendente</span>}
+                    {!r.answered_at && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{t("pending")}</span>}
                   </div>
                   {r.feedback && <p className="text-sm text-muted-foreground mt-1">{r.feedback}</p>}
                   <p className="text-xs text-muted-foreground mt-1">
-                    Enviado em {new Date(r.sent_at).toLocaleDateString("pt-BR")}
-                    {r.answered_at && ` - Respondido em ${new Date(r.answered_at).toLocaleDateString("pt-BR")}`}
+                    {t("sentAt")} {new Date(r.sent_at).toLocaleDateString(locale)}
+                    {r.answered_at && ` - ${t("answeredAt")} ${new Date(r.answered_at).toLocaleDateString(locale)}`}
                   </p>
                 </div>
               </div>
@@ -193,9 +198,9 @@ export default function NpsSettingsPage() {
         )}
         {totalPages > 1 && (
           <div className="p-4 border-t flex items-center justify-center gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>Anterior</Button>
-            <span className="text-xs text-muted-foreground">P&aacute;gina {page} de {totalPages}</span>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>Pr&oacute;xima</Button>
+            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t("previous")}</Button>
+            <span className="text-xs text-muted-foreground">{t("pageOf", { page, totalPages })}</span>
+            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>{t("nextPage")}</Button>
           </div>
         )}
       </div>

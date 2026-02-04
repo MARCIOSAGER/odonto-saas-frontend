@@ -13,6 +13,8 @@ import { Eye, EyeOff, Lock, Mail, ArrowRight, User, Building2, Phone, Check } fr
 import { api, getUploadUrl } from "@/lib/api"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
+import { useTranslations } from "next-intl"
+import { LanguageSelector } from "@/components/language-selector"
 
 function maskDocument(value: string) {
   const digits = value.replace(/\D/g, "")
@@ -41,6 +43,8 @@ function maskPhone(value: string) {
 
 function RegisterContent() {
   const { branding } = usePlatformBranding()
+  const t = useTranslations("auth")
+  const tc = useTranslations("common")
   const [showPassword, setShowPassword] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const {
@@ -73,12 +77,12 @@ function RegisterContent() {
       })
 
       if (res?.ok) {
-        toast.success("Conta criada com sucesso!")
+        toast.success(t("registerSuccess"))
         setTimeout(() => {
           window.location.href = "/home"
         }, 300)
       } else {
-        toast.success("Conta criada! Faça login para continuar.")
+        toast.success(t("registerSuccessLogin"))
         window.location.href = "/login"
       }
     } catch (error: any) {
@@ -87,16 +91,16 @@ function RegisterContent() {
 
       if (status === 409) {
         if (msg.includes("Email")) {
-          setApiError("Este e-mail já está cadastrado.")
+          setApiError(t("emailAlreadyRegistered"))
         } else if (msg.includes("CNPJ")) {
-          setApiError("Este CPF/CNPJ já está cadastrado.")
+          setApiError(t("cnpjAlreadyRegistered"))
         } else {
-          setApiError("E-mail ou CPF/CNPJ já cadastrado.")
+          setApiError(t("emailOrCnpjRegistered"))
         }
       } else {
-        setApiError("Erro ao criar conta. Tente novamente.")
+        setApiError(t("registerError"))
       }
-      toast.error("Falha no registro")
+      toast.error(t("registerFailed"))
     }
   }
 
@@ -133,17 +137,17 @@ function RegisterContent() {
 
         <div className="relative z-10 space-y-6">
           <h1 className="text-5xl font-bold leading-tight text-white">
-            Comece agora, grátis.
+            {t("registerHeroTitle")}
           </h1>
           <p className="text-xl text-white/90 max-w-lg">
-            Crie sua conta e comece a gerenciar seu consultório em poucos minutos. Sem cartão de crédito.
+            {t("registerHeroSubtitle")}
           </p>
 
           <div className="space-y-3 pt-2">
             {[
-              "Teste grátis completo, sem compromisso",
-              "Configuração em menos de 5 minutos",
-              "Atendimento via WhatsApp com IA incluso",
+              t("registerFeature1"),
+              t("registerFeature2"),
+              t("registerFeature3"),
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3">
                 <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20">
@@ -171,23 +175,26 @@ function RegisterContent() {
               ))}
             </div>
             <p className="text-sm font-medium text-white/90">
-              +2.000 profissionais já usam
+              {t("socialProof")}
             </p>
           </div>
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © {new Date().getFullYear()} {branding.name}. Todos os direitos reservados.
+          {t("copyright", { year: new Date().getFullYear(), name: branding.name })}
         </div>
       </div>
 
       {/* Lado Direito */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
         <div className="w-full max-w-md space-y-6">
           <div className="space-y-2 text-center lg:text-left animate-fade-in-up">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Criar conta</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("registerFormTitle")}</h2>
             <p className="text-muted-foreground">
-              Preencha os dados abaixo para começar seu teste grátis.
+              {t("registerFormSubtitle")}
             </p>
           </div>
 
@@ -196,11 +203,11 @@ function RegisterContent() {
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Nome */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Seu nome</label>
+                  <label className="text-sm font-medium text-foreground">{t("yourName")}</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="João Silva"
+                      placeholder={t("namePlaceholder")}
                       className="pl-10 h-11 bg-white dark:bg-gray-900 text-foreground"
                       {...register("name")}
                     />
@@ -210,11 +217,11 @@ function RegisterContent() {
 
                 {/* Email */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">E-mail profissional</label>
+                  <label className="text-sm font-medium text-foreground">{t("professionalEmail")}</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="nome@clinica.com"
+                      placeholder={t("emailPlaceholder")}
                       className="pl-10 h-11 bg-white dark:bg-gray-900 text-foreground"
                       {...register("email")}
                     />
@@ -225,13 +232,13 @@ function RegisterContent() {
                 {/* Senha + Confirmar */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Senha</label>
+                    <label className="text-sm font-medium text-foreground">{t("password")}</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type={showPassword ? "text" : "password"}
                         className="pl-10 pr-10 h-11 bg-white dark:bg-gray-900 text-foreground"
-                        placeholder="Min. 8 chars"
+                        placeholder={t("passwordPlaceholder")}
                         {...register("password")}
                       />
                       <button
@@ -245,13 +252,13 @@ function RegisterContent() {
                     {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Confirmar</label>
+                    <label className="text-sm font-medium text-foreground">{t("confirmPasswordShort")}</label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type={showPassword ? "text" : "password"}
                         className="pl-10 h-11 bg-white dark:bg-gray-900 text-foreground"
-                        placeholder="Repita"
+                        placeholder={t("repeatPassword")}
                         {...register("confirmPassword")}
                       />
                     </div>
@@ -264,17 +271,17 @@ function RegisterContent() {
                     <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground lg:bg-card">Dados da clínica</span>
+                    <span className="bg-background px-2 text-muted-foreground lg:bg-card">{t("clinicDataSection")}</span>
                   </div>
                 </div>
 
                 {/* Nome da Clínica */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Nome da clínica</label>
+                  <label className="text-sm font-medium text-foreground">{t("clinicName")}</label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Clínica Odonto Saúde"
+                      placeholder={t("clinicNamePlaceholder")}
                       className="pl-10 h-11 bg-white dark:bg-gray-900 text-foreground"
                       {...register("clinic_name")}
                     />
@@ -285,9 +292,9 @@ function RegisterContent() {
                 {/* CPF/CNPJ + Telefone */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">CPF ou CNPJ</label>
+                    <label className="text-sm font-medium text-foreground">{t("cpfOrCnpj")}</label>
                     <Input
-                      placeholder="000.000.000-00"
+                      placeholder={t("cpfPlaceholder")}
                       className="h-11 bg-white dark:bg-gray-900 text-foreground"
                       {...register("cnpj")}
                       onChange={(e) => setValue("cnpj", maskDocument(e.target.value))}
@@ -295,11 +302,11 @@ function RegisterContent() {
                     {errors.cnpj && <p className="text-xs text-destructive">{errors.cnpj.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Telefone</label>
+                    <label className="text-sm font-medium text-foreground">{tc("phone")}</label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="(00) 00000-0000"
+                        placeholder={t("phonePlaceholder")}
                         className="pl-10 h-11 bg-white dark:bg-gray-900 text-foreground"
                         {...register("phone")}
                         onChange={(e) => setValue("phone", maskPhone(e.target.value))}
@@ -320,7 +327,7 @@ function RegisterContent() {
                   className="w-full h-12 text-base font-semibold group"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Criando conta..." : "Começar teste grátis"}
+                  {isSubmitting ? t("creatingAccount") : t("startFreeTrial")}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </form>
@@ -328,9 +335,9 @@ function RegisterContent() {
           </Card>
 
           <p className="text-center text-sm text-muted-foreground animate-fade-in opacity-0" style={{ animationDelay: "200ms" }}>
-            Já tem uma conta?{" "}
+            {t("hasAccount")}{" "}
             <Link href={`/login${clinicParam}`} className="font-semibold text-primary hover:underline">
-              Fazer login
+              {t("login")}
             </Link>
           </p>
         </div>

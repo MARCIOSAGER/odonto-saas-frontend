@@ -11,11 +11,14 @@ import { api, getUploadUrl } from "@/lib/api"
 import Link from "next/link"
 import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 import { adjustBrightness } from "@/lib/colors"
+import { useTranslations } from "next-intl"
+import { LanguageSelector } from "@/components/language-selector"
 
 function Verify2faContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { branding } = usePlatformBranding()
+  const t = useTranslations("auth")
   const [twoFactorToken, setTwoFactorToken] = useState<string | null>(null)
   const [method, setMethod] = useState("whatsapp")
   const [code, setCode] = useState("")
@@ -75,14 +78,14 @@ function Verify2faContent() {
         if (signInRes?.ok) {
           sessionStorage.removeItem("2fa_token")
           sessionStorage.removeItem("2fa_method")
-          toast.success("Login realizado com sucesso!")
+          toast.success(t("loginSuccess"))
           window.location.href = "/home"
         } else {
-          toast.error("Erro ao completar login")
+          toast.error(t("completeLoginError"))
         }
       }
     } catch (error: any) {
-      const msg = error?.response?.data?.message || "Código inválido"
+      const msg = error?.response?.data?.message || t("invalidCode")
       toast.error(msg)
       setCode("")
     } finally {
@@ -99,13 +102,13 @@ function Verify2faContent() {
       })
       const data = res.data?.data || res.data
       if (data?.delivery_method === "email" && method === "whatsapp") {
-        toast.success("WhatsApp indisponível. Código reenviado por e-mail!")
+        toast.success(t("whatsappUnavailableResend"))
       } else {
-        toast.success("Código reenviado!")
+        toast.success(t("codeResent"))
       }
       setCountdown(60)
     } catch {
-      toast.error("Erro ao reenviar código")
+      toast.error(t("resendError"))
     } finally {
       setResending(false)
     }
@@ -122,19 +125,34 @@ function Verify2faContent() {
   if (!twoFactorToken) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-foreground">Sessão inválida</h2>
-          <p className="text-muted-foreground">Faça login novamente.</p>
+          <h2 className="text-2xl font-bold text-foreground">{t("invalidSession")}</h2>
+          <p className="text-muted-foreground">{t("loginAgain")}</p>
           <Link href="/login">
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Voltar ao login
+              {t("backToLogin")}
             </Button>
           </Link>
         </div>
       </div>
     )
   }
+
+  const heroDescription = method === "totp"
+    ? t("twoFaHeroTotp")
+    : method === "email"
+    ? t("twoFaHeroEmail")
+    : t("twoFaHeroWhatsapp")
+
+  const formDescription = method === "totp"
+    ? t("twoFaDescTotp")
+    : method === "email"
+    ? t("twoFaDescEmail")
+    : t("twoFaDescWhatsapp")
 
   return (
     <div className="flex min-h-screen">
@@ -169,24 +187,23 @@ function Verify2faContent() {
 
         <div className="relative z-10 space-y-6">
           <h1 className="text-5xl font-bold leading-tight text-white">
-            Verificação em duas etapas.
+            {t("twoFaHeroTitle")}
           </h1>
           <p className="text-xl text-white/90 max-w-lg">
-            {method === "totp"
-              ? "Abra seu app autenticador e digite o código de 6 dígitos."
-              : method === "email"
-              ? "Enviamos um código para o seu e-mail. Digite abaixo para continuar."
-              : "Enviamos um código para o seu WhatsApp. Digite abaixo para continuar."}
+            {heroDescription}
           </p>
         </div>
 
         <div className="relative z-10 text-sm text-white/70">
-          © 2025 {branding.name}. Todos os direitos reservados.
+          {t("copyright", { year: new Date().getFullYear(), name: branding.name })}
         </div>
       </div>
 
       {/* Lado Direito */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-background text-foreground">
+        <div className="absolute top-4 right-4">
+          <LanguageSelector />
+        </div>
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-4 text-center">
             <div className="flex justify-center">
@@ -195,13 +212,9 @@ function Verify2faContent() {
               </div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground">Verificação 2FA</h2>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">{t("twoFaFormTitle")}</h2>
               <p className="text-muted-foreground">
-                {method === "totp"
-                  ? "Digite o código do seu app autenticador (Google Authenticator, Authy, etc.)"
-                  : method === "email"
-                  ? "Digite o código de 6 dígitos enviado para o seu e-mail."
-                  : "Digite o código de 6 dígitos enviado para o seu WhatsApp."}
+                {formDescription}
               </p>
             </div>
           </div>
@@ -210,7 +223,7 @@ function Verify2faContent() {
             <CardContent className="pt-6">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Código de verificação</label>
+                  <label className="text-sm font-medium text-foreground">{t("verificationCode")}</label>
                   <Input
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
@@ -230,10 +243,10 @@ function Verify2faContent() {
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verificando...
+                      {t("verifying")}
                     </>
                   ) : (
-                    "Verificar e entrar"
+                    t("verifyAndLogin")
                   )}
                 </Button>
 
@@ -245,10 +258,10 @@ function Verify2faContent() {
                       className="text-sm text-primary hover:underline disabled:text-muted-foreground disabled:no-underline"
                     >
                       {countdown > 0
-                        ? `Reenviar código em ${countdown}s`
+                        ? t("resendIn", { seconds: countdown })
                         : resending
-                        ? "Reenviando..."
-                        : "Reenviar código"}
+                        ? t("resending")
+                        : t("resendCode")}
                     </button>
                   </div>
                 )}
@@ -259,7 +272,7 @@ function Verify2faContent() {
           <p className="text-center text-sm text-muted-foreground">
             <Link href="/login" className="font-semibold text-primary hover:underline inline-flex items-center gap-1">
               <ArrowLeft className="h-3 w-3" />
-              Voltar ao login
+              {t("backToLogin")}
             </Link>
           </p>
         </div>

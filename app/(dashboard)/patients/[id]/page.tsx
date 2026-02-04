@@ -6,6 +6,8 @@ import { api } from "@/lib/api"
 import { Loader2, Phone, Mail, Calendar, User, FileText, Sparkles, ClipboardList, Pill, DollarSign, History } from "lucide-react"
 import { PatientSummaryCard } from "@/components/ai/patient-summary-card"
 import { useDentists } from "@/hooks/useDentists"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 
 function TabSkeleton() {
   return (
@@ -74,6 +76,8 @@ export default function PatientDetailPage() {
   const [selectedDentistId, setSelectedDentistId] = useState<string>("")
   const [prescriptionKey, setPrescriptionKey] = useState(0)
   const { dentists } = useDentists()
+  const t = useTranslations("patientDetail")
+  const locale = useLocale()
 
   const loadPatient = useCallback(async () => {
     try {
@@ -101,7 +105,7 @@ export default function PatientDetailPage() {
   if (!patient) {
     return (
       <div className="text-center py-20 text-muted-foreground">
-        Paciente não encontrado
+        {t("patientNotFound")}
       </div>
     )
   }
@@ -114,14 +118,14 @@ export default function PatientDetailPage() {
     : null
 
   const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
-    { key: "resumo", label: "Resumo", icon: User },
-    { key: "odontograma", label: "Odontograma", icon: FileText },
-    { key: "prontuario", label: "Prontuário IA", icon: Sparkles },
-    { key: "tratamento", label: "Plano de Tratamento", icon: Calendar },
-    { key: "receitas", label: "Receitas", icon: Pill },
-    { key: "anamnese", label: "Anamnese", icon: ClipboardList },
-    { key: "financeiro", label: "Financeiro", icon: DollarSign },
-    { key: "historico", label: "Histórico", icon: History },
+    { key: "resumo", label: t("tabSummary"), icon: User },
+    { key: "odontograma", label: t("tabOdontogram"), icon: FileText },
+    { key: "prontuario", label: t("tabClinicalNotes"), icon: Sparkles },
+    { key: "tratamento", label: t("tabTreatmentPlan"), icon: Calendar },
+    { key: "receitas", label: t("tabPrescriptions"), icon: Pill },
+    { key: "anamnese", label: t("tabAnamnesis"), icon: ClipboardList },
+    { key: "financeiro", label: t("tabFinancial"), icon: DollarSign },
+    { key: "historico", label: t("tabTimeline"), icon: History },
   ]
 
   return (
@@ -145,10 +149,10 @@ export default function PatientDetailPage() {
                 </span>
               )}
               {age !== null && (
-                <span>{age} anos</span>
+                <span>{t("yearsOld", { age })}</span>
               )}
               {patient.cpf && (
-                <span>CPF: {patient.cpf}</span>
+                <span>{t("fieldCpf")}: {patient.cpf}</span>
               )}
             </div>
           </div>
@@ -159,7 +163,7 @@ export default function PatientDetailPage() {
                 : "bg-gray-100 text-gray-800"
             }`}
           >
-            {patient.status === "active" ? "Ativo" : patient.status}
+            {patient.status === "active" ? t("active") : patient.status === "inactive" ? t("inactive") : patient.status}
           </span>
         </div>
 
@@ -171,9 +175,9 @@ export default function PatientDetailPage() {
 
         <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground">
           {patient.last_visit && (
-            <span>Última visita: {new Date(patient.last_visit).toLocaleDateString("pt-BR")}</span>
+            <span>{t("lastVisit")}: {new Date(patient.last_visit).toLocaleDateString(locale)}</span>
           )}
-          <span>Cadastro: {new Date(patient.created_at).toLocaleDateString("pt-BR")}</span>
+          <span>{t("registeredAt")}: {new Date(patient.created_at).toLocaleDateString(locale)}</span>
         </div>
       </div>
 
@@ -208,37 +212,37 @@ export default function PatientDetailPage() {
         {activeTab === "resumo" && (
           <div className="space-y-4">
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">Informações do paciente</h3>
+              <h3 className="font-semibold mb-3">{t("patientInfo")}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Nome:</span>{" "}
+                  <span className="text-muted-foreground">{t("fieldName")}:</span>{" "}
                   {patient.name}
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Telefone:</span>{" "}
+                  <span className="text-muted-foreground">{t("fieldPhone")}:</span>{" "}
                   {patient.phone}
                 </div>
                 {patient.email && (
                   <div>
-                    <span className="text-muted-foreground">Email:</span>{" "}
+                    <span className="text-muted-foreground">{t("fieldEmail")}:</span>{" "}
                     {patient.email}
                   </div>
                 )}
                 {patient.cpf && (
                   <div>
-                    <span className="text-muted-foreground">CPF:</span>{" "}
+                    <span className="text-muted-foreground">{t("fieldCpf")}:</span>{" "}
                     {patient.cpf}
                   </div>
                 )}
                 {patient.birth_date && (
                   <div>
-                    <span className="text-muted-foreground">Nascimento:</span>{" "}
-                    {new Date(patient.birth_date).toLocaleDateString("pt-BR")}
+                    <span className="text-muted-foreground">{t("fieldBirthDate")}:</span>{" "}
+                    {new Date(patient.birth_date).toLocaleDateString(locale)}
                   </div>
                 )}
                 {patient.address && (
                   <div className="sm:col-span-2">
-                    <span className="text-muted-foreground">Endereço:</span>{" "}
+                    <span className="text-muted-foreground">{t("fieldAddress")}:</span>{" "}
                     {patient.address}
                   </div>
                 )}
@@ -262,15 +266,15 @@ export default function PatientDetailPage() {
         {activeTab === "receitas" && (
           <div className="space-y-6">
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">Nova Receita / Atestado / Encaminhamento</h3>
+              <h3 className="font-semibold mb-3">{t("newPrescription")}</h3>
               <div className="mb-4">
-                <label className="text-sm font-medium block mb-1">Dentista</label>
+                <label className="text-sm font-medium block mb-1">{t("dentist")}</label>
                 <select
                   value={selectedDentistId}
                   onChange={(e) => setSelectedDentistId(e.target.value)}
                   className="w-full max-w-xs px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  <option value="">Selecionar dentista...</option>
+                  <option value="">{t("selectDentist")}</option>
                   {dentists.map((d: { id: string; name: string; cro: string }) => (
                     <option key={d.id} value={d.id}>
                       Dr(a). {d.name} - CRO {d.cro}
@@ -286,13 +290,13 @@ export default function PatientDetailPage() {
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Selecione um dentista para criar receitas.
+                  {t("selectDentistHint")}
                 </p>
               )}
             </div>
 
             <div className="border rounded-lg p-4">
-              <h3 className="font-semibold mb-3">Documentos Anteriores</h3>
+              <h3 className="font-semibold mb-3">{t("previousDocuments")}</h3>
               <PrescriptionList key={prescriptionKey} patientId={id} />
             </div>
           </div>

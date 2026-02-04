@@ -144,9 +144,9 @@ function AppointmentsContent() {
   const handleEventDrop = useCallback(({ event, start }: { event: any; start: any }) => {
     const newDate = format(new Date(start), "yyyy-MM-dd")
     const newTime = format(new Date(start), "HH:mm")
-    const label = `${format(new Date(start), "dd/MM/yyyy")} às ${newTime}`
+    const label = `${format(new Date(start), "dd/MM/yyyy")} ${t("at")} ${newTime}`
     setDragEvent({ id: event.id, date: newDate, time: newTime, label })
-  }, [])
+  }, [t])
 
   const handleConfirmDrag = async () => {
     if (!dragEvent) return

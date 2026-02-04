@@ -1,5 +1,7 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { api } from "@/lib/api"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -63,6 +65,9 @@ export default function ClinicsPage() {
   const [totalPages, setTotalPages] = useState(1)
   const [toggleTarget, setToggleTarget] = useState<Clinic | null>(null)
   const [toggling, setToggling] = useState(false)
+  const t = useTranslations("clinics")
+  const tc = useTranslations("common")
+  const locale = useLocale()
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -84,7 +89,7 @@ export default function ClinicsPage() {
 
       setStats(statsRes.data?.data || statsRes.data)
     } catch {
-      toast.error("Erro ao carregar clínicas")
+      toast.error(t("loadError"))
     } finally {
       setLoading(false)
     }
@@ -104,11 +109,11 @@ export default function ClinicsPage() {
     const newStatus = toggleTarget.status === "active" ? "inactive" : "active"
     try {
       await api.patch(`/admin/clinics/${toggleTarget.id}/status`, { status: newStatus })
-      toast.success(`Clínica ${newStatus === "active" ? "ativada" : "desativada"}`)
+      toast.success(newStatus === "active" ? t("clinicActivated") : t("clinicDeactivated"))
       setToggleTarget(null)
       loadData()
     } catch {
-      toast.error("Erro ao alterar status")
+      toast.error(t("statusError"))
     } finally {
       setToggling(false)
     }
@@ -116,9 +121,9 @@ export default function ClinicsPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      active: { label: "Ativa", variant: "default" },
-      inactive: { label: "Inativa", variant: "secondary" },
-      suspended: { label: "Suspensa", variant: "destructive" },
+      active: { label: t("statusActive"), variant: "default" },
+      inactive: { label: t("statusInactive"), variant: "secondary" },
+      suspended: { label: t("statusSuspended"), variant: "destructive" },
     }
     const s = map[status] || { label: status, variant: "outline" as const }
     return <Badge variant={s.variant}>{s.label}</Badge>
@@ -137,10 +142,10 @@ export default function ClinicsPage() {
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Hospital className="h-6 w-6" /> Clínicas
+          <Hospital className="h-6 w-6" /> {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Gerencie todas as clínicas da plataforma
+          {t("subtitle")}
         </p>
       </div>
 
@@ -154,7 +159,7 @@ export default function ClinicsPage() {
                   <Hospital className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-sm text-muted-foreground">{t("kpiTotal")}</p>
                   <p className="text-2xl font-bold">{stats.total_clinics}</p>
                 </div>
               </div>
@@ -167,7 +172,7 @@ export default function ClinicsPage() {
                   <UserCheck className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Ativas</p>
+                  <p className="text-sm text-muted-foreground">{t("kpiActive")}</p>
                   <p className="text-2xl font-bold">{stats.active_clinics}</p>
                 </div>
               </div>
@@ -180,7 +185,7 @@ export default function ClinicsPage() {
                   <UserX className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Inativas</p>
+                  <p className="text-sm text-muted-foreground">{t("kpiInactive")}</p>
                   <p className="text-2xl font-bold">{stats.inactive_clinics}</p>
                 </div>
               </div>
@@ -193,7 +198,7 @@ export default function ClinicsPage() {
                   <Users className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Usuários</p>
+                  <p className="text-sm text-muted-foreground">{t("kpiUsers")}</p>
                   <p className="text-2xl font-bold">{stats.total_users}</p>
                 </div>
               </div>
@@ -208,7 +213,7 @@ export default function ClinicsPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar por nome ou CNPJ..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm bg-background"
@@ -219,10 +224,10 @@ export default function ClinicsPage() {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 border rounded-lg text-sm bg-background"
         >
-          <option value="">Todos os status</option>
-          <option value="active">Ativa</option>
-          <option value="inactive">Inativa</option>
-          <option value="suspended">Suspensa</option>
+          <option value="">{t("allStatuses")}</option>
+          <option value="active">{t("filterActive")}</option>
+          <option value="inactive">{t("filterInactive")}</option>
+          <option value="suspended">{t("filterSuspended")}</option>
         </select>
       </div>
 
@@ -233,7 +238,7 @@ export default function ClinicsPage() {
         </div>
       ) : clinics.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground text-sm">
-          Nenhuma clínica encontrada
+          {t("noClinics")}
         </div>
       ) : (
         <div className="bg-card border rounded-xl overflow-hidden">
@@ -241,21 +246,21 @@ export default function ClinicsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left py-3 px-4 font-medium">Clínica</th>
-                  <th className="text-left py-3 px-4 font-medium">CNPJ</th>
-                  <th className="text-left py-3 px-4 font-medium">Plano</th>
-                  <th className="text-left py-3 px-4 font-medium">Status</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colClinic")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colCnpj")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colPlan")}</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colStatus")}</th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <span title="Pacientes"><Users className="h-4 w-4 inline" /></span>
+                    <span title={t("tooltipPatients")}><Users className="h-4 w-4 inline" /></span>
                   </th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <span title="Dentistas"><Stethoscope className="h-4 w-4 inline" /></span>
+                    <span title={t("tooltipDentists")}><Stethoscope className="h-4 w-4 inline" /></span>
                   </th>
                   <th className="text-center py-3 px-4 font-medium">
-                    <span title="Agendamentos"><CalendarDays className="h-4 w-4 inline" /></span>
+                    <span title={t("tooltipAppointments")}><CalendarDays className="h-4 w-4 inline" /></span>
                   </th>
-                  <th className="text-left py-3 px-4 font-medium">Criada em</th>
-                  <th className="text-right py-3 px-4 font-medium">Ações</th>
+                  <th className="text-left py-3 px-4 font-medium">{t("colCreatedAt")}</th>
+                  <th className="text-right py-3 px-4 font-medium">{t("colActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -274,7 +279,7 @@ export default function ClinicsPage() {
                     <td className="py-3 px-4 text-center">{c._count.dentists}</td>
                     <td className="py-3 px-4 text-center">{c._count.appointments}</td>
                     <td className="py-3 px-4 text-muted-foreground text-xs">
-                      {new Date(c.created_at).toLocaleDateString("pt-BR")}
+                      {new Date(c.created_at).toLocaleDateString(locale)}
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Button
@@ -282,7 +287,7 @@ export default function ClinicsPage() {
                         size="sm"
                         onClick={() => setToggleTarget(c)}
                       >
-                        {c.status === "active" ? "Desativar" : "Ativar"}
+                        {c.status === "active" ? t("deactivate") : t("activate")}
                       </Button>
                     </td>
                   </tr>
@@ -298,7 +303,7 @@ export default function ClinicsPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-xs text-muted-foreground">
-                Página {page} de {totalPages}
+                {t("pageOf", { page, totalPages })}
               </span>
               <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
                 <ChevronRight className="h-4 w-4" />
@@ -313,19 +318,19 @@ export default function ClinicsPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {toggleTarget?.status === "active" ? "Desativar" : "Ativar"} clínica
+              {toggleTarget?.status === "active" ? t("deactivateClinic") : t("activateClinic")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {toggleTarget?.status === "active"
-                ? `Deseja desativar a clínica "${toggleTarget?.name}"? Os usuários desta clínica não poderão fazer login.`
-                : `Deseja reativar a clínica "${toggleTarget?.name}"?`}
+                ? t("deactivateMessage", { name: toggleTarget?.name })
+                : t("activateMessage", { name: toggleTarget?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleToggleStatus} disabled={toggling}>
               {toggling ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirmar
+              {tc("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

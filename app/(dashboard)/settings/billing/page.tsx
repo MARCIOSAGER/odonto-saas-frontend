@@ -8,8 +8,11 @@ import { UsageBar } from "@/components/billing/usage-bar"
 import { InvoiceTable } from "@/components/billing/invoice-table"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { enUS } from "date-fns/locale"
 import {
   CreditCard,
   Crown,
@@ -67,12 +70,16 @@ function BillingContent() {
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
 
+  const t = useTranslations("billing")
+  const locale = useLocale()
+  const dateLocale = locale === "pt-BR" ? ptBR : enUS
+
   useEffect(() => {
     if (searchParams.get("success") === "true") {
-      toast.success("Pagamento realizado com sucesso!")
+      toast.success(t("paymentSuccess"))
     }
     if (searchParams.get("cancelled") === "true") {
-      toast.info("Checkout cancelado.")
+      toast.info(t("checkoutCancelled"))
     }
   }, [searchParams])
 
@@ -102,14 +109,14 @@ function BillingContent() {
   }
 
   async function handleCancel() {
-    if (!confirm("Tem certeza que deseja cancelar sua assinatura? Ela continuará ativa até o final do período.")) return
+    if (!confirm(t("cancelConfirm"))) return
     setCancelling(true)
     try {
       await api.post("/subscriptions/cancel")
-      toast.success("Assinatura será cancelada ao final do período.")
+      toast.success(t("cancelSuccess"))
       loadData()
     } catch {
-      toast.error("Erro ao cancelar assinatura.")
+      toast.error(t("cancelError"))
     } finally {
       setCancelling(false)
     }
@@ -118,10 +125,10 @@ function BillingContent() {
   async function handleReactivate() {
     try {
       await api.post("/subscriptions/reactivate")
-      toast.success("Assinatura reativada!")
+      toast.success(t("reactivateSuccess"))
       loadData()
     } catch {
-      toast.error("Erro ao reativar assinatura.")
+      toast.error(t("reactivateError"))
     }
   }
 
@@ -138,11 +145,11 @@ function BillingContent() {
   }
 
   const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    active: { label: "Ativa", variant: "default" },
-    trialing: { label: "Trial", variant: "secondary" },
-    past_due: { label: "Pagamento pendente", variant: "destructive" },
-    cancelled: { label: "Cancelada", variant: "outline" },
-    expired: { label: "Expirada", variant: "destructive" },
+    active: { label: t("statusActive"), variant: "default" },
+    trialing: { label: t("statusTrialing"), variant: "secondary" },
+    past_due: { label: t("statusPastDue"), variant: "destructive" },
+    cancelled: { label: t("statusCancelled"), variant: "outline" },
+    expired: { label: t("statusExpired"), variant: "destructive" },
   }
 
   const subStatus = subscription ? statusLabels[subscription.status] || statusLabels.active : null
@@ -150,9 +157,9 @@ function BillingContent() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Assinatura e Faturamento</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground mt-1">
-          Gerencie seu plano, pagamentos e faturas.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -162,15 +169,14 @@ function BillingContent() {
           <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
           <div className="flex-1">
             <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-              Seu período de teste termina em{" "}
-              {format(new Date(subscription.trial_end), "dd 'de' MMMM", { locale: ptBR })}.
+              {t("trialEndsAt", { date: format(new Date(subscription.trial_end), "PPP", { locale: dateLocale }) })}
             </p>
             <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-              Faça upgrade para não perder acesso às funcionalidades.
+              {t("trialUpgradeHint")}
             </p>
           </div>
           <Button size="sm" onClick={handleUpgrade}>
-            Fazer upgrade
+            {t("upgrade")}
           </Button>
         </div>
       )}
@@ -183,7 +189,7 @@ function BillingContent() {
               <div className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">
-                  Plano {subscription?.plan?.display_name || "—"}
+                  {t("plan", { name: subscription?.plan?.display_name || "—" })}
                 </h2>
                 {subStatus && (
                   <Badge variant={subStatus.variant}>{subStatus.label}</Badge>
@@ -191,22 +197,21 @@ function BillingContent() {
               </div>
               {subscription && (
                 <p className="text-sm text-muted-foreground">
-                  Próxima cobrança:{" "}
-                  {format(new Date(subscription.current_period_end), "dd/MM/yyyy", { locale: ptBR })}
+                  {t("nextBilling")}: {format(new Date(subscription.current_period_end), "dd/MM/yyyy", { locale: dateLocale })}
                   {" — "}
-                  {subscription.billing_cycle === "yearly" ? "Anual" : "Mensal"}
+                  {subscription.billing_cycle === "yearly" ? t("yearly") : t("monthly")}
                 </p>
               )}
               {subscription?.cancel_at_period_end && (
                 <p className="text-sm text-destructive font-medium">
-                  Cancelamento agendado para o final do período.
+                  {t("cancelScheduled")}
                 </p>
               )}
             </div>
             <div className="flex gap-2">
               {subscription?.cancel_at_period_end ? (
                 <Button variant="outline" size="sm" onClick={handleReactivate}>
-                  Reativar
+                  {t("reactivate")}
                 </Button>
               ) : (
                 <Button
@@ -215,12 +220,12 @@ function BillingContent() {
                   onClick={handleCancel}
                   disabled={cancelling || !subscription}
                 >
-                  {cancelling ? "Cancelando..." : "Cancelar plano"}
+                  {cancelling ? t("cancelling") : t("cancelPlan")}
                 </Button>
               )}
               <Button size="sm" onClick={handleUpgrade}>
                 <ArrowUpRight className="h-4 w-4 mr-1" />
-                Alterar plano
+                {t("changePlan")}
               </Button>
             </div>
           </div>
@@ -233,23 +238,23 @@ function BillingContent() {
           <CardContent className="pt-6 space-y-4">
             <h3 className="font-semibold flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Uso do plano
+              {t("planUsage")}
             </h3>
             <div className="grid gap-4 sm:grid-cols-3">
               <UsageBar
-                label="Pacientes"
+                label={t("usagePatients")}
                 current={usage.usage.patients.current}
                 limit={usage.usage.patients.limit}
                 percentage={usage.usage.patients.percentage}
               />
               <UsageBar
-                label="Dentistas"
+                label={t("usageDentists")}
                 current={usage.usage.dentists.current}
                 limit={usage.usage.dentists.limit}
                 percentage={usage.usage.dentists.percentage}
               />
               <UsageBar
-                label="Agendamentos/mês"
+                label={t("usageAppointments")}
                 current={usage.usage.appointments_month.current}
                 limit={usage.usage.appointments_month.limit}
                 percentage={usage.usage.appointments_month.percentage}
@@ -262,7 +267,7 @@ function BillingContent() {
       {/* Invoices */}
       <Card>
         <CardContent className="pt-6">
-          <h3 className="font-semibold mb-4">Faturas</h3>
+          <h3 className="font-semibold mb-4">{t("invoices")}</h3>
           <InvoiceTable invoices={invoices} />
         </CardContent>
       </Card>

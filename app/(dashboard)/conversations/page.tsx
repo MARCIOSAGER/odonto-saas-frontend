@@ -11,9 +11,12 @@ import { format } from "date-fns"
 import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { useIsMobile } from "@/hooks/useIsMobile"
+import { useTranslations } from "next-intl"
 
 export default function ConversationsPage() {
   const isMobile = useIsMobile()
+  const t = useTranslations("conversations")
+  const tc = useTranslations("common")
   const [search, setSearch] = useState("")
   const [selectedPhone, setSelectedPhone] = useState<string | null>(null)
   const [messageText, setMessageText] = useState("")
@@ -84,7 +87,7 @@ export default function ConversationsPage() {
   const handleStartChat = (phone: string) => {
     const cleaned = phone.replace(/\D/g, "")
     if (!cleaned) {
-      toast.error("Informe um número de telefone válido")
+      toast.error(t("invalidPhone"))
       return
     }
     setSelectedPhone(cleaned)
@@ -109,7 +112,7 @@ export default function ConversationsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
             <Input
-              placeholder="Buscar paciente..."
+              placeholder={t("searchPatient")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-11 bg-card border-border shadow-sm text-gray-900 dark:text-gray-100"
@@ -119,7 +122,7 @@ export default function ConversationsPage() {
             size="icon"
             className="h-11 w-11 shrink-0"
             onClick={() => setShowNewChat(true)}
-            title="Nova conversa"
+            title={t("newConversation")}
           >
             <Plus size={18} />
           </Button>
@@ -133,10 +136,10 @@ export default function ConversationsPage() {
               <div className="divide-y divide-border">
                 {!Array.isArray(conversations) || conversations.length === 0 ? (
                   <div className="p-8 text-center space-y-3">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma conversa encontrada.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t("noConversations")}</p>
                     <Button variant="outline" size="sm" onClick={() => setShowNewChat(true)} className="gap-2">
                       <Plus size={14} />
-                      Iniciar conversa
+                      {t("startConversation")}
                     </Button>
                   </div>
                 ) : (
@@ -190,7 +193,7 @@ export default function ConversationsPage() {
                     size="icon"
                     className="h-8 w-8 shrink-0"
                     onClick={() => setSelectedPhone(null)}
-                    aria-label="Voltar"
+                    aria-label={tc("back")}
                   >
                     <ArrowLeft size={18} />
                   </Button>
@@ -204,7 +207,7 @@ export default function ConversationsPage() {
                   </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     {selectedPhone}
-                    {patient?._count?.appointments ? ` \u00b7 ${patient._count.appointments} consulta(s)` : ""}
+                    {patient?._count?.appointments ? ` \u00b7 ${t("appointmentCount", { count: patient._count.appointments })}` : ""}
                   </p>
                 </div>
               </div>
@@ -216,7 +219,7 @@ export default function ConversationsPage() {
                 <div className="flex h-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
               ) : !Array.isArray(messages) || messages.length === 0 ? (
                 <div className="flex h-full items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
-                  Nenhuma mensagem nesta conversa. Envie a primeira mensagem abaixo.
+                  {t("noMessages")}
                 </div>
               ) : (
                 messages.map((m: any) => (
@@ -249,7 +252,7 @@ export default function ConversationsPage() {
             <div className="p-4 border-t border-border bg-white dark:bg-gray-800">
               <div className="flex gap-3">
                 <Input
-                  placeholder="Escreva sua mensagem..."
+                  placeholder={t("messagePlaceholder")}
                   value={messageText}
                   onChange={(e) => setMessageText(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -270,7 +273,7 @@ export default function ConversationsPage() {
                 </Button>
               </div>
               <p className="text-[10px] text-center text-gray-500 dark:text-gray-400 mt-2">
-                Enviar uma mensagem manual pausa temporariamente a IA para este paciente.
+                {t("manualMessageNote")}
               </p>
             </div>
           </>
@@ -280,14 +283,14 @@ export default function ConversationsPage() {
               <MessageSquare size={40} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Suas Conversas</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t("yourConversations")}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-                Selecione uma conversa ao lado ou inicie uma nova para interagir com o paciente.
+                {t("selectConversationHint")}
               </p>
             </div>
             <Button onClick={() => setShowNewChat(true)} className="gap-2">
               <Plus size={16} />
-              Nova Conversa
+              {t("newConversation")}
             </Button>
           </div>
         )}
@@ -296,17 +299,17 @@ export default function ConversationsPage() {
       {/* Dialog Nova Conversa */}
       <Dialog open={showNewChat} onOpenChange={setShowNewChat}>
         <DialogContent className="dark:bg-gray-900">
-          <DialogHeader title="Nova Conversa" description="Selecione um paciente ou digite um número de telefone." />
+          <DialogHeader title={t("dialogTitle")} description={t("dialogDescription")} />
           <div className="p-4 space-y-4">
             {/* Opção 1: Digitar número */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Phone size={14} />
-                Enviar para um número
+                {t("sendToNumber")}
               </label>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Ex: 5521999999999"
+                  placeholder={t("phoneExample")}
                   value={newChatPhone}
                   onChange={(e) => setNewChatPhone(e.target.value)}
                   className="flex-1 bg-muted/30 border-none h-10 text-gray-900 dark:text-gray-100"
@@ -317,11 +320,11 @@ export default function ConversationsPage() {
                   disabled={!newChatPhone.replace(/\D/g, "")}
                   onClick={() => handleStartChat(newChatPhone)}
                 >
-                  Iniciar
+                  {t("start")}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Informe o número com DDI + DDD + número (ex: 5521999999999).
+                {t("phoneFormatHint")}
               </p>
             </div>
 
@@ -330,7 +333,7 @@ export default function ConversationsPage() {
                 <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">ou selecione um paciente</span>
+                <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">{t("orSelectPatient")}</span>
               </div>
             </div>
 
@@ -339,7 +342,7 @@ export default function ConversationsPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
-                  placeholder="Buscar paciente por nome..."
+                  placeholder={t("searchPatientByName")}
                   value={newChatSearch}
                   onChange={(e) => setNewChatSearch(e.target.value)}
                   className="pl-10 bg-muted/30 border-none h-10 text-gray-900 dark:text-gray-100"
@@ -350,7 +353,7 @@ export default function ConversationsPage() {
                   <div className="flex p-4 justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
                 ) : patientsWithPhone.length === 0 ? (
                   <p className="p-4 text-center text-sm text-muted-foreground">
-                    {patients.length > 0 ? "Nenhum paciente com telefone cadastrado." : "Nenhum paciente encontrado."}
+                    {patients.length > 0 ? t("noPatientWithPhone") : t("noPatientFound")}
                   </p>
                 ) : (
                   patientsWithPhone.map((p: any) => (
