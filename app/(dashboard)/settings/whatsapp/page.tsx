@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, MessageSquare, ShieldCheck, RefreshCcw, Smartphone, AlertCircle, QrCode, Send, Power, RotateCcw, Unplug } from "lucide-react"
 import { toast } from "sonner"
 import { api } from "@/lib/api"
+import { useTranslations } from "next-intl"
 
 export default function WhatsAppSettingsPage() {
+  const t = useTranslations("whatsappSettings")
   const { clinic, isLoading, updateClinic, testWhatsApp, getQrCode, sendTestMessage, disconnectWhatsApp, restartWhatsApp, restoreWhatsApp } = useClinic()
 
   const [instanceId, setInstanceId] = useState("")
@@ -30,7 +32,6 @@ export default function WhatsAppSettingsPage() {
 
   const statusIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Verificar status silenciosamente - chama API direta, sem toast
   const checkStatusSilently = useCallback(async () => {
     try {
       const res = await api.post("/clinics/my/test-whatsapp")
@@ -45,7 +46,6 @@ export default function WhatsAppSettingsPage() {
     }
   }, [])
 
-  // Teste manual com feedback (toast)
   const handleTestConnection = async () => {
     setIsTesting(true)
     setConnectionStatus('checking')
@@ -63,7 +63,6 @@ export default function WhatsAppSettingsPage() {
     }
   }
 
-  // Carregar credenciais + verificar status automaticamente
   useEffect(() => {
     if (clinic) {
       setInstanceId(clinic.z_api_instance || "")
@@ -78,7 +77,6 @@ export default function WhatsAppSettingsPage() {
     }
   }, [clinic, checkStatusSilently])
 
-  // Polling de status a cada 30 segundos
   useEffect(() => {
     if (!clinic?.z_api_instance || !clinic?.z_api_token) return
 
@@ -93,7 +91,6 @@ export default function WhatsAppSettingsPage() {
     }
   }, [clinic?.z_api_instance, clinic?.z_api_token, checkStatusSilently])
 
-  // Limpar intervalos ao desmontar
   useEffect(() => {
     return () => {
       if (qrIntervalRef.current) clearInterval(qrIntervalRef.current)
@@ -104,10 +101,10 @@ export default function WhatsAppSettingsPage() {
   const handleSave = async () => {
     try {
       await updateClinic.mutateAsync({ z_api_instance: instanceId, z_api_token: token, z_api_client_token: clientToken })
-      toast.success("Credenciais salvas!")
+      toast.success(t("credentialsSaved"))
       handleTestConnection()
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao salvar")
+      toast.error(error.response?.data?.message || t("saveError"))
     }
   }
 
@@ -127,7 +124,7 @@ export default function WhatsAppSettingsPage() {
         qrAttemptsRef.current++
         if (qrAttemptsRef.current >= 3) {
           stopQrPolling()
-          toast.error("Falha ao gerar QR Code. Verifique suas credenciais.")
+          toast.error(t("qrCodeFailed"))
         }
       }
     } catch (error) {
@@ -143,14 +140,13 @@ export default function WhatsAppSettingsPage() {
     qrAttemptsRef.current = 0
     fetchQrCode()
     qrIntervalRef.current = setInterval(async () => {
-      // Verificar se conectou
       try {
         const res = await api.post("/clinics/my/test-whatsapp")
         const data = res.data?.data || res.data
         if (data?.connected) {
           stopQrPolling()
           setConnectionStatus('connected')
-          toast.success("WhatsApp conectado com sucesso!")
+          toast.success(t("connected"))
           return
         }
       } catch {}
@@ -169,7 +165,7 @@ export default function WhatsAppSettingsPage() {
 
   const handleSendTestMessage = async () => {
     if (!testPhone.trim()) {
-      toast.error("Informe o número de telefone")
+      toast.error(t("phoneRequired"))
       return
     }
     setIsSendingTest(true)
@@ -193,7 +189,6 @@ export default function WhatsAppSettingsPage() {
     setConnectionStatus('checking')
     try {
       await restartWhatsApp.mutateAsync()
-      // Aguardar um pouco e re-checar
       setTimeout(() => checkStatusSilently(), 3000)
     } catch {
       setConnectionStatus('disconnected')
@@ -221,8 +216,8 @@ export default function WhatsAppSettingsPage() {
   return (
     <div className="max-w-4xl space-y-6 pb-12">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Configurações do WhatsApp</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Conecte sua clínica ao WhatsApp para automações e lembretes.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
       </div>
 
       <div className="grid gap-6">
@@ -239,10 +234,10 @@ export default function WhatsAppSettingsPage() {
                    connectionStatus === 'checking' ? <Loader2 size={24} className="animate-spin" /> : <AlertCircle size={24} />}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">Status da Conexão</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t("connectionStatus")}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {connectionStatus === 'connected' ? 'Sua instância do WhatsApp está ativa e conectada.' :
-                     connectionStatus === 'checking' ? 'Verificando conexão...' : 'WhatsApp não configurado ou desconectado.'}
+                    {connectionStatus === 'connected' ? t("statusConnected") :
+                     connectionStatus === 'checking' ? t("statusChecking") : t("statusDisconnected")}
                   </p>
                 </div>
               </div>
@@ -250,12 +245,11 @@ export default function WhatsAppSettingsPage() {
                 variant={connectionStatus === 'connected' ? "green" : connectionStatus === 'checking' ? "yellow" : "gray"}
                 className="px-3 py-1"
               >
-                {connectionStatus === 'connected' ? 'Conectado' :
-                 connectionStatus === 'checking' ? 'Verificando...' : 'Desconectado'}
+                {connectionStatus === 'connected' ? t("badgeConnected") :
+                 connectionStatus === 'checking' ? t("badgeChecking") : t("badgeDisconnected")}
               </Badge>
             </div>
 
-            {/* Ações de gerenciamento */}
             {instanceId && token && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
                 <Button
@@ -266,7 +260,7 @@ export default function WhatsAppSettingsPage() {
                   className="gap-2 text-gray-700 dark:text-gray-300"
                 >
                   {isTesting ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCcw size={14} />}
-                  Testar Conexão
+                  {t("testConnection")}
                 </Button>
                 <Button
                   variant="outline"
@@ -276,7 +270,7 @@ export default function WhatsAppSettingsPage() {
                   className="gap-2 text-gray-700 dark:text-gray-300"
                 >
                   {restartWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw size={14} />}
-                  Reiniciar
+                  {t("restart")}
                 </Button>
                 <Button
                   variant="outline"
@@ -286,7 +280,7 @@ export default function WhatsAppSettingsPage() {
                   className="gap-2 text-gray-700 dark:text-gray-300"
                 >
                   {restoreWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Power size={14} />}
-                  Restaurar Sessão
+                  {t("restoreSession")}
                 </Button>
                 <Button
                   variant="outline"
@@ -296,7 +290,7 @@ export default function WhatsAppSettingsPage() {
                   className="gap-2 text-destructive hover:text-destructive"
                 >
                   {disconnectWhatsApp.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Unplug size={14} />}
-                  Desconectar
+                  {t("disconnect")}
                 </Button>
               </div>
             )}
@@ -306,25 +300,25 @@ export default function WhatsAppSettingsPage() {
         {/* Configuration Form */}
         <Card className="border-border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">Credenciais Z-API</CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Insira os dados da sua instância do Z-API para habilitar o envio de mensagens.</CardDescription>
+            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{t("zapiCredentials")}</CardTitle>
+            <CardDescription className="text-gray-500 dark:text-gray-400">{t("zapiCredentialsDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Instance ID</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("instanceId")}</label>
                 <Input
-                  placeholder="Ex: 3B8C..."
+                  placeholder={t("instanceIdPlaceholder")}
                   value={instanceId}
                   onChange={(e) => setInstanceId(e.target.value)}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Token da Instância</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("instanceToken")}</label>
                 <Input
                   type="password"
-                  placeholder="Token da instância Z-API"
+                  placeholder={t("instanceTokenPlaceholder")}
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -332,10 +326,10 @@ export default function WhatsAppSettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Client-Token (Token de segurança da conta)</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("clientToken")}</label>
               <Input
                 type="password"
-                placeholder="Token de segurança da sua conta Z-API"
+                placeholder={t("clientTokenPlaceholder")}
                 value={clientToken}
                 onChange={(e) => setClientToken(e.target.value)}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -349,7 +343,7 @@ export default function WhatsAppSettingsPage() {
                 className="w-full sm:w-auto h-11 px-8"
               >
                 {updateClinic.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-                Salvar Configuração
+                {t("saveConfig")}
               </Button>
             </div>
           </CardContent>
@@ -360,10 +354,10 @@ export default function WhatsAppSettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <QrCode size={20} className="text-primary" />
-              Conectar via QR Code
+              {t("connectQrCode")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Escaneie o QR Code com seu WhatsApp para conectar a instância. O código atualiza automaticamente a cada 15 segundos.
+              {t("qrCodeDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -373,10 +367,10 @@ export default function WhatsAppSettingsPage() {
                   <img src={qrCodeData} alt="WhatsApp QR Code" className="w-64 h-64 object-contain" />
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
-                  Abra o WhatsApp no celular &gt; Menu &gt; Aparelhos conectados &gt; Conectar um aparelho
+                  {t("qrCodeInstructions")}
                 </p>
                 <Button variant="outline" onClick={stopQrPolling} className="text-gray-700 dark:text-gray-300">
-                  Cancelar
+                  {t("cancel")}
                 </Button>
               </div>
             ) : (
@@ -387,14 +381,14 @@ export default function WhatsAppSettingsPage() {
                 className="w-full h-11 text-gray-700 dark:text-gray-300"
               >
                 {isLoadingQr ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando QR Code...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("generatingQr")}</>
                 ) : (
-                  <><QrCode className="mr-2 h-4 w-4" /> Gerar QR Code</>
+                  <><QrCode className="mr-2 h-4 w-4" /> {t("generateQr")}</>
                 )}
               </Button>
             )}
             {!instanceId && (
-              <p className="text-xs text-muted-foreground">Salve as credenciais Z-API primeiro para gerar o QR Code.</p>
+              <p className="text-xs text-muted-foreground">{t("saveCredentialsFirst")}</p>
             )}
           </CardContent>
         </Card>
@@ -404,16 +398,16 @@ export default function WhatsAppSettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Send size={20} className="text-primary" />
-              Enviar Mensagem de Teste
+              {t("sendTestMessage")}
             </CardTitle>
             <CardDescription className="text-gray-500 dark:text-gray-400">
-              Envie uma mensagem de teste para verificar se a integração está funcionando corretamente.
+              {t("sendTestDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-3">
               <Input
-                placeholder="Ex: 5521999999999"
+                placeholder={t("testPhonePlaceholder")}
                 value={testPhone}
                 onChange={(e) => setTestPhone(e.target.value)}
                 className="flex-1 bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -424,14 +418,14 @@ export default function WhatsAppSettingsPage() {
                 className="h-11 px-6"
               >
                 {isSendingTest ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Enviando...</>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("sending")}</>
                 ) : (
-                  <><Send className="mr-2 h-4 w-4" /> Enviar</>
+                  <><Send className="mr-2 h-4 w-4" /> {t("send")}</>
                 )}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Informe o número completo com código do país + DDD + número. Brasil: 5521999999999. Números brasileiros (só DDD) são aceitos também.
+              {t("phoneHint")}
             </p>
           </CardContent>
         </Card>
@@ -441,8 +435,8 @@ export default function WhatsAppSettingsPage() {
           <div className="flex gap-3">
             <MessageSquare className="h-5 w-5 text-sky-600 shrink-0" />
             <div className="text-sm text-sky-900/80 dark:text-sky-300/80">
-              <p className="font-semibold mb-1">Como obter essas credenciais?</p>
-              <p>Acesse o painel do <a href="https://z-api.io" target="_blank" className="underline font-medium">Z-API</a>, crie uma instância e copie o Instance ID, Token e Client-Token gerados para vincular sua conta do WhatsApp Business.</p>
+              <p className="font-semibold mb-1">{t("howToGetCredentials")}</p>
+              <p>{t("credentialsHelp")}</p>
             </div>
           </div>
         </div>

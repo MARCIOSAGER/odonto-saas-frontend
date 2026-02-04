@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 
 interface Automation {
   id: string
@@ -27,40 +29,43 @@ interface Automation {
   last_error: string | null
 }
 
-const AUTOMATION_TYPES = [
-  {
-    type: "follow_up",
-    name: "Follow-up pós-procedimento",
-    description: "Envia mensagem automática após uma consulta concluída, perguntando como o paciente está se sentindo.",
-    icon: MessageCircle,
-    defaultTrigger: { hours_after: 2 },
-    defaultAction: {
-      template: "Olá {patientName}! Como você está se sentindo após o procedimento de {service}? Se tiver qualquer dúvida ou desconforto, não hesite em nos contatar. Equipe {clinicName}",
-    },
-  },
-  {
-    type: "birthday",
-    name: "Mensagem de aniversário",
-    description: "Envia mensagem no dia do aniversário do paciente (às 9h). Requer data de nascimento cadastrada.",
-    icon: Cake,
-    defaultTrigger: { time: "09:00" },
-    defaultAction: {
-      template: "Feliz aniversário, {patientName}! A equipe {clinicName} deseja um dia maravilhoso! Aproveite para cuidar do seu sorriso com condições especiais neste mês.",
-    },
-  },
-  {
-    type: "reactivation",
-    name: "Reativação de pacientes inativos",
-    description: "Contata pacientes que não visitam a clínica há meses, convidando-os a retornar. Roda semanalmente (segundas).",
-    icon: UserCheck,
-    defaultTrigger: { months_inactive: 3, max_per_run: 20 },
-    defaultAction: {
-      template: "Olá {patientName}! Sentimos sua falta na {clinicName}. Já faz um tempo desde sua última visita. Que tal agendar uma consulta de acompanhamento? Responda para verificar horários disponíveis!",
-    },
-  },
-]
-
 export default function WhatsAppAutomationsPage() {
+  const t = useTranslations("automations")
+  const locale = useLocale()
+
+  const AUTOMATION_TYPES = [
+    {
+      type: "follow_up",
+      name: t("followUpName"),
+      description: t("followUpDesc"),
+      icon: MessageCircle,
+      defaultTrigger: { hours_after: 2 },
+      defaultAction: {
+        template: t.raw("followUpTemplate"),
+      },
+    },
+    {
+      type: "birthday",
+      name: t("birthdayName"),
+      description: t("birthdayDesc"),
+      icon: Cake,
+      defaultTrigger: { time: "09:00" },
+      defaultAction: {
+        template: t.raw("birthdayTemplate"),
+      },
+    },
+    {
+      type: "reactivation",
+      name: t("reactivationName"),
+      description: t("reactivationDesc"),
+      icon: UserCheck,
+      defaultTrigger: { months_inactive: 3, max_per_run: 20 },
+      defaultAction: {
+        template: t.raw("reactivationTemplate"),
+      },
+    },
+  ]
+
   const [automations, setAutomations] = useState<Automation[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
@@ -105,7 +110,6 @@ export default function WhatsAppAutomationsPage() {
     const existing = getAutomation(type)
 
     if (!existing) {
-      // Create new automation
       const typeDef = AUTOMATION_TYPES.find((t) => t.type === type)!
       setSaving(type)
       try {
@@ -117,10 +121,10 @@ export default function WhatsAppAutomationsPage() {
           action_config: typeDef.defaultAction,
           is_active: isActive,
         })
-        toast.success(`${typeDef.name} ${isActive ? "ativada" : "desativada"}`)
+        toast.success(`${typeDef.name} ${isActive ? t("activated") : t("deactivated")}`)
         await loadAutomations()
       } catch {
-        toast.error("Erro ao salvar automação")
+        toast.error(t("saveAutomationError"))
       } finally {
         setSaving(null)
       }
@@ -130,12 +134,12 @@ export default function WhatsAppAutomationsPage() {
     setSaving(type)
     try {
       await api.patch(`/automations/${type}/toggle`, { is_active: isActive })
-      toast.success(`Automação ${isActive ? "ativada" : "desativada"}`)
+      toast.success(`${existing.name} ${isActive ? t("activated") : t("deactivated")}`)
       setAutomations((prev) =>
         prev.map((a) => (a.type === type ? { ...a, is_active: isActive } : a))
       )
     } catch {
-      toast.error("Erro ao atualizar automação")
+      toast.error(t("toggleError"))
     } finally {
       setSaving(null)
     }
@@ -163,10 +167,10 @@ export default function WhatsAppAutomationsPage() {
         action_config: actionConfig,
         is_active: existing?.is_active ?? false,
       })
-      toast.success("Configuração salva")
+      toast.success(t("configSaved"))
       await loadAutomations()
     } catch {
-      toast.error("Erro ao salvar")
+      toast.error(t("configSaveError"))
     } finally {
       setSaving(null)
     }
@@ -184,26 +188,26 @@ export default function WhatsAppAutomationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Automações WhatsApp</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Configure mensagens automáticas para engajar pacientes
+            {t("subtitle")}
           </p>
         </div>
         <Link href="/settings/whatsapp">
           <Button variant="outline" size="sm" className="gap-2">
             <Settings2 className="h-4 w-4" />
-            Configurações WhatsApp
+            {t("whatsappSettings")}
           </Button>
         </Link>
       </div>
 
       <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
         <p>
-          <strong>Lembretes de consulta</strong> (24h e 1h antes) são configurados na{" "}
+          <strong>{t("remindersNote").split(t("aiPage"))[0]}</strong>
           <Link href="/settings/ai" className="text-primary hover:underline">
-            página de IA
+            {t("aiPage")}
           </Link>
-          , seção &ldquo;Lembretes Automáticos&rdquo;.
+          {t("remindersNote").split(t("aiPage"))[1]}
         </p>
       </div>
 
@@ -248,7 +252,7 @@ export default function WhatsAppAutomationsPage() {
               {typeDef.type === "follow_up" && (
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Enviar</span>
+                  <span className="text-muted-foreground">{t("sendLabel")}</span>
                   <input
                     type="number"
                     min={1}
@@ -265,13 +269,13 @@ export default function WhatsAppAutomationsPage() {
                     }
                     className="w-16 px-2 py-1 border rounded text-center"
                   />
-                  <span className="text-muted-foreground">horas após o procedimento</span>
+                  <span className="text-muted-foreground">{t("hoursAfter")}</span>
                 </div>
               )}
 
               {typeDef.type === "reactivation" && (
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">Contatar pacientes inativos há</span>
+                  <span className="text-muted-foreground">{t("contactInactive")}</span>
                   <input
                     type="number"
                     min={1}
@@ -288,7 +292,7 @@ export default function WhatsAppAutomationsPage() {
                     }
                     className="w-16 px-2 py-1 border rounded text-center"
                   />
-                  <span className="text-muted-foreground">meses, máximo</span>
+                  <span className="text-muted-foreground">{t("months")}</span>
                   <input
                     type="number"
                     min={1}
@@ -305,13 +309,13 @@ export default function WhatsAppAutomationsPage() {
                     }
                     className="w-16 px-2 py-1 border rounded text-center"
                   />
-                  <span className="text-muted-foreground">por execução</span>
+                  <span className="text-muted-foreground">{t("perRun")}</span>
                 </div>
               )}
 
               {/* Template editor */}
               <div className="space-y-2">
-                <label className="text-sm font-medium">Mensagem</label>
+                <label className="text-sm font-medium">{t("messageLabel")}</label>
                 <textarea
                   value={template}
                   onChange={(e) =>
@@ -324,8 +328,7 @@ export default function WhatsAppAutomationsPage() {
                   className="w-full px-3 py-2 border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Variáveis: {"{patientName}"}, {"{clinicName}"}
-                  {typeDef.type === "follow_up" && <>, {"{service}"}, {"{dentist}"}</>}
+                  {t.raw(typeDef.type === "follow_up" ? "variablesHintFollowUp" : "variablesHint")}
                 </p>
               </div>
 
@@ -334,16 +337,16 @@ export default function WhatsAppAutomationsPage() {
                   {automation && (
                     <>
                       {automation.run_count > 0 && (
-                        <span>Executado {automation.run_count}x</span>
+                        <span>{t("executedCount", { count: automation.run_count })}</span>
                       )}
                       {automation.last_run_at && (
                         <span className="ml-3">
-                          Última: {new Date(automation.last_run_at).toLocaleString("pt-BR")}
+                          {t("lastRun", { date: new Date(automation.last_run_at).toLocaleString(locale) })}
                         </span>
                       )}
                       {automation.error_count > 0 && (
                         <span className="ml-3 text-destructive">
-                          {automation.error_count} erros
+                          {t("errorCount", { count: automation.error_count })}
                         </span>
                       )}
                     </>
@@ -362,7 +365,7 @@ export default function WhatsAppAutomationsPage() {
                   ) : (
                     <Save className="h-3 w-3" />
                   )}
-                  Salvar
+                  {t("save")}
                 </Button>
               </div>
             </div>

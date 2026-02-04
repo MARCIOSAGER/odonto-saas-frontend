@@ -5,25 +5,25 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sun, Moon, Monitor } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function SettingsPage() {
+  const t = useTranslations("settingsGeneral")
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // Evitar hydration mismatch - OBRIGATÓRIO
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Não renderizar até montar (evita flash)
   if (!mounted) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6 text-foreground">Configurações</h1>
+        <h1 className="text-2xl font-bold mb-6 text-foreground">{t("title")}</h1>
         <Card>
           <CardHeader>
-            <CardTitle className="text-foreground">Aparência</CardTitle>
-            <CardDescription className="text-muted-foreground">Carregando...</CardDescription>
+            <CardTitle className="text-foreground">{t("appearance")}</CardTitle>
+            <CardDescription className="text-muted-foreground">{t("loading")}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -32,42 +32,42 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6 text-foreground">Configurações</h1>
-      
+      <h1 className="text-2xl font-bold mb-6 text-foreground">{t("title")}</h1>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-foreground">Aparência</CardTitle>
+          <CardTitle className="text-foreground">{t("appearance")}</CardTitle>
           <CardDescription className="text-muted-foreground">
-            Tema atual: {resolvedTheme === "dark" ? "Escuro" : "Claro"}
+            {t("currentTheme", { theme: resolvedTheme === "dark" ? t("themeDark") : t("themeLight") })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Button 
-              variant={theme === "light" ? "default" : "outline"} 
-              onClick={() => setTheme("light")} 
+            <Button
+              variant={theme === "light" ? "default" : "outline"}
+              onClick={() => setTheme("light")}
               className="flex items-center gap-2"
             >
               <Sun className="h-4 w-4" />
-              Modo Claro
+              {t("lightMode")}
             </Button>
-            
-            <Button 
-              variant={theme === "dark" ? "default" : "outline"} 
-              onClick={() => setTheme("dark")} 
+
+            <Button
+              variant={theme === "dark" ? "default" : "outline"}
+              onClick={() => setTheme("dark")}
               className="flex items-center gap-2"
             >
               <Moon className="h-4 w-4" />
-              Modo Escuro
+              {t("darkMode")}
             </Button>
-            
-            <Button 
-              variant={theme === "system" ? "default" : "outline"} 
-              onClick={() => setTheme("system")} 
+
+            <Button
+              variant={theme === "system" ? "default" : "outline"}
+              onClick={() => setTheme("system")}
               className="flex items-center gap-2"
             >
               <Monitor className="h-4 w-4" />
-              Sistema
+              {t("system")}
             </Button>
           </div>
         </CardContent>

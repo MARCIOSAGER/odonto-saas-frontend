@@ -19,8 +19,10 @@ import {
   useVerifyTotpSetup,
   useDisable2fa,
 } from "@/hooks/useTwoFactor"
+import { useTranslations } from "next-intl"
 
 export default function SecuritySettingsPage() {
+  const t = useTranslations("security")
   const { data: status, isLoading } = useTwoFactorStatus()
   const setupWhatsApp = useSetupWhatsApp2fa()
   const setupTotp = useSetupTotp()
@@ -80,9 +82,9 @@ export default function SecuritySettingsPage() {
   return (
     <div className="space-y-6 pb-12">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Segurança</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Gerencie a autenticação de dois fatores (2FA) da sua conta.
+          {t("subtitle")}
         </p>
       </div>
 
@@ -96,23 +98,23 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 dark:text-gray-100">
-                  Autenticação de dois fatores
+                  {t("twoFactorAuth")}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {status?.enabled
-                    ? `Ativo via ${status.method === "whatsapp" ? "WhatsApp" : "Google Authenticator"}`
-                    : "Desativado - ative para maior segurança"}
+                    ? t("activeVia", { method: status.method === "whatsapp" ? t("methodWhatsapp") : t("methodTotp") })
+                    : t("inactive2fa")}
                 </p>
               </div>
             </div>
             <Badge variant={status?.enabled ? "green" : "yellow"}>
-              {status?.enabled ? "Ativo" : "Inativo"}
+              {status?.enabled ? t("active") : t("inactiveLabel")}
             </Badge>
           </div>
 
           {status?.enabled && status?.phone && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 ml-16">
-              Telefone: {status.phone}
+              {t("phone", { phone: status.phone })}
             </p>
           )}
         </CardContent>
@@ -128,14 +130,14 @@ export default function SecuritySettingsPage() {
                 <Smartphone className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100">WhatsApp</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{t("whatsapp")}</h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Receba o código via WhatsApp
+                  {t("receiveViaWhatsapp")}
                 </p>
               </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Um código de 6 dígitos será enviado para o seu WhatsApp a cada login.
+              {t("whatsappDescription")}
             </p>
             <Button
               variant={status?.method === "whatsapp" ? "outline" : "default"}
@@ -143,7 +145,7 @@ export default function SecuritySettingsPage() {
               onClick={() => setShowWhatsAppDialog(true)}
               disabled={status?.method === "whatsapp"}
             >
-              {status?.method === "whatsapp" ? "Ativo" : "Ativar WhatsApp 2FA"}
+              {status?.method === "whatsapp" ? t("active") : t("activateWhatsapp")}
             </Button>
           </CardContent>
         </Card>
@@ -156,14 +158,14 @@ export default function SecuritySettingsPage() {
                 <Key className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100">App Autenticador</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{t("authenticatorApp")}</h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Google Authenticator, Authy, etc.
+                  {t("authenticatorApps")}
                 </p>
               </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Use um app autenticador para gerar códigos temporários.
+              {t("authenticatorDescription")}
             </p>
             <Button
               variant={status?.method === "totp" ? "outline" : "default"}
@@ -174,7 +176,7 @@ export default function SecuritySettingsPage() {
               {setupTotp.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              {status?.method === "totp" ? "Ativo" : "Ativar App Autenticador"}
+              {status?.method === "totp" ? t("active") : t("activateTotp")}
             </Button>
           </CardContent>
         </Card>
@@ -186,9 +188,9 @@ export default function SecuritySettingsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100">Desativar 2FA</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-gray-100">{t("disable2fa")}</h4>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Remover a proteção de dois fatores da sua conta.
+                  {t("disableDescription")}
                 </p>
               </div>
               <Button
@@ -196,7 +198,7 @@ export default function SecuritySettingsPage() {
                 className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950"
                 onClick={() => setShowDisableDialog(true)}
               >
-                Desativar
+                {t("disable")}
               </Button>
             </div>
           </CardContent>
@@ -213,10 +215,10 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <DialogTitle className="text-white text-lg font-bold">
-                  Ativar 2FA via WhatsApp
+                  {t("setupWhatsappTitle")}
                 </DialogTitle>
                 <p className="text-green-100 text-sm mt-0.5">
-                  Receba códigos de verificação no seu WhatsApp
+                  {t("setupWhatsappSubtitle")}
                 </p>
               </div>
             </div>
@@ -224,7 +226,7 @@ export default function SecuritySettingsPage() {
           <div className="px-6 py-5 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Número do WhatsApp
+                {t("whatsappNumber")}
               </label>
               <div className="relative">
                 <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -236,12 +238,12 @@ export default function SecuritySettingsPage() {
                 />
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Formato: DDI + DDD + número (ex: 5521999999999)
+                {t("phoneFormat")}
               </p>
             </div>
             <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg p-3">
               <p className="text-xs text-green-700 dark:text-green-400">
-                A cada login, enviaremos um código de 6 dígitos para este número. O código expira em 5 minutos.
+                {t("whatsappLoginNote")}
               </p>
             </div>
             <Button
@@ -254,7 +256,7 @@ export default function SecuritySettingsPage() {
               ) : (
                 <ShieldCheck className="h-4 w-4 mr-2" />
               )}
-              Ativar WhatsApp 2FA
+              {t("activateWhatsapp")}
             </Button>
           </div>
         </DialogContent>
@@ -270,21 +272,20 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <DialogTitle className="text-white text-lg font-bold">
-                  Configurar App Autenticador
+                  {t("setupTotpTitle")}
                 </DialogTitle>
                 <p className="text-purple-100 text-sm mt-0.5">
-                  Google Authenticator, Authy ou similar
+                  {t("setupTotpSubtitle")}
                 </p>
               </div>
             </div>
           </div>
           <div className="px-6 py-5 space-y-5">
-            {/* Step 1: QR Code */}
             {totpData?.qrCode && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="flex items-center justify-center h-5 w-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 text-xs font-bold">1</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Escaneie o QR Code</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("scanQrCode")}</span>
                 </div>
                 <div className="flex justify-center py-2">
                   <div className="p-3 bg-white rounded-xl shadow-sm border">
@@ -294,11 +295,10 @@ export default function SecuritySettingsPage() {
               </div>
             )}
 
-            {/* Manual Secret */}
             {totpData?.secret && (
               <div className="space-y-1.5">
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Ou digite manualmente no app:
+                  {t("manualEntry")}
                 </p>
                 <div className="bg-muted rounded-lg p-2.5 border border-border">
                   <p className="text-center font-mono text-sm tracking-wider select-all text-gray-900 dark:text-gray-100 break-all">
@@ -308,11 +308,10 @@ export default function SecuritySettingsPage() {
               </div>
             )}
 
-            {/* Step 2: Verify Code */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <span className="flex items-center justify-center h-5 w-5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 text-xs font-bold">2</span>
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Digite o código gerado</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{t("enterCode")}</span>
               </div>
               <Input
                 value={totpCode}
@@ -333,7 +332,7 @@ export default function SecuritySettingsPage() {
               ) : (
                 <ShieldCheck className="h-4 w-4 mr-2" />
               )}
-              Verificar e ativar
+              {t("verifyAndActivate")}
             </Button>
           </div>
         </DialogContent>
@@ -349,10 +348,10 @@ export default function SecuritySettingsPage() {
               </div>
               <div>
                 <DialogTitle className="text-white text-lg font-bold">
-                  Desativar 2FA
+                  {t("disableTitle")}
                 </DialogTitle>
                 <p className="text-red-100 text-sm mt-0.5">
-                  Sua conta ficará menos protegida
+                  {t("disableWarning")}
                 </p>
               </div>
             </div>
@@ -360,12 +359,12 @@ export default function SecuritySettingsPage() {
           <div className="px-6 py-5 space-y-4">
             <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg p-3">
               <p className="text-xs text-red-700 dark:text-red-400">
-                Ao desativar a autenticação de dois fatores, sua conta ficará protegida apenas pela senha. Recomendamos manter o 2FA ativo.
+                {t("disableExplanation")}
               </p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Confirme sua senha
+                {t("confirmPassword")}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -374,7 +373,7 @@ export default function SecuritySettingsPage() {
                   value={disablePassword}
                   onChange={(e) => setDisablePassword(e.target.value)}
                   className="pl-10 h-11 text-gray-900 dark:text-gray-100"
-                  placeholder="Digite sua senha atual"
+                  placeholder={t("currentPassword")}
                 />
               </div>
             </div>
@@ -389,7 +388,7 @@ export default function SecuritySettingsPage() {
               ) : (
                 <Lock className="h-4 w-4 mr-2" />
               )}
-              Confirmar desativação
+              {t("confirmDisable")}
             </Button>
           </div>
         </DialogContent>
