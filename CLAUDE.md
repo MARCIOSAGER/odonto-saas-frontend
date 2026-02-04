@@ -326,3 +326,5 @@ curl -s -X POST "https://coolify.marciosager.com/api/v1/deploy" \
   -H "Content-Type: application/json" \
   -d '{"uuid":"tc08w80kccws48osw48woswo","force":false}'
 ```
+
+> Webhook configurado em 04/02/2026.
