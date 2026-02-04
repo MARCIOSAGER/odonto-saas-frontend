@@ -322,8 +322,8 @@ export default function ClinicsPage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               {toggleTarget?.status === "active"
-                ? t("deactivateMessage", { name: toggleTarget?.name })
-                : t("activateMessage", { name: toggleTarget?.name })}
+                ? t("deactivateMessage", { name: toggleTarget?.name ?? "" })
+                : t("activateMessage", { name: toggleTarget?.name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
