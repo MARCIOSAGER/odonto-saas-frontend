@@ -21,6 +21,7 @@ const CalendarView = dynamic(() => import("@/components/appointments/calendar-vi
 })
 import { AppointmentForm } from "@/components/forms/appointment-form"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { useIsMobile } from "@/hooks/useIsMobile"
 import {
   AlertDialog,
@@ -33,12 +34,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-const statusMap: Record<string, string> = {
-  scheduled: "Agendado",
-  confirmed: "Confirmado",
-  completed: "Realizado",
-  cancelled: "Cancelado",
-  "no-show": "Faltou",
+const statusKeys: Record<string, string> = {
+  scheduled: "scheduled",
+  confirmed: "confirmed",
+  completed: "completed",
+  cancelled: "cancelled",
+  "no-show": "noShow",
 }
 
 const statusVariant = (status: string): "green" | "yellow" | "red" => {
@@ -57,8 +58,8 @@ function getDentistName(a: any): string {
 function getServiceName(a: any): string {
   return a.service?.name || a.service_name || a.servico || ""
 }
-function getStatusLabel(a: any): string {
-  return statusMap[a.status] || a.status || "Agendado"
+function getStatusKey(a: any): string {
+  return statusKeys[a.status] || "scheduled"
 }
 function getAppointmentDate(a: any): Date {
   if (a.date_time) return new Date(a.date_time)
@@ -71,6 +72,8 @@ function getAppointmentDate(a: any): Date {
 }
 
 function AppointmentsContent() {
+  const t = useTranslations("appointments")
+  const tc = useTranslations("common")
   const searchParams = useSearchParams()
   const isMobile = useIsMobile()
   const [view, setView] = useState<"lista" | "calendario">("lista")
@@ -202,9 +205,9 @@ function AppointmentsContent() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-destructive font-medium">Erro ao carregar agendamentos</div>
+        <div className="text-destructive font-medium">{tc("errorLoad")}</div>
         <Button onClick={() => window.location.reload()} variant="outline">
-          Tentar novamente
+          {tc("tryAgain")}
         </Button>
       </div>
     )
@@ -214,8 +217,8 @@ function AppointmentsContent() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Agendamentos</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie as consultas e horários da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -227,7 +230,7 @@ function AppointmentsContent() {
               onClick={() => setView("lista")}
             >
               <LayoutList size={14} />
-              Lista
+              {t("listView")}
             </Button>
             <Button
               variant={view === "calendario" ? "default" : "ghost"}
@@ -236,12 +239,12 @@ function AppointmentsContent() {
               onClick={() => setView("calendario")}
             >
               <CalendarIcon size={14} />
-              Calendário
+              {t("calendarView")}
             </Button>
           </div>
           <Button className="gap-2" onClick={handleCreate}>
             <Plus size={18} />
-            Novo Agendamento
+            {t("newAppointment")}
           </Button>
         </div>
       </div>
@@ -250,12 +253,10 @@ function AppointmentsContent() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-100">
-              {editingItem ? "Editar Agendamento" : "Novo Agendamento"}
+              {editingItem ? t("editAppointment") : t("newAppointment")}
             </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              {editingItem
-                ? "Atualize as informações da consulta selecionada."
-                : "Selecione o paciente, dentista e serviço para marcar uma nova consulta."}
+              {editingItem ? t("formSubtitleEdit") : t("formSubtitleNew")}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
@@ -273,15 +274,15 @@ function AppointmentsContent() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Cancelar Agendamento</AlertDialogTitle>
+            <AlertDialogTitle>{t("cancelConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja cancelar esta consulta? Esta ação removerá o horário da agenda.
+              {t("cancelConfirmMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogCancel>{tc("back")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Confirmar Cancelamento
+              {t("confirmCancellation")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -290,16 +291,16 @@ function AppointmentsContent() {
       <AlertDialog open={!!dragEvent} onOpenChange={() => setDragEvent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reagendar Consulta</AlertDialogTitle>
+            <AlertDialogTitle>{t("rescheduleTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Deseja mover esta consulta para <strong>{dragEvent?.label}</strong>?
+              {t("rescheduleMessage", { label: dragEvent?.label || "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDrag} disabled={rescheduleAppointment.isPending}>
               {rescheduleAppointment.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Confirmar
+              {tc("confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -316,25 +317,25 @@ function AppointmentsContent() {
               <Table className="min-w-[700px]">
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Data/Hora</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Paciente</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Dentista</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Serviço</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Status</TH>
-                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("dateTime")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("patient")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("dentist")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("service")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{tc("status")}</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">{tc("actions")}</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {safeAppointments.length === 0 ? (
                     <TR>
                       <TD colSpan={6} className="h-32 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum agendamento encontrado.
+                        {t("noAppointments")}
                       </TD>
                     </TR>
                   ) : (
                     safeAppointments.map((a: any) => {
                       const aptDate = getAppointmentDate(a)
-                      const label = getStatusLabel(a)
+                      const statusKey = getStatusKey(a)
                       const isScheduled = a.status === "scheduled"
                       return (
                         <TR key={a.id} className="hover:bg-muted/30 transition-colors">
@@ -353,7 +354,7 @@ function AppointmentsContent() {
                           <TD className="text-gray-700 dark:text-gray-300 text-sm">{getServiceName(a)}</TD>
                           <TD>
                             <Badge variant={statusVariant(a.status)}>
-                              {label}
+                              {t(statusKey)}
                             </Badge>
                           </TD>
                           <TD className="text-right">
@@ -364,7 +365,7 @@ function AppointmentsContent() {
                                   size="icon"
                                   className="h-8 w-8 text-success hover:bg-success/10"
                                   onClick={() => handleConfirm(a.id)}
-                                  title="Confirmar"
+                                  title={tc("confirm")}
                                   disabled={confirmAppointment.isPending}
                                 >
                                   {confirmAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
@@ -375,7 +376,7 @@ function AppointmentsContent() {
                                 size="icon"
                                 className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                                 onClick={() => handleEdit(a)}
-                                title="Editar"
+                                title={tc("edit")}
                               >
                                 <Pencil size={14} />
                               </Button>
@@ -384,7 +385,7 @@ function AppointmentsContent() {
                                 size="icon"
                                 className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                                 onClick={() => setDeleteId(a.id)}
-                                title="Cancelar"
+                                title={tc("cancel")}
                                 disabled={cancelAppointment.isPending}
                               >
                                 {cancelAppointment.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}

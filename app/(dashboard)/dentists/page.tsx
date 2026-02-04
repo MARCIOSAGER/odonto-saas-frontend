@@ -8,6 +8,7 @@ import { useDentists } from "@/hooks/useDentists"
 import { Plus, Loader2, Trash2, UserCheck, IdCard, Stethoscope, Pencil } from "lucide-react"
 import { DentistForm } from "@/components/forms/dentist-form"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function DentistsPage() {
+  const t = useTranslations("dentists")
+  const tc = useTranslations("common")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -60,9 +63,9 @@ export default function DentistsPage() {
     if (!deleteId) return
     try {
       await deleteDentist.mutateAsync(deleteId)
-      toast.success("Dentista excluído com sucesso!")
+      toast.success(t("deleteSuccess"))
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao excluir dentista")
+      toast.error(error.response?.data?.message || t("deleteError"))
     } finally {
       setDeleteId(null)
     }
@@ -79,9 +82,9 @@ export default function DentistsPage() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-destructive font-medium">Erro ao carregar dentistas</div>
+        <div className="text-destructive font-medium">{t("loadError")}</div>
         <Button onClick={() => window.location.reload()} variant="outline">
-          Tentar novamente
+          {tc("tryAgain")}
         </Button>
       </div>
     )
@@ -91,12 +94,12 @@ export default function DentistsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Dentistas</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Corpo clínico e profissionais da clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
         <Button className="gap-2" onClick={handleCreate}>
           <Plus size={18} />
-          Novo Dentista
+          {t("newDentist")}
         </Button>
       </div>
 
@@ -104,12 +107,10 @@ export default function DentistsPage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-100">
-              {editingItem ? "Editar Dentista" : "Novo Dentista"}
+              {editingItem ? t("editDentist") : t("newDentist")}
             </DialogTitle>
             <DialogDescription className="text-gray-500 dark:text-gray-400">
-              {editingItem 
-                ? "Atualize as informações do profissional selecionado." 
-                : "Preencha as informações do novo profissional para cadastrá-lo no sistema."}
+              {editingItem ? t("formSubtitleEdit") : t("formSubtitleNew")}
             </DialogDescription>
           </DialogHeader>
           <div className="p-6 pt-0">
@@ -126,15 +127,15 @@ export default function DentistsPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogTitle>{tc("deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+              {tc("deleteConfirmMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Excluir
+              {tc("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -151,17 +152,17 @@ export default function DentistsPage() {
               <Table className="min-w-[500px]">
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Nome Profissional</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">CRO</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Especialidade</TH>
-                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("professionalName")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("cro")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("specialty")}</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">{tc("actions")}</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {safeDentists.length === 0 ? (
                     <TR>
                       <TD colSpan={4} className="h-32 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum dentista cadastrado.
+                        {t("noDentists")}
                       </TD>
                     </TR>
                   ) : (

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { Loader2, DollarSign, Users, Calendar, TrendingUp, BarChart3 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 const RevenueCharts = dynamic(() => import("@/components/reports/revenue-charts"), {
   ssr: false,
@@ -38,6 +39,7 @@ function ChartSkeleton() {
 type TabKey = "receita" | "atendimentos" | "pacientes" | "fluxo"
 
 export default function ReportsPage() {
+  const t = useTranslations("reports")
   const [activeTab, setActiveTab] = useState<TabKey>("receita")
   const [startDate, setStartDate] = useState(() => {
     const d = new Date()
@@ -100,7 +102,7 @@ export default function ReportsPage() {
       const url = window.URL.createObjectURL(new Blob([res.data]))
       const a = document.createElement("a")
       a.href = url
-      a.download = `relatorio-${type}.csv`
+      a.download = `${t("report")}-${type}.csv`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch {
@@ -114,7 +116,7 @@ export default function ReportsPage() {
       const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }))
       const a = document.createElement("a")
       a.href = url
-      a.download = `relatorio-${type}.pdf`
+      a.download = `${t("report")}-${type}.pdf`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch {
@@ -126,18 +128,18 @@ export default function ReportsPage() {
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v)
 
   const tabs: { key: TabKey; label: string; icon: typeof DollarSign }[] = [
-    { key: "receita", label: "Receita", icon: DollarSign },
-    { key: "atendimentos", label: "Atendimentos", icon: Calendar },
-    { key: "pacientes", label: "Pacientes", icon: Users },
-    { key: "fluxo", label: "Fluxo de Caixa", icon: TrendingUp },
+    { key: "receita", label: t("revenue"), icon: DollarSign },
+    { key: "atendimentos", label: t("appointments"), icon: Calendar },
+    { key: "pacientes", label: t("patients"), icon: Users },
+    { key: "fluxo", label: t("cashflow"), icon: TrendingUp },
   ]
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><BarChart3 className="h-6 w-6" /> Relatórios</h1>
-          <p className="text-sm text-muted-foreground mt-1">Visão financeira e operacional da clínica</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><BarChart3 className="h-6 w-6" /> {t("title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -146,7 +148,7 @@ export default function ReportsPage() {
             onChange={(e) => setStartDate(e.target.value)}
             className="px-3 py-2 border rounded-lg text-sm"
           />
-          <span className="text-muted-foreground">a</span>
+          <span className="text-muted-foreground">{t("to")}</span>
           <input
             type="date"
             value={endDate}

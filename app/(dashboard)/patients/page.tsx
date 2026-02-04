@@ -11,6 +11,7 @@ import { usePatients } from "@/hooks/usePatients"
 import { PatientForm } from "@/components/forms/patient-form"
 import { Search, Plus, FilterX, Loader2, Edit2, Trash2, Eye } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +24,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function PatientsPage() {
+  const t = useTranslations("patients")
+  const tc = useTranslations("common")
   const router = useRouter()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"Todos" | "Ativo" | "Inativo">("Todos")
@@ -60,9 +63,9 @@ export default function PatientsPage() {
     if (!deleteId) return
     try {
       await deletePatient.mutateAsync(deleteId)
-      toast.success("Paciente excluído com sucesso!")
+      toast.success(t("deleteSuccess"))
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao excluir paciente")
+      toast.error(error.response?.data?.message || t("deleteError"))
     } finally {
       setDeleteId(null)
     }
@@ -97,9 +100,9 @@ export default function PatientsPage() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-destructive font-medium">Erro ao carregar pacientes</div>
+        <div className="text-destructive font-medium">{t("loadError")}</div>
         <Button onClick={() => window.location.reload()} variant="outline">
-          Tentar novamente
+          {tc("tryAgain")}
         </Button>
       </div>
     )
@@ -109,24 +112,22 @@ export default function PatientsPage() {
     <div className="space-y-6 pb-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Pacientes</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Gerencie o cadastro de pacientes da sua clínica.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("title")}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
         </div>
         
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2" onClick={handleCreate}>
               <Plus size={18} />
-              Novo Paciente
+              {t("newPatient")}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle className="text-gray-900 dark:text-gray-100">{editingItem ? "Editar Paciente" : "Novo Paciente"}</DialogTitle>
+              <DialogTitle className="text-gray-900 dark:text-gray-100">{editingItem ? t("editPatient") : t("newPatient")}</DialogTitle>
               <DialogDescription className="text-gray-500 dark:text-gray-400">
-                {editingItem 
-                  ? "Atualize os dados pessoais e de contato do paciente." 
-                  : "Preencha os dados pessoais e de contato do paciente."}
+                {editingItem ? t("formSubtitleEdit") : t("formSubtitleNew")}
               </DialogDescription>
             </DialogHeader>
             <div className="p-6 pt-0">
@@ -143,15 +144,15 @@ export default function PatientsPage() {
         <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogTitle>{tc("deleteConfirmTitle")}</AlertDialogTitle>
               <AlertDialogDescription>
-                Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+                {tc("deleteConfirmMessage")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
               <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                Excluir
+                {tc("delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -164,7 +165,7 @@ export default function PatientsPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-gray-400" />
               <Input
-                placeholder="Buscar por nome, telefone ou CPF..."
+                placeholder={t("searchPlaceholder")}
                 className="pl-10 h-11 bg-muted/30 border-none text-gray-900 dark:text-gray-100 placeholder:text-gray-500"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -176,16 +177,16 @@ export default function PatientsPage() {
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
               >
-                <option>Todos</option>
-                <option>Ativo</option>
-                <option>Inativo</option>
+                <option value="Todos">{tc("all")}</option>
+                <option value="Ativo">{t("active")}</option>
+                <option value="Inativo">{t("inactive")}</option>
               </select>
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="h-11 w-11 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                 onClick={() => { setSearch(""); setStatus("Todos") }}
-                title="Limpar filtros"
+                title={tc("clearFilters")}
               >
                 <FilterX size={18} />
               </Button>
@@ -201,18 +202,18 @@ export default function PatientsPage() {
               <Table className="min-w-[640px]">
                 <THead className="bg-muted/50">
                   <TR>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Nome</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Telefone</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">CPF</TH>
-                    <TH className="font-bold text-gray-900 dark:text-gray-100">Status</TH>
-                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">Ações</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{tc("name")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{tc("phone")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{t("cpf")}</TH>
+                    <TH className="font-bold text-gray-900 dark:text-gray-100">{tc("status")}</TH>
+                    <TH className="text-right font-bold text-gray-900 dark:text-gray-100">{tc("actions")}</TH>
                   </TR>
                 </THead>
                 <TBody>
                   {safePatients.length === 0 ? (
                     <TR>
                       <TD colSpan={5} className="h-32 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum paciente encontrado.
+                        {t("noPatients")}
                       </TD>
                     </TR>
                   ) : (
@@ -243,7 +244,7 @@ export default function PatientsPage() {
                               size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                               onClick={() => router.push(`/patients/${p.id}`)}
-                              title="Ver detalhes"
+                              title={tc("viewDetails")}
                             >
                               <Eye size={14} />
                             </Button>
@@ -252,7 +253,7 @@ export default function PatientsPage() {
                               size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-primary dark:text-gray-400"
                               onClick={() => handleEdit(p)}
-                              title="Editar"
+                              title={tc("edit")}
                             >
                               <Edit2 size={14} />
                             </Button>
@@ -261,7 +262,7 @@ export default function PatientsPage() {
                               size="icon"
                               className="h-8 w-8 text-gray-500 hover:text-destructive dark:text-gray-400"
                               onClick={() => setDeleteId(p.id)}
-                              title="Excluir"
+                              title={tc("delete")}
                             >
                               <Trash2 size={14} />
                             </Button>

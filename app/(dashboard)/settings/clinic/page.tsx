@@ -10,8 +10,10 @@ import { api } from "@/lib/api"
 import { toast } from "sonner"
 import { hexToHsl } from "@/lib/colors"
 import { getUploadUrl } from "@/lib/api"
+import { useTranslations } from "next-intl"
 
 export default function ClinicSettingsPage() {
+  const t = useTranslations("settings")
   const { clinic, isLoading, updateClinic } = useClinic()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const faviconInputRef = useRef<HTMLInputElement>(null)
@@ -90,13 +92,13 @@ export default function ClinicSettingsPage() {
 
     // Validar tipo
     if (!file.type.startsWith("image/")) {
-      toast.error("Selecione uma imagem válida")
+      toast.error(t("invalidImage"))
       return
     }
 
     // Validar tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 5MB")
+      toast.error(t("logoMaxSize"))
       return
     }
 
@@ -117,12 +119,12 @@ export default function ClinicSettingsPage() {
 
       const logoData = response.data?.data || response.data
       const newLogoUrl = logoData?.logo_url
-      toast.success("Logo atualizado com sucesso!")
+      toast.success(t("logoSuccess"))
       if (newLogoUrl) {
         setLogoPreview(getUploadUrl(newLogoUrl))
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao enviar logo")
+      toast.error(error.response?.data?.message || t("logoError"))
       setLogoPreview(clinic?.logo_url ? getUploadUrl(clinic.logo_url) : null)
     } finally {
       setUploading(false)
@@ -147,12 +149,12 @@ export default function ClinicSettingsPage() {
     if (!file) return
 
     if (!file.type.startsWith("image/") && !file.name.endsWith(".ico")) {
-      toast.error("Selecione uma imagem válida")
+      toast.error(t("invalidImage"))
       return
     }
 
     if (file.size > 1 * 1024 * 1024) {
-      toast.error("O favicon deve ter no máximo 1MB")
+      toast.error(t("faviconMaxSize"))
       return
     }
 
@@ -171,14 +173,14 @@ export default function ClinicSettingsPage() {
 
       const faviconData = response.data?.data || response.data
       const newFaviconUrl = faviconData?.favicon_url
-      toast.success("Favicon atualizado com sucesso!")
+      toast.success(t("faviconSuccess"))
       if (newFaviconUrl) {
         const fullUrl = getUploadUrl(newFaviconUrl)
         setFaviconPreview(fullUrl)
         updateFavicon(fullUrl)
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Erro ao enviar favicon")
+      toast.error(error.response?.data?.message || t("faviconError"))
       setFaviconPreview(clinic?.favicon_url ? getUploadUrl(clinic.favicon_url) : null)
     } finally {
       setUploadingFavicon(false)
@@ -209,10 +211,10 @@ export default function ClinicSettingsPage() {
       )
 
       await updateClinic.mutateAsync(cleanData)
-      toast.success("Configurações salvas!")
+      toast.success(t("saveSuccess"))
     } catch (error: any) {
       const message = error.response?.data?.message
-      toast.error(Array.isArray(message) ? message.join(", ") : message || "Erro ao salvar")
+      toast.error(Array.isArray(message) ? message.join(", ") : message || t("saveError"))
     }
   }
 
@@ -227,8 +229,8 @@ export default function ClinicSettingsPage() {
   return (
     <div className="max-w-5xl space-y-8 pb-20">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Minha Clínica</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Personalize a identidade e informações públicas do seu consultório.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">{t("myClinic")}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("clinicSubtitle")}</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8">
@@ -237,15 +239,15 @@ export default function ClinicSettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Palette size={20} className="text-primary" />
-              Identidade Visual
+              {t("branding")}
             </CardTitle>
-            <CardDescription className="text-gray-500 dark:text-gray-400">Defina as cores e logotipos que representam sua marca.</CardDescription>
+            <CardDescription className="text-gray-500 dark:text-gray-400">{t("brandingSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cor Primária</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("primaryColor")}</label>
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
@@ -261,7 +263,7 @@ export default function ClinicSettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cor Secundária</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("secondaryColor")}</label>
                   <div className="flex gap-3 items-center">
                     <input 
                       type="color" 
@@ -280,7 +282,7 @@ export default function ClinicSettingsPage() {
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Logo da Clínica</label>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("clinicLogo")}</label>
                   <div className="flex items-center gap-4">
                     <div className="w-32 h-32 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
                       {logoPreview ? (
@@ -290,7 +292,7 @@ export default function ClinicSettingsPage() {
                           className="w-full h-full object-contain"
                         />
                       ) : (
-                        <span className="text-gray-400 text-sm text-center px-2">Sem logo</span>
+                        <span className="text-gray-400 text-sm text-center px-2">{t("noLogo")}</span>
                       )}
                     </div>
 
@@ -308,18 +310,18 @@ export default function ClinicSettingsPage() {
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
                       >
-                        {uploading ? "Enviando..." : "Alterar Logo"}
+                        {uploading ? t("uploading") : t("changeLogo")}
                       </Button>
                       <p className="text-xs text-muted-foreground">
-                        PNG, JPG ou SVG. Máximo 5MB.
+                        {t("logoHint")}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Favicon da Clínica</label>
-                  <p className="text-xs text-muted-foreground">Ícone que aparece na aba do navegador.</p>
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("clinicFavicon")}</label>
+                  <p className="text-xs text-muted-foreground">{t("faviconHint")}</p>
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 border-2 border-dashed rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
                       {faviconPreview ? (
@@ -329,7 +331,7 @@ export default function ClinicSettingsPage() {
                           className="w-full h-full object-contain"
                         />
                       ) : (
-                        <span className="text-gray-400 text-[10px] text-center px-1">Sem favicon</span>
+                        <span className="text-gray-400 text-[10px] text-center px-1">{t("noFavicon")}</span>
                       )}
                     </div>
 
@@ -348,10 +350,10 @@ export default function ClinicSettingsPage() {
                         onClick={() => faviconInputRef.current?.click()}
                         disabled={uploadingFavicon}
                       >
-                        {uploadingFavicon ? "Enviando..." : "Alterar Favicon"}
+                        {uploadingFavicon ? t("uploading") : t("changeFavicon")}
                       </Button>
                       <p className="text-xs text-muted-foreground">
-                        PNG, JPG, ICO ou SVG. Máximo 1MB.
+                        {t("faviconFileHint")}
                       </p>
                     </div>
                   </div>
@@ -361,13 +363,13 @@ export default function ClinicSettingsPage() {
 
             {/* Modo de Exibição do Logo na Sidebar */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Exibição no Menu Lateral</label>
-              <p className="text-xs text-muted-foreground">Escolha como seu logo e nome aparecem na barra lateral do sistema.</p>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("sidebarDisplay")}</label>
+              <p className="text-xs text-muted-foreground">{t("sidebarDisplaySubtitle")}</p>
               <div className="grid grid-cols-3 gap-3">
                 {([
-                  { value: "logo_name", label: "Logo + Nome", icon: <><ImageIcon size={16} /><Type size={14} /></> },
-                  { value: "logo_only", label: "Só Logo", icon: <ImageIcon size={18} /> },
-                  { value: "name_only", label: "Só Nome", icon: <Type size={18} /> },
+                  { value: "logo_name", label: t("logoAndName"), icon: <><ImageIcon size={16} /><Type size={14} /></> },
+                  { value: "logo_only", label: t("logoOnly"), icon: <ImageIcon size={18} /> },
+                  { value: "name_only", label: t("nameOnly"), icon: <Type size={18} /> },
                 ] as const).map((option) => (
                   <button
                     key={option.value}
@@ -387,9 +389,9 @@ export default function ClinicSettingsPage() {
             </div>
 
             <div className="p-4 rounded-xl bg-muted/20 border border-border">
-              <p className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Preview do Botão Principal</p>
+              <p className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">{t("buttonPreview")}</p>
               <Button type="button" className="bg-primary hover:opacity-90 transition-opacity">
-                Botão de Exemplo
+                {t("exampleButton")}
               </Button>
             </div>
           </CardContent>
@@ -400,33 +402,33 @@ export default function ClinicSettingsPage() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <Building2 size={20} className="text-primary" />
-              Informações Gerais
+              {t("generalInfo")}
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Nome da Clínica</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("clinicName")}</label>
               <Input 
                 {...register("name")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CNPJ</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("cnpj")}</label>
               <Input 
                 {...register("cnpj")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Telefone de Contato</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("contactPhone")}</label>
               <Input 
                 {...register("phone")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Email</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("email")}</label>
               <Input 
                 {...register("email")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -435,19 +437,17 @@ export default function ClinicSettingsPage() {
             <div className="space-y-2 sm:col-span-2">
               <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <Link2 size={14} />
-                Slug para White-Label
+                {t("slug")}
               </label>
               <Input
                 {...register("slug")}
-                placeholder="minha-clinica"
+                placeholder={t("slugPlaceholder")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
               />
-              <p className="text-xs text-muted-foreground">
-                Usado para login personalizado: <code className="bg-muted px-1 py-0.5 rounded text-xs">/login?clinic=seu-slug</code>. Apenas letras minúsculas, números e hífens.
-              </p>
+              <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: t("slugHint") }} />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Endereço Completo</label>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("fullAddress")}</label>
               <Input 
                 {...register("address")}
                 className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100"
@@ -455,15 +455,15 @@ export default function ClinicSettingsPage() {
             </div>
             <div className="grid grid-cols-3 gap-4 sm:col-span-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cidade</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("city")}</label>
                 <Input {...register("city")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Estado</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("state")}</label>
                 <Input {...register("state")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">CEP</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t("zipCode")}</label>
                 <Input {...register("cep")} className="bg-muted/30 border-none h-11 text-gray-900 dark:text-gray-100" />
               </div>
             </div>
@@ -478,7 +478,7 @@ export default function ClinicSettingsPage() {
             disabled={updateClinic.isPending}
           >
             {updateClinic.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={18} />}
-            Salvar Configurações
+            {t("saveSettings")}
           </Button>
         </div>
       </form>

@@ -2,6 +2,7 @@
 import { Search, Plus, Calendar, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +13,7 @@ import { MobileNav } from "./mobile-nav"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 
 export function Header() {
+  const t = useTranslations("header")
   const router = useRouter()
 
   const handleNewAppointment = () => {
@@ -30,7 +32,7 @@ export function Header() {
           className="relative w-full max-w-md hidden md:flex items-center gap-2 h-10 px-3 rounded-lg bg-muted/40 text-sm text-muted-foreground hover:bg-muted/60 transition-colors"
         >
           <Search className="h-4 w-4" />
-          <span>Buscar pacientes, agendamentos...</span>
+          <span>{t("searchPlaceholder")}</span>
           <kbd className="ml-auto pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
             <span className="text-xs">⌘</span>K
           </kbd>
@@ -45,7 +47,7 @@ export function Header() {
           onClick={handleNewAppointment}
         >
           <Plus size={16} />
-          Novo Agendamento
+          {t("newAppointment")}
         </Button>
 
         <div className="h-8 w-px bg-border mx-2 hidden sm:block" />
@@ -55,7 +57,7 @@ export function Header() {
           size="icon"
           className="text-muted-foreground hover:text-foreground"
           onClick={() => router.push("/appointments")}
-          title="Calendário"
+          title={t("calendar")}
         >
           <Calendar size={20} />
         </Button>
@@ -64,19 +66,19 @@ export function Header() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" title="Ajuda">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground" title={t("help")}>
               <HelpCircle size={20} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => router.push("/settings")}>
-              Configurações
+              {t("settings")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/docs")}>
-              Documentação
+              {t("docs")}
             </DropdownMenuItem>
             <DropdownMenuItem>
-              Suporte
+              {t("support")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
