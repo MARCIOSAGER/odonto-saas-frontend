@@ -1,4 +1,6 @@
+"use client"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface UsageBarProps {
   label: string
@@ -8,6 +10,7 @@ interface UsageBarProps {
 }
 
 export function UsageBar({ label, current, limit, percentage }: UsageBarProps) {
+  const t = useTranslations("billing")
   const isUnlimited = limit === null
   const isNearLimit = percentage >= 80
   const isAtLimit = percentage >= 100
@@ -17,7 +20,7 @@ export function UsageBar({ label, current, limit, percentage }: UsageBarProps) {
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">{label}</span>
         <span className="text-muted-foreground">
-          {current} / {isUnlimited ? "Ilimitado" : limit}
+          {current} / {isUnlimited ? t("unlimited") : limit}
         </span>
       </div>
       <div className="h-2 rounded-full bg-muted overflow-hidden">

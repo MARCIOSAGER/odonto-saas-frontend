@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { useTranslations } from "next-intl"
 
 interface Invoice {
   id: string
@@ -17,19 +18,20 @@ interface Invoice {
   nfse_pdf_url?: string
 }
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  paid: { label: "Pago", variant: "default" },
-  pending: { label: "Pendente", variant: "secondary" },
-  overdue: { label: "Vencido", variant: "destructive" },
-  cancelled: { label: "Cancelado", variant: "outline" },
-  refunded: { label: "Reembolsado", variant: "outline" },
-}
-
 export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
+  const t = useTranslations("billing")
+
+  const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    paid: { label: t("statusPaid"), variant: "default" },
+    pending: { label: t("statusPending"), variant: "secondary" },
+    overdue: { label: t("statusOverdue"), variant: "destructive" },
+    cancelled: { label: t("statusCancelled"), variant: "outline" },
+    refunded: { label: t("statusRefunded"), variant: "outline" },
+  }
   if (invoices.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nenhuma fatura encontrada.
+        {t("noInvoices")}
       </div>
     )
   }
@@ -38,12 +40,12 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
     <Table>
       <THead>
         <TR>
-          <TH>Fatura</TH>
-          <TH>Descrição</TH>
-          <TH>Valor</TH>
-          <TH>Vencimento</TH>
-          <TH>Status</TH>
-          <TH>NFS-e</TH>
+          <TH>{t("invoiceNumber")}</TH>
+          <TH>{t("description")}</TH>
+          <TH>{t("amount")}</TH>
+          <TH>{t("dueDate")}</TH>
+          <TH>{t("status")}</TH>
+          <TH>{t("nfse")}</TH>
         </TR>
       </THead>
       <TBody>
@@ -77,9 +79,9 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
                     PDF
                   </a>
                 ) : invoice.nfse_status === "pending" ? (
-                  <span className="text-xs text-muted-foreground">Processando</span>
+                  <span className="text-xs text-muted-foreground">{t("nfseProcessing")}</span>
                 ) : invoice.nfse_status === "error" ? (
-                  <span className="text-xs text-destructive">Erro</span>
+                  <span className="text-xs text-destructive">{t("nfseError")}</span>
                 ) : (
                   "—"
                 )}

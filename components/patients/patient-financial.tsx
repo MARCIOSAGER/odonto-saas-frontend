@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { api } from "@/lib/api"
 import {
   Loader2,
@@ -49,16 +50,6 @@ interface FinancialData {
   treatment_plans: TreatmentPlanItem[]
 }
 
-const statusLabels: Record<string, string> = {
-  scheduled: "Agendada",
-  confirmed: "Confirmada",
-  completed: "Conclu\u00edda",
-  cancelled: "Cancelada",
-  no_show: "N\u00e3o compareceu",
-  pending: "Pendente",
-  in_progress: "Em andamento",
-}
-
 const statusColors: Record<string, string> = {
   completed: "bg-green-100 text-green-800",
   confirmed: "bg-blue-100 text-blue-800",
@@ -69,13 +60,6 @@ const statusColors: Record<string, string> = {
   in_progress: "bg-blue-100 text-blue-800",
 }
 
-const planStatusLabels: Record<string, string> = {
-  pending: "Pendente",
-  in_progress: "Em andamento",
-  completed: "Conclu\u00eddo",
-  cancelled: "Cancelado",
-}
-
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -84,9 +68,27 @@ function formatCurrency(value: number): string {
 }
 
 export function PatientFinancial({ patientId }: { patientId: string }) {
+  const t = useTranslations("patientDetail")
   const [data, setData] = useState<FinancialData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const statusLabels: Record<string, string> = {
+    scheduled: t("statusScheduled"),
+    confirmed: t("statusConfirmed"),
+    completed: t("statusCompleted"),
+    cancelled: t("statusCancelled"),
+    no_show: t("statusNoShow"),
+    pending: t("statusPending"),
+    in_progress: t("statusInProgress"),
+  }
+
+  const planStatusLabels: Record<string, string> = {
+    pending: t("planStatusPending"),
+    in_progress: t("planStatusInProgress"),
+    completed: t("planStatusCompleted"),
+    cancelled: t("planStatusCancelled"),
+  }
 
   useEffect(() => {
     async function load() {
@@ -95,7 +97,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
         const res = await api.get(`/patients/${patientId}/financial`)
         setData(res.data?.data || res.data)
       } catch {
-        setError("Erro ao carregar dados financeiros")
+        setError(t("financialLoadError"))
       } finally {
         setLoading(false)
       }
@@ -114,7 +116,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
   if (error || !data) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        {error || "Nenhum dado financeiro encontrado"}
+        {error || t("financialNoData")}
       </div>
     )
   }
@@ -128,52 +130,52 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
         <div className="border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-muted-foreground">Realizado</span>
+            <span className="text-sm text-muted-foreground">{t("financialCompleted")}</span>
           </div>
           <p className="text-2xl font-bold text-green-700">
             {formatCurrency(summary.completed_total)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {summary.completed_count} consulta{summary.completed_count !== 1 ? "s" : ""} conclu\u00edda{summary.completed_count !== 1 ? "s" : ""}
+            {t("financialCompletedCount", { count: summary.completed_count })}
           </p>
         </div>
 
         <div className="border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="h-4 w-4 text-yellow-600" />
-            <span className="text-sm text-muted-foreground">Pendente</span>
+            <span className="text-sm text-muted-foreground">{t("financialPending")}</span>
           </div>
           <p className="text-2xl font-bold text-yellow-700">
             {formatCurrency(summary.pending_total)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {summary.pending_count} consulta{summary.pending_count !== 1 ? "s" : ""} agendada{summary.pending_count !== 1 ? "s" : ""}
+            {t("financialPendingCount", { count: summary.pending_count })}
           </p>
         </div>
 
         <div className="border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <TrendingUp className="h-4 w-4 text-blue-600" />
-            <span className="text-sm text-muted-foreground">Planos de Tratamento</span>
+            <span className="text-sm text-muted-foreground">{t("financialTreatmentPlans")}</span>
           </div>
           <p className="text-2xl font-bold text-blue-700">
             {formatCurrency(summary.treatment_plan_total)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {summary.active_plans_count} plano{summary.active_plans_count !== 1 ? "s" : ""} ativo{summary.active_plans_count !== 1 ? "s" : ""}
+            {t("financialActivePlans", { count: summary.active_plans_count })}
           </p>
         </div>
 
         <div className="border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-1">
             <DollarSign className="h-4 w-4 text-purple-600" />
-            <span className="text-sm text-muted-foreground">Total Geral</span>
+            <span className="text-sm text-muted-foreground">{t("financialGrandTotal")}</span>
           </div>
           <p className="text-2xl font-bold text-purple-700">
             {formatCurrency(summary.completed_total + summary.pending_total)}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {summary.total_appointments} consulta{summary.total_appointments !== 1 ? "s" : ""} no total
+            {t("financialTotalAppointments", { count: summary.total_appointments })}
           </p>
         </div>
       </div>
@@ -182,22 +184,22 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
       <div className="border rounded-lg p-4">
         <h3 className="font-semibold mb-3 flex items-center gap-2">
           <DollarSign className="h-4 w-4" />
-          Hist\u00f3rico de Consultas
+          {t("financialHistory")}
         </h3>
         {appointments.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Nenhuma consulta registrada
+            {t("financialNoAppointments")}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
-                  <th className="pb-2 font-medium">Data</th>
-                  <th className="pb-2 font-medium">Servi\u00e7o</th>
-                  <th className="pb-2 font-medium">Dentista</th>
-                  <th className="pb-2 font-medium">Status</th>
-                  <th className="pb-2 font-medium text-right">Valor</th>
+                  <th className="pb-2 font-medium">{t("financialDate")}</th>
+                  <th className="pb-2 font-medium">{t("financialService")}</th>
+                  <th className="pb-2 font-medium">{t("financialDentist")}</th>
+                  <th className="pb-2 font-medium">{t("financialStatus")}</th>
+                  <th className="pb-2 font-medium text-right">{t("financialValue")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,7 +211,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
                     </td>
                     <td className="py-2.5">{apt.service?.name || "-"}</td>
                     <td className="py-2.5">
-                      {apt.dentist ? `Dr(a). ${apt.dentist.name}` : "-"}
+                      {apt.dentist ? `${t("financialDrPrefix")}${apt.dentist.name}` : "-"}
                     </td>
                     <td className="py-2.5">
                       <span
@@ -231,7 +233,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
               <tfoot>
                 <tr className="border-t font-semibold">
                   <td colSpan={4} className="py-2.5">
-                    Total Realizado
+                    {t("financialTotalCompleted")}
                   </td>
                   <td className="py-2.5 text-right text-green-700">
                     {formatCurrency(summary.completed_total)}
@@ -247,22 +249,22 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
       <div className="border rounded-lg p-4">
         <h3 className="font-semibold mb-3 flex items-center gap-2">
           <FileText className="h-4 w-4" />
-          Planos de Tratamento
+          {t("financialTreatmentPlans")}
         </h3>
         {treatment_plans.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            Nenhum plano de tratamento registrado
+            {t("financialNoTreatmentPlans")}
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
-                  <th className="pb-2 font-medium">Data</th>
-                  <th className="pb-2 font-medium">Status</th>
-                  <th className="pb-2 font-medium">Sess\u00f5es</th>
-                  <th className="pb-2 font-medium">Observa\u00e7\u00f5es</th>
-                  <th className="pb-2 font-medium text-right">Valor Estimado</th>
+                  <th className="pb-2 font-medium">{t("financialDate")}</th>
+                  <th className="pb-2 font-medium">{t("financialStatus")}</th>
+                  <th className="pb-2 font-medium">{t("financialSessions")}</th>
+                  <th className="pb-2 font-medium">{t("financialNotes")}</th>
+                  <th className="pb-2 font-medium text-right">{t("financialEstimatedValue")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -297,7 +299,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
               <tfoot>
                 <tr className="border-t font-semibold">
                   <td colSpan={4} className="py-2.5">
-                    Total Estimado
+                    {t("financialTotalEstimated")}
                   </td>
                   <td className="py-2.5 text-right text-blue-700">
                     {formatCurrency(summary.treatment_plan_total)}
@@ -315,8 +317,7 @@ export function PatientFinancial({ patientId }: { patientId: string }) {
           <div className="flex items-center gap-2">
             <XCircle className="h-4 w-4 text-red-500" />
             <span className="text-sm font-medium text-red-700">
-              {summary.cancelled_count} consulta{summary.cancelled_count !== 1 ? "s" : ""} cancelada{summary.cancelled_count !== 1 ? "s" : ""}{" "}
-              ({formatCurrency(summary.cancelled_total)} em servi\u00e7os)
+              {t("financialCancelledCount", { count: summary.cancelled_count, value: formatCurrency(summary.cancelled_total) })}
             </span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import {
 } from "recharts"
 import { Button } from "@/components/ui/button"
 import { Download, FileText } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface AppointmentsData {
   total: number
@@ -26,26 +27,35 @@ export default function AppointmentsCharts({
   onExportCsv: () => void
   onExportPdf: () => void
 }) {
+  const t = useTranslations("reports")
+
+  const statusItems = [
+    { label: t("completed"), value: data.completed, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
+    { label: t("cancelled"), value: data.cancelled, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
+    { label: t("noShow"), value: data.no_show, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
+    { label: t("scheduled"), value: Math.max(0, data.total - data.completed - data.cancelled - data.no_show), color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+  ]
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Total</p>
+          <p className="text-xs text-muted-foreground">{t("total")}</p>
           <p className="text-2xl font-bold mt-1">{data.total}</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Taxa Comparecimento</p>
+          <p className="text-xs text-muted-foreground">{t("attendanceRate")}</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{data.attendance_rate}%</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Taxa Cancelamento</p>
+          <p className="text-xs text-muted-foreground">{t("cancellationRate")}</p>
           <p className="text-2xl font-bold text-red-600 mt-1">{data.cancellation_rate}%</p>
         </div>
       </div>
 
       <div className="bg-card border rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium">Resumo por status</p>
+          <p className="text-sm font-medium">{t("statusSummary")}</p>
           <div className="flex gap-1">
             <Button variant="ghost" size="sm" onClick={onExportCsv} className="gap-1 text-xs">
               <Download className="h-3 w-3" /> CSV
@@ -61,12 +71,7 @@ export default function AppointmentsCharts({
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={[
-                    { name: "Realizados", value: data.completed },
-                    { name: "Cancelados", value: data.cancelled },
-                    { name: "Faltas", value: data.no_show },
-                    { name: "Agendados", value: Math.max(0, data.total - data.completed - data.cancelled - data.no_show) },
-                  ].filter(d => d.value > 0)}
+                  data={statusItems.map(s => ({ name: s.label, value: s.value })).filter(d => d.value > 0)}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -87,12 +92,7 @@ export default function AppointmentsCharts({
           </div>
 
           <div className="grid grid-cols-2 gap-3 content-center">
-            {[
-              { label: "Realizados", value: data.completed, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" },
-              { label: "Cancelados", value: data.cancelled, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" },
-              { label: "Faltas", value: data.no_show, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" },
-              { label: "Agendados", value: data.total - data.completed - data.cancelled - data.no_show, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
-            ].map((item) => (
+            {statusItems.map((item) => (
               <div key={item.label} className={`rounded-lg p-3 text-center ${item.color}`}>
                 <p className="text-2xl font-bold">{item.value}</p>
                 <p className="text-xs font-medium">{item.label}</p>

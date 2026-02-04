@@ -4,6 +4,7 @@ import {
 } from "recharts"
 import { Button } from "@/components/ui/button"
 import { Download, FileText } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface RevenueData {
   total_revenue: number
@@ -15,12 +16,6 @@ interface RevenueData {
 }
 
 const COLORS = { primary: "#10b981", secondary: "#3b82f6" }
-
-function formatMonthLabel(month: string) {
-  const [y, m] = month.split("-")
-  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-  return `${months[parseInt(m, 10) - 1]}/${y.slice(2)}`
-}
 
 function formatCurrencyShort(v: number) {
   if (v >= 1000) return `R$${(v / 1000).toFixed(1)}k`
@@ -50,26 +45,39 @@ export default function RevenueCharts({
   onExportCsv: () => void
   onExportPdf: () => void
 }) {
+  const t = useTranslations("reports")
+
+  const monthNames = [
+    t("monthJan"), t("monthFeb"), t("monthMar"), t("monthApr"),
+    t("monthMay"), t("monthJun"), t("monthJul"), t("monthAug"),
+    t("monthSep"), t("monthOct"), t("monthNov"), t("monthDec"),
+  ]
+
+  function formatMonthLabel(month: string) {
+    const [y, m] = month.split("-")
+    return `${monthNames[parseInt(m, 10) - 1]}/${y.slice(2)}`
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Receita Total</p>
+          <p className="text-xs text-muted-foreground">{t("totalRevenue")}</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{formatCurrency(data.total_revenue)}</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Atendimentos</p>
+          <p className="text-xs text-muted-foreground">{t("totalAppointments")}</p>
           <p className="text-2xl font-bold mt-1">{data.total_appointments}</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Ticket Médio</p>
+          <p className="text-xs text-muted-foreground">{t("averageTicket")}</p>
           <p className="text-2xl font-bold mt-1">{formatCurrency(data.average_ticket)}</p>
         </div>
       </div>
 
       {data.by_month.length > 0 && (
         <div className="bg-card border rounded-xl p-5 space-y-3">
-          <p className="text-sm font-medium">Receita por mês</p>
+          <p className="text-sm font-medium">{t("revenueByMonth")}</p>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.by_month.map(m => ({ ...m, label: formatMonthLabel(m.month) }))}>
@@ -87,7 +95,7 @@ export default function RevenueCharts({
       {data.by_dentist.length > 0 && (
         <div className="bg-card border rounded-xl p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Receita por dentista</p>
+            <p className="text-sm font-medium">{t("revenueByDentist")}</p>
             <div className="flex gap-1">
               <Button variant="ghost" size="sm" onClick={onExportCsv} className="gap-1 text-xs">
                 <Download className="h-3 w-3" /> CSV
@@ -113,13 +121,13 @@ export default function RevenueCharts({
 
       {data.by_service.length > 0 && (
         <div className="bg-card border rounded-xl p-5 space-y-3">
-          <p className="text-sm font-medium">Receita por serviço</p>
+          <p className="text-sm font-medium">{t("revenueByService")}</p>
           <div className="divide-y">
             {data.by_service.map((s, i) => (
               <div key={i} className="flex items-center justify-between py-2">
                 <div>
                   <p className="text-sm font-medium">{s.name}</p>
-                  <p className="text-xs text-muted-foreground">{s.count} realizados</p>
+                  <p className="text-xs text-muted-foreground">{t("completedCount", { count: s.count })}</p>
                 </div>
                 <span className="text-sm font-bold">{formatCurrency(s.revenue)}</span>
               </div>

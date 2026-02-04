@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Check, Crown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface PlanCardProps {
   name: string
@@ -30,6 +31,7 @@ export function PlanCard({
   loading,
   billingCycle,
 }: PlanCardProps) {
+  const t = useTranslations("billing")
   const price =
     billingCycle === "yearly" && priceYearly
       ? Math.round(priceYearly / 12)
@@ -45,13 +47,13 @@ export function PlanCard({
     >
       {isPopular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
-          Mais popular
+          {t("mostPopular")}
         </div>
       )}
       {isCurrentPlan && (
         <div className="absolute -top-3 right-4 bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
           <Crown className="h-3 w-3" />
-          Plano atual
+          {t("currentPlan")}
         </div>
       )}
       <CardContent className="pt-6 space-y-4">
@@ -64,12 +66,12 @@ export function PlanCard({
 
         <div>
           {price === 0 ? (
-            <span className="text-3xl font-bold">Grátis</span>
+            <span className="text-3xl font-bold">{t("free")}</span>
           ) : (
             <div className="flex items-baseline gap-1">
               <span className="text-sm text-muted-foreground">R$</span>
               <span className="text-3xl font-bold">{price}</span>
-              <span className="text-muted-foreground">/mês</span>
+              <span className="text-muted-foreground">{t("perMonth")}</span>
             </div>
           )}
         </div>
@@ -90,12 +92,12 @@ export function PlanCard({
           onClick={onSelect}
         >
           {isCurrentPlan
-            ? "Plano atual"
+            ? t("currentPlan")
             : loading
-            ? "Processando..."
+            ? t("processing")
             : price === 0
-            ? "Selecionar"
-            : "Fazer upgrade"}
+            ? t("select")
+            : t("upgradeAction")}
         </Button>
       </CardContent>
     </Card>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { api } from "@/lib/api"
 import {
   Loader2,
@@ -24,57 +25,12 @@ interface TimelineEvent {
   meta?: Record<string, unknown>
 }
 
-const typeConfig: Record<
-  string,
-  { icon: React.ElementType; color: string; bg: string; label: string }
-> = {
-  appointment: {
-    icon: Calendar,
-    color: "text-blue-600",
-    bg: "bg-blue-100",
-    label: "Consulta",
-  },
-  prescription: {
-    icon: FileText,
-    color: "text-purple-600",
-    bg: "bg-purple-100",
-    label: "Documento",
-  },
-  anamnesis: {
-    icon: ClipboardList,
-    color: "text-orange-600",
-    bg: "bg-orange-100",
-    label: "Anamnese",
-  },
-  treatment_plan: {
-    icon: TrendingUp,
-    color: "text-green-600",
-    bg: "bg-green-100",
-    label: "Plano",
-  },
-  odontogram: {
-    icon: CircleDot,
-    color: "text-cyan-600",
-    bg: "bg-cyan-100",
-    label: "Odontograma",
-  },
-}
-
 const statusIcons: Record<string, React.ElementType> = {
   completed: CheckCircle,
   cancelled: XCircle,
   confirmed: Clock,
   scheduled: Clock,
 }
-
-const typeFilters = [
-  { value: "", label: "Todos" },
-  { value: "appointment", label: "Consultas" },
-  { value: "prescription", label: "Documentos" },
-  { value: "anamnesis", label: "Anamnese" },
-  { value: "treatment_plan", label: "Planos" },
-  { value: "odontogram", label: "Odontograma" },
-]
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr)
@@ -95,10 +51,56 @@ function formatCurrency(value: unknown): string {
 }
 
 export function PatientTimeline({ patientId }: { patientId: string }) {
+  const t = useTranslations("patientDetail")
   const [events, setEvents] = useState<TimelineEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState("")
+
+  const typeConfig: Record<
+    string,
+    { icon: React.ElementType; color: string; bg: string; label: string }
+  > = {
+    appointment: {
+      icon: Calendar,
+      color: "text-blue-600",
+      bg: "bg-blue-100",
+      label: t("timelineAppointment"),
+    },
+    prescription: {
+      icon: FileText,
+      color: "text-purple-600",
+      bg: "bg-purple-100",
+      label: t("timelineDocument"),
+    },
+    anamnesis: {
+      icon: ClipboardList,
+      color: "text-orange-600",
+      bg: "bg-orange-100",
+      label: t("timelineAnamnesis"),
+    },
+    treatment_plan: {
+      icon: TrendingUp,
+      color: "text-green-600",
+      bg: "bg-green-100",
+      label: t("timelinePlan"),
+    },
+    odontogram: {
+      icon: CircleDot,
+      color: "text-cyan-600",
+      bg: "bg-cyan-100",
+      label: t("timelineOdontogram"),
+    },
+  }
+
+  const typeFilters = [
+    { value: "", label: t("timelineAll") },
+    { value: "appointment", label: t("timelineAppointments") },
+    { value: "prescription", label: t("timelineDocuments") },
+    { value: "anamnesis", label: t("timelineAnamnesis") },
+    { value: "treatment_plan", label: t("timelinePlans") },
+    { value: "odontogram", label: t("timelineOdontogram") },
+  ]
 
   useEffect(() => {
     async function load() {
@@ -108,7 +110,7 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
         const data = res.data?.data || res.data
         setEvents(data.events || [])
       } catch {
-        setError("Erro ao carregar histórico")
+        setError(t("timelineLoadError"))
       } finally {
         setLoading(false)
       }
@@ -172,18 +174,18 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
 
       {/* Stats */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        <span>{filtered.length} evento{filtered.length !== 1 ? "s" : ""}</span>
+        <span>{t("timelineEvents", { count: filtered.length })}</span>
         {!filter && (
           <>
             <span>|</span>
             <span>
-              {events.filter((e) => e.type === "appointment").length} consultas
+              {t("timelineConsultations", { count: events.filter((e) => e.type === "appointment").length })}
             </span>
             <span>
-              {events.filter((e) => e.type === "prescription").length} documentos
+              {t("timelineDocCount", { count: events.filter((e) => e.type === "prescription").length })}
             </span>
             <span>
-              {events.filter((e) => e.type === "treatment_plan").length} planos
+              {t("timelinePlanCount", { count: events.filter((e) => e.type === "treatment_plan").length })}
             </span>
           </>
         )}
@@ -192,7 +194,7 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
       {/* Timeline */}
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          Nenhum evento encontrado
+          {t("timelineNoEvents")}
         </div>
       ) : (
         <div className="space-y-6">
@@ -278,7 +280,7 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
                             {event.meta.sent_at ? (
                               <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 <Send className="h-3 w-3" />
-                                Enviado
+                                {t("timelineSent")}
                               </span>
                             ) : null}
                             {typeof event.meta.notes === "string" && event.meta.notes ? (

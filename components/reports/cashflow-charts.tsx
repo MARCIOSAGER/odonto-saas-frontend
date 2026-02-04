@@ -2,6 +2,7 @@
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from "recharts"
+import { useTranslations } from "next-intl"
 
 interface CashflowData {
   projection_30d: { appointments: number; revenue: number }
@@ -33,34 +34,36 @@ export default function CashflowCharts({
   data: CashflowData
   formatCurrency: (v: number) => string
 }) {
+  const t = useTranslations("reports")
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">Próximos 30 dias</p>
+          <p className="text-xs text-muted-foreground">{t("next30Days")}</p>
           <p className="text-2xl font-bold text-green-600 mt-1">{formatCurrency(data.projection_30d.revenue)}</p>
-          <p className="text-xs text-muted-foreground mt-1">{data.projection_30d.appointments} consultas agendadas</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("scheduledAppointments", { count: data.projection_30d.appointments })}</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">30-60 dias</p>
+          <p className="text-xs text-muted-foreground">{t("days30to60")}</p>
           <p className="text-2xl font-bold mt-1">{formatCurrency(data.projection_60d.revenue)}</p>
-          <p className="text-xs text-muted-foreground mt-1">{data.projection_60d.appointments} consultas agendadas</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("scheduledAppointments", { count: data.projection_60d.appointments })}</p>
         </div>
         <div className="bg-card border rounded-xl p-5">
-          <p className="text-xs text-muted-foreground">60-90 dias</p>
+          <p className="text-xs text-muted-foreground">{t("days60to90")}</p>
           <p className="text-2xl font-bold mt-1">{formatCurrency(data.projection_90d.revenue)}</p>
-          <p className="text-xs text-muted-foreground mt-1">{data.projection_90d.appointments} consultas agendadas</p>
+          <p className="text-xs text-muted-foreground mt-1">{t("scheduledAppointments", { count: data.projection_90d.appointments })}</p>
         </div>
       </div>
 
       <div className="bg-card border rounded-xl p-5 space-y-3">
-        <p className="text-sm font-medium">Projeção de receita</p>
+        <p className="text-sm font-medium">{t("revenueProjection")}</p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={[
-              { period: "0-30 dias", revenue: data.projection_30d.revenue, appointments: data.projection_30d.appointments },
-              { period: "30-60 dias", revenue: data.projection_60d.revenue, appointments: data.projection_60d.appointments },
-              { period: "60-90 dias", revenue: data.projection_90d.revenue, appointments: data.projection_90d.appointments },
+              { period: t("period0to30"), revenue: data.projection_30d.revenue, appointments: data.projection_30d.appointments },
+              { period: t("period30to60"), revenue: data.projection_60d.revenue, appointments: data.projection_60d.appointments },
+              { period: t("period60to90"), revenue: data.projection_90d.revenue, appointments: data.projection_90d.appointments },
             ]}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="period" tick={{ fontSize: 12 }} />
@@ -78,7 +81,7 @@ export default function CashflowCharts({
 
       <div className="bg-card border rounded-xl p-5">
         <p className="text-sm text-muted-foreground">
-          Projeção baseada em consultas já agendadas. Os valores reais podem variar conforme novos agendamentos e cancelamentos.
+          {t("projectionNote")}
         </p>
       </div>
     </div>
