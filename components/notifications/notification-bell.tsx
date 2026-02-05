@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { Bell, Check } from "lucide-react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR, enUS } from "date-fns/locale"
@@ -21,21 +22,34 @@ interface Notification {
 export function NotificationBell() {
   const t = useTranslations("notificationBell")
   const locale = useLocale()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [loading, setLoading] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    loadUnreadCount()
-    const interval = setInterval(loadUnreadCount, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  // Unread count via React Query (invalidated by socket hook)
+  const { data: unreadData } = useQuery({
+    queryKey: ["notifications-unread-count"],
+    queryFn: async () => {
+      const res = await api.get("/notifications/unread-count")
+      const data = res.data?.data || res.data
+      return { count: data?.count || 0 }
+    },
+    refetchInterval: 60000,
+  })
+  const unreadCount = unreadData?.count || 0
 
-  useEffect(() => {
-    if (open) loadNotifications()
-  }, [open])
+  // Notifications list (only fetched when panel is open)
+  const { data: notificationsData, isLoading: loading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await api.get("/notifications?limit=10")
+      const data = res.data?.data || res.data
+      const list = Array.isArray(data) ? data : data?.data || []
+      return list as Notification[]
+    },
+    enabled: open,
+  })
+  const notifications = notificationsData || []
 
   // Close on click outside
   useEffect(() => {
@@ -48,44 +62,19 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [open])
 
-  async function loadUnreadCount() {
-    try {
-      const res = await api.get("/notifications/unread-count")
-      const data = res.data?.data || res.data
-      setUnreadCount(data?.count || 0)
-    } catch {
-      // silently fail
-    }
-  }
-
-  async function loadNotifications() {
-    setLoading(true)
-    try {
-      const res = await api.get("/notifications?limit=10")
-      const data = res.data?.data || res.data
-      setNotifications(Array.isArray(data) ? data : data?.data || [])
-    } catch {
-      // silently fail
-    } finally {
-      setLoading(false)
-    }
-  }
-
   async function markAsRead(id: string) {
     try {
       await api.patch(`/notifications/${id}/read`)
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      )
-      setUnreadCount((c) => Math.max(0, c - 1))
+      queryClient.invalidateQueries({ queryKey: ["notifications"] })
+      queryClient.invalidateQueries({ queryKey: ["notifications-unread-count"] })
     } catch {}
   }
 
   async function markAllAsRead() {
     try {
       await api.post("/notifications/read-all")
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-      setUnreadCount(0)
+      queryClient.invalidateQueries({ queryKey: ["notifications"] })
+      queryClient.setQueryData(["notifications-unread-count"], { count: 0 })
     } catch {}
   }
 

@@ -5,6 +5,7 @@ import { CommandPalette } from "@/components/command-palette/command-palette"
 import { useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useClinic } from "@/hooks/useClinic"
+import { useNotificationSocket } from "@/hooks/useNotificationSocket"
 import { hexToHsl } from "@/lib/colors"
 import { getUploadUrl } from "@/lib/api"
 
@@ -12,6 +13,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { clinic } = useClinic()
   const pathname = usePathname()
   const router = useRouter()
+
+  // Socket.IO for real-time notifications
+  useNotificationSocket()
 
   // Redirect to onboarding if not completed
   useEffect(() => {
