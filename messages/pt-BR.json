@@ -1293,6 +1293,7 @@
     "loadError": "Erro ao carregar configurações"
   },
   "commandPalette": {
+    "title": "Busca rápida",
     "placeholder": "Buscar pacientes, navegar, executar ações...",
     "searching": "Buscando...",
     "noResults": "Nenhum resultado encontrado.",

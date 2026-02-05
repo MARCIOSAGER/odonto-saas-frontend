@@ -154,26 +154,31 @@ export function CommandPalette() {
         className="relative w-full max-w-[540px] mx-4 rounded-2xl border border-border bg-popover text-popover-foreground shadow-[0_16px_70px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_16px_70px_-12px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"
         shouldFilter={false}
       >
-        {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-border px-5">
-          {loading ? (
-            <Loader2 className="h-[18px] w-[18px] shrink-0 text-primary animate-spin" />
-          ) : (
-            <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground/70" />
-          )}
-          <Command.Input
-            ref={inputRef}
-            value={search}
-            onValueChange={setSearch}
-            placeholder={t("placeholder")}
-            className="flex h-14 w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground/60"
-          />
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-2">
+          <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
           <button
             onClick={() => setOpen(false)}
             className="shrink-0 text-[11px] font-medium text-muted-foreground/70 bg-muted/60 hover:bg-muted px-2 py-1 rounded-md border border-border/50 transition-colors"
           >
             ESC
           </button>
+        </div>
+
+        {/* Search input */}
+        <div className="flex items-center gap-3 border-b border-border mx-5 mb-0.5 rounded-lg bg-muted/40 px-3">
+          {loading ? (
+            <Loader2 className="h-[18px] w-[18px] shrink-0 text-primary animate-spin" />
+          ) : (
+            <Search className="h-[18px] w-[18px] shrink-0 text-muted-foreground/50" />
+          )}
+          <Command.Input
+            ref={inputRef}
+            value={search}
+            onValueChange={setSearch}
+            placeholder={t("placeholder")}
+            className="flex h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+          />
         </div>
 
         <Command.List className="max-h-[360px] overflow-y-auto overscroll-contain scroll-smooth px-3 py-2.5">

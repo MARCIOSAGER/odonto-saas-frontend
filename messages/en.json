@@ -1293,6 +1293,7 @@
     "loadError": "Error loading settings"
   },
   "commandPalette": {
+    "title": "Quick search",
     "placeholder": "Search patients, navigate, run actions...",
     "searching": "Searching...",
     "noResults": "No results found.",
