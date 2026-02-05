@@ -151,11 +151,11 @@ export function CommandPalette() {
 
       {/* Command dialog */}
       <Command
-        className="relative w-full max-w-[540px] mx-4 rounded-2xl border border-border/60 bg-popover text-popover-foreground shadow-[0_16px_70px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_16px_70px_-12px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"
+        className="relative w-full max-w-[540px] mx-4 rounded-2xl border border-border bg-popover text-popover-foreground shadow-[0_16px_70px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_16px_70px_-12px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200"
         shouldFilter={false}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-border/60 px-4">
+        <div className="flex items-center gap-3 border-b border-border px-5">
           {loading ? (
             <Loader2 className="h-[18px] w-[18px] shrink-0 text-primary animate-spin" />
           ) : (
@@ -176,7 +176,7 @@ export function CommandPalette() {
           </button>
         </div>
 
-        <Command.List className="max-h-[360px] overflow-y-auto overscroll-contain scroll-smooth p-2">
+        <Command.List className="max-h-[360px] overflow-y-auto overscroll-contain scroll-smooth px-3 py-2.5">
           {loading && (
             <Command.Loading>
               <div className="flex items-center gap-2 px-3 py-4 text-sm text-muted-foreground">
@@ -301,7 +301,7 @@ export function CommandPalette() {
         </Command.List>
 
         {/* Footer with keyboard hints */}
-        <div className="flex items-center gap-4 border-t border-border/60 px-4 py-2.5 text-[11px] text-muted-foreground/50">
+        <div className="flex items-center gap-4 border-t border-border px-5 py-2.5 text-[11px] text-muted-foreground/50">
           <span className="flex items-center gap-1.5">
             <kbd className="inline-flex items-center justify-center h-[18px] min-w-[18px] px-1 rounded border border-border/60 bg-muted/40 font-mono text-[10px]">
               <CornerDownLeft className="h-2.5 w-2.5" />
