@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Menu, X, ChevronDown, CalendarDays, FileText, BarChart3, Megaphone, Brain } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { usePlatformBranding } from "@/hooks/usePlatformBranding"
-import { getUploadUrl } from "@/lib/api"
 
 const modules = [
   { key: "agenda", icon: CalendarDays, href: "/#features" },
@@ -18,7 +16,6 @@ const modules = [
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [featuresOpen, setFeaturesOpen] = useState(false)
-  const { branding } = usePlatformBranding()
   const t = useTranslations("marketing")
 
   return (
@@ -26,16 +23,12 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
-          {branding.logoUrl ? (
-            <img src={getUploadUrl(branding.logoUrl)} alt={branding.name} className="h-8 w-8 rounded-lg object-contain bg-white/10" />
-          ) : (
-            <div className="p-1.5 rounded-lg bg-white/20">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
-              </svg>
-            </div>
-          )}
-          <span>{branding.name}</span>
+          <div className="p-1.5 rounded-lg bg-white/20">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" fill="white"/>
+            </svg>
+          </div>
+          <span>INTER-IA</span>
         </Link>
 
         {/* Desktop nav */}

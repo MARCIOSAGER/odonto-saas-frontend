@@ -2,7 +2,6 @@
 import { Suspense } from "react"
 import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
-import { BrandingCSSInjector } from "@/components/providers/branding-css-injector"
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
@@ -86,9 +85,6 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <Suspense fallback={null}>
-        <BrandingCSSInjector />
-      </Suspense>
       <Suspense fallback={<div className="h-16 border-b bg-background" />}>
         <Navbar />
       </Suspense>
