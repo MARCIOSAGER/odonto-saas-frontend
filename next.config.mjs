@@ -13,21 +13,24 @@ const nextConfig = {
     const connectSrcUrls = [
       "'self'",
       'https://api-odonto.marciosager.com',
-      'https://*.ingest.sentry.io'
+      'wss://api-odonto.marciosager.com',
+      'https://*.ingest.sentry.io',
+      'https://accounts.google.com'
     ];
 
     // Only allow localhost in development
     if (isDev) {
       connectSrcUrls.push('http://localhost:3001');
+      connectSrcUrls.push('ws://localhost:3001');
     }
 
-    // CSP with nonce support for Next.js inline scripts
-    // Note: Next.js automatically adds nonces to inline scripts in production
+    // CSP for scripts - allow unsafe-inline for both dev and prod since Next.js
+    // injects inline scripts and Google OAuth requires inline scripts to work
     const scriptSrc = isDev
-      ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com"
-      : "'self' 'nonce-{NONCE}' https://accounts.google.com";
+      ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.gstatic.com"
+      : "'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com";
 
-    const styleSrc = "'self' 'unsafe-inline'"; // Tailwind requires unsafe-inline
+    const styleSrc = "'self' 'unsafe-inline' https://accounts.google.com"; // Tailwind + Google requires unsafe-inline
 
     const csp = `
       default-src 'self';
