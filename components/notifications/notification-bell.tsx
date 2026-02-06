@@ -34,7 +34,7 @@ export function NotificationBell() {
       const data = res.data?.data || res.data
       return { count: data?.count || 0 }
     },
-    refetchInterval: 60000,
+    staleTime: 5 * 60 * 1000, // 5 minutes - relies on socket invalidation for real-time updates
   })
   const unreadCount = unreadData?.count || 0
 
