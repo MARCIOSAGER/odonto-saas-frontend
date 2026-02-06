@@ -71,7 +71,8 @@ function LoginContent() {
       })
       if (res?.ok) {
         toast.success(t("loginSuccess"))
-        setTimeout(() => { window.location.href = "/home" }, 300)
+        // Use router.replace for cleaner navigation after auth
+        router.replace("/home")
       } else {
         setApiError(t("invalidCredentials"))
         toast.error(t("authFailed"))

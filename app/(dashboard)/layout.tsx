@@ -8,14 +8,24 @@ import { useClinic } from "@/hooks/useClinic"
 import { useNotificationSocket } from "@/hooks/useNotificationSocket"
 import { hexToHsl } from "@/lib/colors"
 import { getUploadUrl } from "@/lib/api"
+import { useSession } from "next-auth/react"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { clinic } = useClinic()
+  const { data: session, status: sessionStatus } = useSession()
+  const { clinic, isLoading: isLoadingClinic } = useClinic()
   const pathname = usePathname()
   const router = useRouter()
 
   // Socket.IO for real-time notifications
   useNotificationSocket()
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (sessionStatus === "unauthenticated") {
+      router.push("/login")
+    }
+  }, [sessionStatus, router])
 
   // Redirect to onboarding if not completed
   useEffect(() => {
@@ -24,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [clinic, pathname, router])
 
+  // Apply clinic branding (colors, title, favicon)
   useEffect(() => {
     if (clinic) {
       if (clinic.primary_color) {
@@ -69,6 +80,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       }
     }
   }, [clinic])
+
+  // Show loading state while session or clinic data is being fetched
+  if (sessionStatus === "loading" || (sessionStatus === "authenticated" && isLoadingClinic)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render dashboard if not authenticated
+  if (sessionStatus === "unauthenticated") {
+    return null
+  }
 
   return (
     <div className="flex min-h-screen">
