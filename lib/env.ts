@@ -8,7 +8,7 @@
 // ── Public (client + server) ──────────────────────────────────────────
 export const env = {
   apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://odontosaas.com.br",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://odonto.marciosager.com",
   sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "",
   sentryEnvironment: process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT || "development",
 } as const

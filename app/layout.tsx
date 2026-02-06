@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Odonto SaaS" }],
   metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -44,11 +47,20 @@ export const metadata: Metadata = {
     title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
     description,
     url: siteUrl,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Odonto SaaS — Software de Gestão para Clínicas Odontológicas",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
     description,
+    images: ["/og-image.png"],
   },
   manifest: "/manifest.json",
   icons: {
