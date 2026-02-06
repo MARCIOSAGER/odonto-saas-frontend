@@ -12,13 +12,14 @@ import { useTranslations } from "next-intl"
 
 export default function WhatsAppSettingsPage() {
   const t = useTranslations("whatsappSettings")
-  const { clinic, isLoading, updateClinic, testWhatsApp, getQrCode, sendTestMessage, disconnectWhatsApp, restartWhatsApp, restoreWhatsApp } = useClinic()
+  const { isLoading, updateClinic, whatsappSettings, isLoadingWhatsApp, testWhatsApp, getQrCode, sendTestMessage, disconnectWhatsApp, restartWhatsApp, restoreWhatsApp } = useClinic()
 
   const [instanceId, setInstanceId] = useState("")
   const [token, setToken] = useState("")
   const [clientToken, setClientToken] = useState("")
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking')
   const [isTesting, setIsTesting] = useState(false)
+  const [hasExistingCredentials, setHasExistingCredentials] = useState(false)
 
   // QR Code state
   const [qrCodeData, setQrCodeData] = useState<string | null>(null)
@@ -64,21 +65,22 @@ export default function WhatsAppSettingsPage() {
   }
 
   useEffect(() => {
-    if (clinic) {
-      setInstanceId(clinic.z_api_instance || "")
-      setToken(clinic.z_api_token || "")
-      setClientToken(clinic.z_api_client_token || "")
+    if (whatsappSettings) {
+      setInstanceId(whatsappSettings.z_api_instance || "")
+      // Only set token placeholders if credentials exist (masked)
+      const hasCredentials = whatsappSettings.z_api_token_set && whatsappSettings.z_api_instance
+      setHasExistingCredentials(hasCredentials)
 
-      if (clinic.z_api_instance && clinic.z_api_token) {
+      if (hasCredentials) {
         checkStatusSilently()
       } else {
         setConnectionStatus('disconnected')
       }
     }
-  }, [clinic, checkStatusSilently])
+  }, [whatsappSettings, checkStatusSilently])
 
   useEffect(() => {
-    if (!clinic?.z_api_instance || !clinic?.z_api_token) return
+    if (!hasExistingCredentials) return
 
     statusIntervalRef.current = setInterval(() => {
       checkStatusSilently()
@@ -89,7 +91,7 @@ export default function WhatsAppSettingsPage() {
         clearInterval(statusIntervalRef.current)
       }
     }
-  }, [clinic?.z_api_instance, clinic?.z_api_token, checkStatusSilently])
+  }, [hasExistingCredentials, checkStatusSilently])
 
   useEffect(() => {
     return () => {
@@ -205,7 +207,7 @@ export default function WhatsAppSettingsPage() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || isLoadingWhatsApp) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -250,7 +252,7 @@ export default function WhatsAppSettingsPage() {
               </Badge>
             </div>
 
-            {instanceId && token && (
+            {hasExistingCredentials && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
                 <Button
                   variant="outline"

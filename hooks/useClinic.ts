@@ -171,6 +171,20 @@ export function useClinic() {
     }
   })
 
+  // WhatsApp / Z-API Settings
+  const whatsappSettingsQuery = useQuery({
+    queryKey: ["clinic", "whatsapp-settings"],
+    queryFn: async () => {
+      try {
+        const res = await api.get("/clinics/my/whatsapp-settings")
+        return res.data?.data || res.data || {}
+      } catch (error) {
+        console.error("Erro ao buscar configurações de WhatsApp:", error)
+        return {}
+      }
+    }
+  })
+
   // Email / SMTP Settings
   const emailSettingsQuery = useQuery({
     queryKey: ["clinic", "email-settings"],
@@ -226,6 +240,8 @@ export function useClinic() {
     aiSettings: aiSettingsQuery.data,
     isLoadingAI: aiSettingsQuery.isLoading,
     updateAISettings: updateAISettingsMutation,
+    whatsappSettings: whatsappSettingsQuery.data,
+    isLoadingWhatsApp: whatsappSettingsQuery.isLoading,
     testWhatsApp: testWhatsAppMutation,
     getQrCode: getQrCodeMutation,
     sendTestMessage: sendTestMessageMutation,

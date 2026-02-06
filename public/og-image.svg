@@ -1,0 +1,28 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0284c7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+
+  <!-- Decorative elements -->
+  <circle cx="100" cy="530" r="200" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="1100" cy="100" r="150" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Logo/Brand -->
+  <text x="600" y="250" font-family="system-ui, -apple-system, sans-serif" font-size="96" font-weight="bold" fill="white" text-anchor="middle">INTER-IA</text>
+
+  <!-- Tagline -->
+  <text x="600" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="36" fill="rgba(255,255,255,0.9)" text-anchor="middle">Gestao Completa para Clinicas Odontologicas</text>
+
+  <!-- Features -->
+  <text x="600" y="440" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.7)" text-anchor="middle">Agenda • Odontograma Digital • Prontuario com IA • WhatsApp</text>
+
+  <!-- CTA -->
+  <rect x="450" y="480" width="300" height="60" rx="30" fill="white"/>
+  <text x="600" y="520" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="600" fill="#0284c7" text-anchor="middle">Teste Gratis 14 Dias</text>
+</svg>
