@@ -1,8 +1,9 @@
 "use client"
 import { Suspense } from "react"
 import { Hero } from "@/components/marketing/hero"
+import { SocialProof } from "@/components/marketing/social-proof"
 import { Features } from "@/components/marketing/features"
-import { PricingTable } from "@/components/marketing/pricing-table"
+import { PricingSection } from "@/components/marketing/pricing-section"
 import { Faq } from "@/components/marketing/faq"
 import { Cta } from "@/components/marketing/cta"
 
@@ -10,8 +11,9 @@ function LandingContent() {
   return (
     <>
       <Hero />
+      <SocialProof />
       <Features />
-      <PricingTable />
+      <PricingSection />
       <Faq />
       <Cta />
     </>
