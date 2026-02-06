@@ -1,220 +1,166 @@
 "use client"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, MessageCircle, CheckCircle } from "lucide-react"
+import { ArrowRight, Zap, Shield, Clock, Sparkles, Users, Calendar, Brain } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { usePlatformBranding } from "@/hooks/usePlatformBranding"
 
 export function Hero() {
-  const { branding } = usePlatformBranding()
   const t = useTranslations("marketing")
 
-  // Placeholder avatars for social proof
-  const avatars = [
-    { initials: "CM", color: "bg-blue-500" },
-    { initials: "RS", color: "bg-green-500" },
-    { initials: "AL", color: "bg-purple-500" },
-    { initials: "MF", color: "bg-amber-500" },
-  ]
-
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50/50">
-      {/* Decorative blobs */}
-      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-[600px] h-[600px] rounded-full bg-blue-100/40 blur-3xl" />
-      <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-[400px] h-[400px] rounded-full bg-green-100/30 blur-3xl" />
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-violet-50/30 to-indigo-50/50" />
 
-      <div className="container relative z-10 py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Text Content */}
-          <div className="space-y-8">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
-              <CheckCircle className="h-4 w-4" />
-              {t("trialBadge")}
-            </div>
+      {/* Animated gradient orbs */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-violet-400/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-400/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-violet-200/20 to-indigo-200/20 rounded-full blur-3xl" />
 
-            {/* Headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] text-gray-900">
-              {branding.heroTitle || "Gestao completa para sua clinica odontologica"}
-            </h1>
+      {/* Grid pattern overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}
+      />
 
-            {/* Subheadline */}
-            <p className="text-lg md:text-xl text-gray-600 max-w-lg leading-relaxed">
-              {branding.heroSubtitle || "Agenda inteligente, prontuario com IA, financeiro integrado e WhatsApp automatizado. Tudo em uma unica plataforma."}
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  className="h-14 px-8 text-base font-semibold bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/25 group"
-                >
-                  {t("startFreeTrial")}
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </Link>
-              <Link href="/contato">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-14 px-8 text-base font-medium border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 group"
-                >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  Falar com um especialista
-                </Button>
-              </Link>
-            </div>
-
-            {/* Social Proof */}
-            <div className="flex items-center gap-4 pt-4">
-              <div className="flex -space-x-3">
-                {avatars.map((avatar, i) => (
-                  <div
-                    key={i}
-                    className={`w-10 h-10 rounded-full ${avatar.color} border-2 border-white flex items-center justify-center text-white text-sm font-semibold shadow-md`}
-                  >
-                    {avatar.initials}
-                  </div>
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900">Aprovado por +2.000 profissionais</p>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <svg key={i} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="text-sm text-gray-500 ml-1">4.9/5</span>
-                </div>
-              </div>
-            </div>
+      <div className="container relative z-10 py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Announcement badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-gradient-to-r from-violet-100 to-indigo-100 border border-violet-200/50">
+            <Sparkles className="w-4 h-4 text-violet-600" />
+            <span className="text-sm font-semibold text-violet-700">
+              IA integrada para prontuarios automaticos
+            </span>
+            <ArrowRight className="w-4 h-4 text-violet-600" />
           </div>
 
-          {/* Right: Dashboard Screenshot */}
-          <div className="relative lg:pl-8">
-            <div className="relative">
-              {/* Browser mockup frame */}
-              <div className="rounded-2xl bg-white shadow-2xl shadow-blue-900/10 border border-gray-200 overflow-hidden">
-                {/* Browser header */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 border-b">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                    <div className="w-3 h-3 rounded-full bg-amber-400" />
-                    <div className="w-3 h-3 rounded-full bg-green-400" />
-                  </div>
-                  <div className="flex-1 mx-4">
-                    <div className="bg-white rounded-md px-3 py-1.5 text-xs text-gray-500 border">
-                      app.inter-ia.com.br/dashboard
-                    </div>
-                  </div>
-                </div>
+          {/* Main headline */}
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
+            <span className="text-gray-900">Sua clinica </span>
+            <span className="bg-gradient-to-r from-violet-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              mais inteligente
+            </span>
+            <br />
+            <span className="text-gray-900">em minutos</span>
+          </h1>
 
-                {/* Dashboard Preview (Placeholder) */}
-                <div className="aspect-[4/3] bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-                  {/* Mini dashboard mockup */}
-                  <div className="h-full flex flex-col gap-4">
-                    {/* Top stats row */}
-                    <div className="grid grid-cols-4 gap-3">
-                      {[
-                        { label: "Agendamentos", value: "32", color: "bg-blue-500" },
-                        { label: "Pacientes", value: "1.847", color: "bg-green-500" },
-                        { label: "Receita", value: "R$ 45k", color: "bg-purple-500" },
-                        { label: "NPS", value: "9.2", color: "bg-amber-500" },
-                      ].map((stat, i) => (
-                        <div key={i} className="bg-white rounded-lg p-3 shadow-sm border">
-                          <div className={`w-8 h-8 ${stat.color} rounded-lg mb-2 flex items-center justify-center`}>
-                            <div className="w-4 h-4 bg-white/30 rounded" />
-                          </div>
-                          <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-                          <p className="text-xs text-gray-500">{stat.label}</p>
-                        </div>
-                      ))}
-                    </div>
+          {/* Subheadline */}
+          <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Agenda, prontuario, financeiro e WhatsApp em uma plataforma
+            potencializada por inteligencia artificial.
+          </p>
 
-                    {/* Calendar and chart row */}
-                    <div className="flex-1 grid grid-cols-5 gap-3">
-                      {/* Calendar */}
-                      <div className="col-span-3 bg-white rounded-lg p-4 shadow-sm border">
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="text-sm font-semibold text-gray-900">Agenda de Hoje</p>
-                          <div className="text-xs text-blue-600 font-medium">Ver tudo</div>
-                        </div>
-                        <div className="space-y-2">
-                          {[
-                            { time: "09:00", name: "Maria Silva", proc: "Limpeza" },
-                            { time: "10:30", name: "Joao Santos", proc: "Consulta" },
-                            { time: "14:00", name: "Ana Costa", proc: "Canal" },
-                          ].map((apt, i) => (
-                            <div key={i} className="flex items-center gap-3 p-2 bg-blue-50 rounded-lg">
-                              <div className="text-xs font-semibold text-blue-600 w-12">{apt.time}</div>
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-900">{apt.name}</p>
-                                <p className="text-xs text-gray-500">{apt.proc}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="h-14 px-8 text-base font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-xl shadow-violet-500/30 group"
+              >
+                Comece gratis - 14 dias
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <Link href="/#how-it-works">
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-14 px-8 text-base font-medium border-2 border-gray-200 hover:border-violet-300 hover:bg-violet-50/50 group"
+              >
+                Ver demonstracao
+              </Button>
+            </Link>
+          </div>
 
-                      {/* Mini chart */}
-                      <div className="col-span-2 bg-white rounded-lg p-4 shadow-sm border">
-                        <p className="text-sm font-semibold text-gray-900 mb-3">Receita Mensal</p>
-                        <div className="flex items-end gap-1 h-24">
-                          {[40, 65, 45, 80, 55, 90, 75].map((h, i) => (
-                            <div key={i} className="flex-1 bg-blue-500 rounded-t" style={{ height: `${h}%` }} />
-                          ))}
-                        </div>
-                        <div className="flex justify-between mt-2 text-xs text-gray-400">
-                          <span>Seg</span>
-                          <span>Dom</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-emerald-500" />
+              <span>Dados criptografados</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-violet-500" />
+              <span>Setup em 5 minutos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-500" />
+              <span>Sem cartao de credito</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature cards grid below */}
+        <div className="mt-20 grid md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          {[
+            {
+              icon: Calendar,
+              title: "Agenda Inteligente",
+              desc: "Lembretes automaticos",
+              gradient: "from-violet-500 to-violet-600"
+            },
+            {
+              icon: Brain,
+              title: "Prontuario com IA",
+              desc: "Transcricao automatica",
+              gradient: "from-indigo-500 to-indigo-600"
+            },
+            {
+              icon: Users,
+              title: "Portal do Paciente",
+              desc: "Agendamento online",
+              gradient: "from-purple-500 to-purple-600"
+            },
+            {
+              icon: Zap,
+              title: "WhatsApp Integrado",
+              desc: "Mensagens automaticas",
+              gradient: "from-emerald-500 to-emerald-600"
+            },
+          ].map((feature, i) => (
+            <div
+              key={i}
+              className="group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 hover:border-violet-200 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10 hover:-translate-y-1"
+            >
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                <feature.icon className="w-6 h-6 text-white" />
               </div>
+              <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
+              <p className="text-sm text-gray-500">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
 
-              {/* Floating badges */}
-              <div className="absolute -left-4 top-1/4 bg-white rounded-xl shadow-lg px-4 py-3 border flex items-center gap-3 animate-float">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+        {/* Social proof */}
+        <div className="mt-16 text-center">
+          <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-white/60 backdrop-blur-sm border border-gray-100">
+            <div className="flex -space-x-2">
+              {["violet", "indigo", "purple", "emerald"].map((color, i) => (
+                <div
+                  key={i}
+                  className={`w-8 h-8 rounded-full bg-${color}-500 border-2 border-white flex items-center justify-center text-white text-xs font-bold`}
+                  style={{ backgroundColor: color === "violet" ? "#8b5cf6" : color === "indigo" ? "#6366f1" : color === "purple" ? "#a855f7" : "#10b981" }}
+                >
+                  {["CM", "RS", "AL", "MF"][i]}
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">WhatsApp Conectado</p>
-                  <p className="text-xs text-gray-500">Mensagens automaticas</p>
-                </div>
-              </div>
-
-              <div className="absolute -right-4 bottom-1/4 bg-white rounded-xl shadow-lg px-4 py-3 border flex items-center gap-3 animate-float-delayed">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              ))}
+            </div>
+            <div className="h-8 w-px bg-gray-200" />
+            <div className="text-left">
+              <div className="flex items-center gap-1 mb-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <svg key={star} className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">IA Ativa</p>
-                  <p className="text-xs text-gray-500">Prontuarios gerados</p>
-                </div>
+                ))}
+                <span className="text-sm font-semibold text-gray-700 ml-1">4.9</span>
               </div>
+              <p className="text-xs text-gray-500">+2.000 clinicas confiam na INTER-IA</p>
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float 3s ease-in-out infinite 1.5s;
-        }
-      `}</style>
     </section>
   )
 }
