@@ -396,7 +396,29 @@
     "faviconError": "Error uploading favicon",
     "invalidImage": "Please select a valid image",
     "logoMaxSize": "Image must be 5MB or less",
-    "faviconMaxSize": "Favicon must be 1MB or less"
+    "faviconMaxSize": "Favicon must be 1MB or less",
+    "booking": {
+      "title": "Online Booking",
+      "subtitle": "Configure public booking for your patients.",
+      "onlineBooking": "Booking Link",
+      "description": "Allow your patients to book appointments online without calling.",
+      "enableBooking": "Enable online booking",
+      "enableDescription": "When enabled, patients can book via the public link.",
+      "enabledSuccess": "Online booking enabled!",
+      "disabledSuccess": "Online booking disabled.",
+      "saveError": "Error saving settings",
+      "noSlugTitle": "Configure clinic slug first",
+      "noSlugDescription": "To enable online booking, you need to set a unique slug for your clinic in settings.",
+      "configureSlug": "Configure slug →",
+      "bookingLink": "Your booking link",
+      "linkCopied": "Link copied!",
+      "shareTip": "Share this link on social media, WhatsApp, or your website.",
+      "howItWorks": "How it works?",
+      "step1": "Patient accesses the link and chooses the desired service.",
+      "step2": "Selects the dentist (or any available) and the best time.",
+      "step3": "Fills in their details and confirms the booking.",
+      "step4": "You receive a notification and the patient appears on your calendar."
+    }
   },
   "header": {
     "searchPlaceholder": "Search patients, appointments...",

@@ -396,7 +396,29 @@
     "faviconError": "Erro ao enviar favicon",
     "invalidImage": "Selecione uma imagem válida",
     "logoMaxSize": "A imagem deve ter no máximo 5MB",
-    "faviconMaxSize": "O favicon deve ter no máximo 1MB"
+    "faviconMaxSize": "O favicon deve ter no máximo 1MB",
+    "booking": {
+      "title": "Agendamento Online",
+      "subtitle": "Configure o agendamento público para seus pacientes.",
+      "onlineBooking": "Link de Agendamento",
+      "description": "Permita que seus pacientes agendem consultas online sem precisar ligar.",
+      "enableBooking": "Habilitar agendamento online",
+      "enableDescription": "Quando ativado, pacientes podem agendar pelo link público.",
+      "enabledSuccess": "Agendamento online ativado!",
+      "disabledSuccess": "Agendamento online desativado.",
+      "saveError": "Erro ao salvar configurações",
+      "noSlugTitle": "Configure o slug da clínica primeiro",
+      "noSlugDescription": "Para ativar o agendamento online, você precisa definir um slug único para sua clínica nas configurações.",
+      "configureSlug": "Configurar slug →",
+      "bookingLink": "Seu link de agendamento",
+      "linkCopied": "Link copiado!",
+      "shareTip": "Compartilhe este link nas redes sociais, WhatsApp ou no seu site.",
+      "howItWorks": "Como funciona?",
+      "step1": "O paciente acessa o link e escolhe o serviço desejado.",
+      "step2": "Seleciona o dentista (ou qualquer disponível) e o melhor horário.",
+      "step3": "Preenche seus dados e confirma o agendamento.",
+      "step4": "Você recebe uma notificação e o paciente aparece na agenda."
+    }
   },
   "header": {
     "searchPlaceholder": "Buscar pacientes, agendamentos...",
