@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { translatePatientStatus, getPatientStatusVariant, getPatientDisplayName, getPatientPhone } from "@/lib/patient-utils"
 
 export default function PatientsPage() {
   const t = useTranslations("patients")
@@ -217,7 +218,13 @@ export default function PatientsPage() {
                       </TD>
                     </TR>
                   ) : (
-                    safePatients.map((p: any) => (
+                    safePatients.map((p: any) => {
+                      const displayName = getPatientDisplayName(p)
+                      const displayPhone = getPatientPhone(p)
+                      const displayStatus = translatePatientStatus(p.status)
+                      const statusVariant = getPatientStatusVariant(p.status)
+
+                      return (
                       <TR key={p.id} className="hover:bg-muted/30 transition-colors">
                         <TD>
                           <div
@@ -225,16 +232,16 @@ export default function PatientsPage() {
                             onClick={() => router.push(`/patients/${p.id}`)}
                           >
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                              {(p.name || p.nome || "P").charAt(0)}
+                              {displayName.charAt(0).toUpperCase()}
                             </div>
-                            <span className="font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">{p.name || p.nome}</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">{displayName}</span>
                           </div>
                         </TD>
-                        <TD className="text-gray-700 dark:text-gray-300">{p.phone || p.telefone}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300">{displayPhone}</TD>
                         <TD className="text-gray-700 dark:text-gray-300">{p.cpf || "---"}</TD>
                         <TD>
-                          <Badge variant={p.status === "Ativo" ? "green" : "gray"}>
-                            {p.status}
+                          <Badge variant={statusVariant}>
+                            {displayStatus}
                           </Badge>
                         </TD>
                         <TD className="text-right">
@@ -269,7 +276,7 @@ export default function PatientsPage() {
                           </div>
                         </TD>
                       </TR>
-                    ))
+                    )})
                   )}
                 </TBody>
               </Table>
