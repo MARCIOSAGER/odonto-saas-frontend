@@ -7,7 +7,7 @@ export default function TermsPageEn() {
     <div className="min-h-screen bg-white">
       <header className="border-b">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <Link href="/" className="text-lg font-bold text-sky-700">Odonto SaaS</Link>
+          <Link href="/" className="text-lg font-bold text-sky-700">INTER-IA</Link>
         </div>
       </header>
 
@@ -17,13 +17,13 @@ export default function TermsPageEn() {
 
         <h2>1. Acceptance of Terms</h2>
         <p>
-          By accessing and using the Odonto SaaS platform, you agree to these Terms of Use.
+          By accessing and using the INTER-IA platform, you agree to these Terms of Use.
           If you do not agree with any part, please do not use our services.
         </p>
 
         <h2>2. Service Description</h2>
         <p>
-          Odonto SaaS is a management platform for dental clinics that offers scheduling,
+          INTER-IA is a management platform for dental clinics that offers scheduling,
           patient management, electronic health records, WhatsApp communication, and other
           clinic management tools.
         </p>
@@ -60,7 +60,7 @@ export default function TermsPageEn() {
 
         <h2>7. LGPD and Privacy</h2>
         <p>
-          Odonto SaaS complies with the Brazilian General Data Protection Law (LGPD).
+          INTER-IA complies with the Brazilian General Data Protection Law (LGPD).
           For more details on how we handle your data, please refer to our{" "}
           <Link href="/privacy" className="text-sky-600 hover:underline">Privacy Policy</Link>.
         </p>
@@ -86,7 +86,7 @@ export default function TermsPageEn() {
 
         <h2>11. Contact</h2>
         <p>
-          For questions about these terms, please contact us at: contato@odontosaas.com.br
+          For questions about these terms, please contact us at: contato@marciosager.com
         </p>
       </main>
     </div>

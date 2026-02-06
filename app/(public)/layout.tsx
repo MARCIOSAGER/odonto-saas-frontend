@@ -7,13 +7,13 @@ import { BrandingCSSInjector } from "@/components/providers/branding-css-injecto
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Odonto SaaS",
+  name: "INTER-IA",
   description: "Software de gestão completo para clínicas odontológicas",
-  url: "https://odontosaas.com.br",
-  logo: "https://odontosaas.com.br/icons/icon-512x512.png",
+  url: "https://odonto.marciosager.com",
+  logo: "https://odonto.marciosager.com/icons/icon-512x512.png",
   contactPoint: {
     "@type": "ContactPoint",
-    email: "contato@odontosaas.com.br",
+    email: "contato@marciosager.com",
     contactType: "customer service",
     availableLanguage: "Portuguese",
   },
@@ -22,7 +22,7 @@ const organizationJsonLd = {
 const softwareJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "Odonto SaaS",
+  name: "INTER-IA",
   description: "Software odontológico completo: agenda, odontograma digital, prontuário com IA, WhatsApp integrado, receituário e relatórios.",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",

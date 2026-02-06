@@ -20,7 +20,7 @@ export interface ResolvedBranding {
 }
 
 const DEFAULTS: ResolvedBranding = {
-  name: "Odonto SaaS",
+  name: "INTER-IA",
   description: "Sistema completo para gestão de clínicas odontológicas",
   logoUrl: "",
   faviconUrl: "",

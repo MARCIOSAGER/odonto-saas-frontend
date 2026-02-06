@@ -20,8 +20,8 @@ const description = "Software odontológico completo: agenda, odontograma digita
 
 export const metadata: Metadata = {
   title: {
-    default: "Odonto SaaS — Gestão de Clínicas Odontológicas",
-    template: "%s | Odonto SaaS",
+    default: "INTER-IA — Gestão de Clínicas Odontológicas",
+    template: "%s | INTER-IA",
   },
   description,
   keywords: [
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     "receituário digital",
     "WhatsApp clínica",
   ],
-  authors: [{ name: "Odonto SaaS" }],
+  authors: [{ name: "INTER-IA" }],
   metadataBase: new URL(siteUrl),
   alternates: {
     canonical: "/",
@@ -43,8 +43,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    siteName: "Odonto SaaS",
-    title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
+    siteName: "INTER-IA",
+    title: "INTER-IA — Gestão de Clínicas Odontológicas",
     description,
     url: siteUrl,
     images: [
@@ -52,13 +52,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Odonto SaaS — Software de Gestão para Clínicas Odontológicas",
+        alt: "INTER-IA — Software de Gestão para Clínicas Odontológicas",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Odonto SaaS — Gestão de Clínicas Odontológicas",
+    title: "INTER-IA — Gestão de Clínicas Odontológicas",
     description,
     images: ["/og-image.png"],
   },
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Odonto SaaS",
+    title: "INTER-IA",
   },
 }
 

@@ -7,7 +7,7 @@ export default function TermsPagePt() {
     <div className="min-h-screen bg-white">
       <header className="border-b">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <Link href="/" className="text-lg font-bold text-sky-700">Odonto SaaS</Link>
+          <Link href="/" className="text-lg font-bold text-sky-700">INTER-IA</Link>
         </div>
       </header>
 
@@ -17,13 +17,13 @@ export default function TermsPagePt() {
 
         <h2>1. Aceite dos Termos</h2>
         <p>
-          Ao acessar e usar a plataforma Odonto SaaS, você concorda com estes Termos de Uso.
+          Ao acessar e usar a plataforma INTER-IA, você concorda com estes Termos de Uso.
           Se não concordar com qualquer parte, não utilize nossos serviços.
         </p>
 
         <h2>2. Descrição do Serviço</h2>
         <p>
-          O Odonto SaaS é uma plataforma de gestão para clínicas odontológicas que oferece
+          O INTER-IA é uma plataforma de gestão para clínicas odontológicas que oferece
           funcionalidades de agendamento, gerenciamento de pacientes, prontuário eletrônico,
           comunicação via WhatsApp, e outras ferramentas de gestão clínica.
         </p>
@@ -60,7 +60,7 @@ export default function TermsPagePt() {
 
         <h2>7. LGPD e Privacidade</h2>
         <p>
-          O Odonto SaaS está em conformidade com a Lei Geral de Proteção de Dados (LGPD).
+          O INTER-IA está em conformidade com a Lei Geral de Proteção de Dados (LGPD).
           Para mais detalhes sobre como tratamos seus dados, consulte nossa{" "}
           <Link href="/privacy" className="text-sky-600 hover:underline">Política de Privacidade</Link>.
         </p>
@@ -87,7 +87,7 @@ export default function TermsPagePt() {
 
         <h2>11. Contato</h2>
         <p>
-          Para dúvidas sobre estes termos, entre em contato pelo e-mail: contato@odontosaas.com.br
+          Para dúvidas sobre estes termos, entre em contato pelo e-mail: contato@marciosager.com
         </p>
       </main>
     </div>

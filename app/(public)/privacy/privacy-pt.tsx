@@ -7,7 +7,7 @@ export default function PrivacyPagePt() {
     <div className="min-h-screen bg-white">
       <header className="border-b">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <Link href="/" className="text-lg font-bold text-sky-700">Odonto SaaS</Link>
+          <Link href="/" className="text-lg font-bold text-sky-700">INTER-IA</Link>
         </div>
       </header>
 
@@ -17,7 +17,7 @@ export default function PrivacyPagePt() {
 
         <h2>1. Introdução</h2>
         <p>
-          A Odonto SaaS respeita a privacidade dos seus usuários e está comprometida com a
+          A INTER-IA respeita a privacidade dos seus usuários e está comprometida com a
           proteção dos dados pessoais. Esta política descreve como coletamos, usamos e
           protegemos suas informações, em conformidade com a Lei Geral de Proteção de Dados
           (LGPD - Lei nº 13.709/2018).
@@ -109,7 +109,7 @@ export default function PrivacyPagePt() {
         <h2>10. Contato do Encarregado (DPO)</h2>
         <p>
           Para exercer seus direitos ou esclarecer dúvidas sobre o tratamento de dados,
-          entre em contato: privacidade@odontosaas.com.br
+          entre em contato: contato@marciosager.com
         </p>
       </main>
     </div>

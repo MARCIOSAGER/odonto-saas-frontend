@@ -168,7 +168,7 @@ export default function DocsPageEn() {
           User Guide
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Learn how to use all the features of the Odonto SaaS platform.
+          Learn how to use all the features of the INTER-IA platform.
         </p>
       </div>
 
@@ -266,9 +266,9 @@ function Step({ number, title, children }: { number: number; title: string; chil
 function GettingStarted() {
   return (
     <>
-      <DocCard title="Welcome to Odonto SaaS">
+      <DocCard title="Welcome to INTER-IA">
         <p className="text-sm mb-4">
-          Odonto SaaS is a complete platform for dental clinic management, featuring intelligent WhatsApp customer service, online scheduling, digital odontogram, prescriptions, NPS, financial reports, and much more.
+          INTER-IA is a complete platform for dental clinic management, featuring intelligent WhatsApp customer service, online scheduling, digital odontogram, prescriptions, NPS, financial reports, and much more.
         </p>
         <p className="text-sm font-semibold mb-3">To get started, follow these steps:</p>
         <Step number={1} title="Set up your clinic">

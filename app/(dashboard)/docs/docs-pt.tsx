@@ -168,7 +168,7 @@ export default function DocsPagePt() {
           Guia do Usuario
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          Aprenda a usar todas as funcionalidades da plataforma Odonto SaaS.
+          Aprenda a usar todas as funcionalidades da plataforma INTER-IA.
         </p>
       </div>
 
@@ -266,9 +266,9 @@ function Step({ number, title, children }: { number: number; title: string; chil
 function InicioRapido() {
   return (
     <>
-      <DocCard title="Bem-vindo ao Odonto SaaS">
+      <DocCard title="Bem-vindo ao INTER-IA">
         <p className="text-sm mb-4">
-          O Odonto SaaS e uma plataforma completa para gestao de clinicas odontologicas, com atendimento inteligente via WhatsApp, agendamento online, odontograma digital, receituario, NPS, relatorios financeiros e muito mais.
+          O INTER-IA e uma plataforma completa para gestao de clinicas odontologicas, com atendimento inteligente via WhatsApp, agendamento online, odontograma digital, receituario, NPS, relatorios financeiros e muito mais.
         </p>
         <p className="text-sm font-semibold mb-3">Para comecar a usar, siga estes passos:</p>
         <Step number={1} title="Configure sua clinica">

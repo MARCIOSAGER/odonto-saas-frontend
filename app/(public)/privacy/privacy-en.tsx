@@ -7,7 +7,7 @@ export default function PrivacyPageEn() {
     <div className="min-h-screen bg-white">
       <header className="border-b">
         <div className="max-w-3xl mx-auto px-6 py-4">
-          <Link href="/" className="text-lg font-bold text-sky-700">Odonto SaaS</Link>
+          <Link href="/" className="text-lg font-bold text-sky-700">INTER-IA</Link>
         </div>
       </header>
 
@@ -17,7 +17,7 @@ export default function PrivacyPageEn() {
 
         <h2>1. Introduction</h2>
         <p>
-          Odonto SaaS respects the privacy of its users and is committed to protecting
+          INTER-IA respects the privacy of its users and is committed to protecting
           personal data. This policy describes how we collect, use, and protect your
           information, in compliance with the Brazilian General Data Protection Law
           (LGPD - Law No. 13,709/2018).
@@ -108,7 +108,7 @@ export default function PrivacyPageEn() {
         <h2>10. Data Protection Officer (DPO) Contact</h2>
         <p>
           To exercise your rights or clarify questions about data processing,
-          please contact: privacidade@odontosaas.com.br
+          please contact: contato@marciosager.com
         </p>
       </main>
     </div>

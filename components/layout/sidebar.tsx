@@ -151,7 +151,7 @@ export function Sidebar() {
                 )}
                 {!isCollapsed && showName && (
                   <span className="text-lg font-bold tracking-tight text-foreground truncate">
-                    {clinic?.name || "Odonto SaaS"}
+                    {clinic?.name || "INTER-IA"}
                   </span>
                 )}
               </>
