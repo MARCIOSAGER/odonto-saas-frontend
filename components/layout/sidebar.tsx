@@ -35,6 +35,7 @@ import {
   Package,
   Palette,
   Settings2,
+  Sparkles,
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
@@ -51,6 +52,7 @@ const mainItems = [
 const clinicItems = [
   { href: "/dentists", labelKey: "dentists", icon: User, permission: "dentists:manage" },
   { href: "/services", labelKey: "services", icon: Wallet, permission: "services:manage" },
+  { href: "/hof", labelKey: "hof", icon: Sparkles, permission: "hof:manage" },
   { href: "/reports", labelKey: "reports", icon: BarChart3, permission: "reports:view" },
 ]
 

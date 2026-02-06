@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { translatePatientStatus, getPatientStatusVariant, getPatientDisplayName, getPatientPhone } from "@/lib/patient-utils"
+import { translatePatientStatus, getPatientStatusVariant, getPatientDisplayName, getPatientPhone, getPatientCpf } from "@/lib/patient-utils"
 
 export default function PatientsPage() {
   const t = useTranslations("patients")
@@ -174,7 +174,7 @@ export default function PatientsPage() {
             </div>
             <div className="flex gap-2">
               <select
-                className="h-11 rounded-md border border-input bg-background px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
+                className="h-11 min-w-[100px] rounded-md border border-input bg-background px-3 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary/20"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as any)}
               >
@@ -221,6 +221,7 @@ export default function PatientsPage() {
                     safePatients.map((p: any) => {
                       const displayName = getPatientDisplayName(p)
                       const displayPhone = getPatientPhone(p)
+                      const displayCpf = getPatientCpf(p)
                       const displayStatus = translatePatientStatus(p.status)
                       const statusVariant = getPatientStatusVariant(p.status)
 
@@ -238,7 +239,7 @@ export default function PatientsPage() {
                           </div>
                         </TD>
                         <TD className="text-gray-700 dark:text-gray-300">{displayPhone}</TD>
-                        <TD className="text-gray-700 dark:text-gray-300">{p.cpf || "---"}</TD>
+                        <TD className="text-gray-700 dark:text-gray-300">{displayCpf}</TD>
                         <TD>
                           <Badge variant={statusVariant}>
                             {displayStatus}

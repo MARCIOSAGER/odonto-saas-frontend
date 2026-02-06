@@ -44,6 +44,7 @@
     "notifications": "Notifications",
     "dentists": "Dentists",
     "services": "Services",
+    "hof": "Harmonization",
     "reports": "Reports",
     "settings": "Settings",
     "clinicManagement": "Clinic Management",
@@ -600,6 +601,7 @@
     "tabTreatmentPlan": "Treatment Plan",
     "tabPrescriptions": "Prescriptions",
     "tabAnamnesis": "Anamnesis",
+    "tabHof": "HOF",
     "tabFinancial": "Financial",
     "tabTimeline": "Timeline",
     "patientInfo": "Patient information",
@@ -913,7 +915,8 @@
     "statusCancelled": "Cancelled",
     "statusRefunded": "Refunded",
     "nfseProcessing": "Processing",
-    "nfseError": "Error"
+    "nfseError": "Error",
+    "noPlanDefined": "Plan not defined"
   },
   "notificationBell": {
     "title": "Notifications",
@@ -1424,6 +1427,107 @@
     "standardPlanDesc": "For growing clinics. WhatsApp, basic AI, and full reports.",
     "premiumPlanName": "Premium",
     "premiumPlanDesc": "Everything unlimited. Full AI, WhatsApp automations, automatic invoicing, and priority support."
+  },
+  "hof": {
+    "title": "Orofacial Harmonization",
+    "subtitle": "Manage facial aesthetic procedures",
+    "newProcedure": "New Procedure",
+    "totalProcedures": "Total Procedures",
+    "totalRevenue": "Monthly Revenue",
+    "totalPatients": "Patients Treated",
+    "scheduledSessions": "Scheduled Sessions",
+    "recentProcedures": "Recent Procedures",
+    "filterByType": "Filter by type",
+    "patient": "Patient",
+    "procedure": "Procedure",
+    "region": "Region",
+    "product": "Product",
+    "noProcedures": "No procedures found.",
+    "showingPage": "Page {page} of {total}",
+    "legend": "Legend",
+    "statusCompleted": "Completed",
+    "procedureTypes": {
+      "TOXINA_BOTULINICA": "Botulinum Toxin",
+      "PREENCHIMENTO_HA": "Hyaluronic Acid Filler",
+      "BIOESTIMULADOR_COLAGENO": "Collagen Biostimulator",
+      "FIOS_PDO": "PDO Threads",
+      "SKINBOOSTER": "Skinbooster",
+      "OUTRO": "Other"
+    },
+    "facialRegions": {
+      "TESTA": "Forehead",
+      "GLABELA": "Glabella",
+      "PERIORBICULAR": "Periorbital",
+      "NARIZ": "Nose",
+      "SULCO_NASOGENIANO": "Nasolabial Fold",
+      "LABIO_SUPERIOR": "Upper Lip",
+      "LABIO_INFERIOR": "Lower Lip",
+      "MENTO": "Chin",
+      "MANDIBULA": "Jawline",
+      "MALAR": "Malar",
+      "TEMPORAL": "Temple"
+    },
+    "faceogram": {
+      "title": "Faceogram",
+      "selectRegion": "Select a region to view details",
+      "noEntries": "No entries for this region.",
+      "addEntry": "Add Entry",
+      "history": "History",
+      "corrected": "Corrected",
+      "superseded": "Superseded"
+    },
+    "anamnesis": {
+      "title": "Aesthetic Anamnesis",
+      "skinType": "Fitzpatrick Skin Type",
+      "previousTreatments": "Previous Aesthetic Treatments",
+      "allergies": "Known Allergies",
+      "medications": "Current Medications",
+      "expectations": "Patient Expectations",
+      "contraindications": "Contraindications",
+      "notes": "Additional Notes"
+    },
+    "photos": {
+      "title": "Before/After Photos",
+      "upload": "Upload Photo",
+      "before": "Before",
+      "after": "After",
+      "comparison": "Comparison",
+      "noPhotos": "No photos registered."
+    },
+    "plan": {
+      "title": "Treatment Plan",
+      "addItem": "Add Item",
+      "procedure": "Procedure",
+      "region": "Region",
+      "product": "Product",
+      "quantity": "Quantity",
+      "price": "Price",
+      "total": "Total",
+      "noItems": "No items in the plan."
+    },
+    "sessions": {
+      "title": "Sessions",
+      "newSession": "New Session",
+      "noSessions": "No sessions registered.",
+      "date": "Date",
+      "professional": "Professional",
+      "notes": "Notes"
+    },
+    "consent": {
+      "title": "Consent Form",
+      "sign": "Sign",
+      "signed": "Signed",
+      "pending": "Pending Signature",
+      "signatureCanvas": "Draw your signature below",
+      "clear": "Clear",
+      "confirm": "Confirm Signature"
+    },
+    "reports": {
+      "title": "HOF Reports",
+      "revenue": "Revenue",
+      "procedures": "Procedures",
+      "products": "Products"
+    }
   },
   "faq": {
     "title": "Frequently asked questions",

@@ -189,7 +189,7 @@ function BillingContent() {
               <div className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">
-                  {t("plan", { name: subscription?.plan?.display_name || "—" })}
+                  {t("plan", { name: subscription?.plan?.display_name || subscription?.plan?.name || t("noPlanDefined") })}
                 </h2>
                 {subStatus && (
                   <Badge variant={subStatus.variant}>{subStatus.label}</Badge>

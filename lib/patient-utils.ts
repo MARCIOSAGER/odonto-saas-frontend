@@ -1,6 +1,7 @@
 /**
  * Utilities for patient data normalization and status translation
  */
+import { formatPhone, formatCpf } from "./format-utils"
 
 export type PatientStatus = "active" | "inactive" | "Ativo" | "Inativo"
 
@@ -59,10 +60,21 @@ export function getPatientDisplayName(patient: any): string {
 }
 
 /**
- * Gets patient phone with fallback
+ * Gets patient phone with formatting
  * @param patient - Patient object
- * @returns Phone number
+ * @returns Formatted phone number (e.g., "(11) 95555-5555")
  */
 export function getPatientPhone(patient: any): string {
-  return patient?.phone || patient?.telefone || "---"
+  const phone = patient?.phone || patient?.telefone
+  return formatPhone(phone)
+}
+
+/**
+ * Gets patient CPF with formatting
+ * @param patient - Patient object
+ * @returns Formatted CPF (e.g., "123.456.789-01") or "Não informado"
+ */
+export function getPatientCpf(patient: any): string {
+  const cpf = patient?.cpf
+  return formatCpf(cpf)
 }
