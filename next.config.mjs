@@ -5,7 +5,44 @@ const withNextIntl = createNextIntlPlugin('./i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // Build CSP dynamically based on environment
+    const connectSrcUrls = [
+      "'self'",
+      'https://api-odonto.marciosager.com',
+      'https://*.ingest.sentry.io'
+    ];
+
+    // Only allow localhost in development
+    if (isDev) {
+      connectSrcUrls.push('http://localhost:3001');
+    }
+
+    // CSP with nonce support for Next.js inline scripts
+    // Note: Next.js automatically adds nonces to inline scripts in production
+    const scriptSrc = isDev
+      ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com"
+      : "'self' 'nonce-{NONCE}' https://accounts.google.com";
+
+    const styleSrc = "'self' 'unsafe-inline'"; // Tailwind requires unsafe-inline
+
+    const csp = `
+      default-src 'self';
+      script-src ${scriptSrc};
+      style-src ${styleSrc};
+      img-src 'self' data: https: blob:;
+      font-src 'self' data:;
+      connect-src ${connectSrcUrls.join(' ')};
+      frame-src https://accounts.google.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+    `.replace(/\s+/g, ' ').trim();
+
     return [
       {
         source: '/:path*',
@@ -36,7 +73,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://api-odonto.marciosager.com http://localhost:3001 https://*.ingest.sentry.io; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self'"
+            value: csp
           }
         ]
       }
