@@ -41,13 +41,13 @@ export default function HofPage() {
   const router = useRouter()
 
   const [page, setPage] = useState(1)
-  const [procedureTypeFilter, setProcedureTypeFilter] = useState<string>("")
+  const [procedureTypeFilter, setProcedureTypeFilter] = useState<string>("__all__")
 
   const { data: dashboard, isLoading: loadingDashboard } = useHofDashboard()
   const { data: procedures, isLoading: loadingProcedures } = useHofRecentProcedures({
     page,
     limit: 10,
-    procedureType: procedureTypeFilter as HofProcedureType | undefined,
+    procedureType: procedureTypeFilter === "__all__" ? undefined : procedureTypeFilter as HofProcedureType,
   })
   const { data: legend } = useHofLegend()
 
@@ -150,7 +150,7 @@ export default function HofPage() {
                   <SelectValue placeholder={t("filterByType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{tc("all")}</SelectItem>
+                  <SelectItem value="__all__">{tc("all")}</SelectItem>
                   {Object.entries(PROCEDURE_TYPE_LABELS).map(([key, label]) => (
                     <SelectItem key={key} value={key}>
                       {label}
