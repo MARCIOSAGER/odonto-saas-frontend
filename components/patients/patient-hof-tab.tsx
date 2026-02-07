@@ -13,13 +13,15 @@ import {
   Camera,
   CalendarCheck,
   ListTodo,
+  Wand2,
 } from "lucide-react"
+import { HofSimulation } from "@/components/hof/simulation"
 
 interface PatientHofTabProps {
   patientId: string
 }
 
-type SubTabKey = "faceogram" | "anamnesis" | "photos" | "plan" | "sessions"
+type SubTabKey = "faceogram" | "simulation" | "anamnesis" | "photos" | "plan" | "sessions"
 
 export function PatientHofTab({ patientId }: PatientHofTabProps) {
   const t = useTranslations("hof")
@@ -27,6 +29,7 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
 
   const subTabs: { key: SubTabKey; label: string; icon: React.ElementType }[] = [
     { key: "faceogram", label: t("faceogram.title"), icon: Smile },
+    { key: "simulation", label: t("simulation.title"), icon: Wand2 },
     { key: "anamnesis", label: t("anamnesis.title"), icon: ClipboardList },
     { key: "photos", label: t("photos.title"), icon: Camera },
     { key: "plan", label: t("plan.title"), icon: ListTodo },
@@ -36,7 +39,7 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
   return (
     <div className="space-y-6">
       <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as SubTabKey)}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           {subTabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -50,6 +53,12 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
 
         <TabsContent value="faceogram" className="mt-6">
           <FaceogramViewer patientId={patientId} />
+        </TabsContent>
+
+        <TabsContent value="simulation" className="mt-6">
+          <div className="h-[calc(100vh-280px)] min-h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+            <HofSimulation patientId={patientId} />
+          </div>
         </TabsContent>
 
         <TabsContent value="anamnesis" className="mt-6">

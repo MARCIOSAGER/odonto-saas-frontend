@@ -326,7 +326,66 @@
     "photos": "Fotos",
     "planning": "Planejamento",
     "sessions": "Sessões",
-    "consent": "Consentimento"
+    "consent": "Consentimento",
+    "simulation": {
+      "title": "Simulação Facial",
+      "uploadPhoto": "Carregar Foto",
+      "overlay": "Overlay",
+      "landmarks": "Landmarks",
+      "reposition": "Reposicionar",
+      "repositionDone": "Concluir Reposição",
+      "sculpt": "Esculpir",
+      "beforeAfter": "Antes/Depois",
+      "export": "Exportar",
+      "opacity": "Opacidade",
+      "zoom": "Zoom",
+      "showAllZones": "Mostrar Todas as Zonas",
+      "hideAllZones": "Ocultar Todas as Zonas",
+      "selectZone": "Selecione uma zona para registrar",
+      "noProcedures": "Nenhum procedimento registrado",
+      "selectZoneHint": "Clique em uma zona do faceograma",
+      "procedureForm": {
+        "selectedZone": "Zona Selecionada",
+        "procedure": "Procedimento",
+        "product": "Produto / Marca",
+        "dosage": "Dosagem / Volume",
+        "lot": "Lote / Validade",
+        "cost": "Custo (R$)",
+        "intensity": "Intensidade da Simulação",
+        "notes": "Observações",
+        "save": "Salvar Procedimento",
+        "cancel": "Cancelar",
+        "remove": "Remover"
+      },
+      "sculpt": {
+        "push": "Puxar",
+        "inflate": "Inflar",
+        "deflate": "Contrair",
+        "smooth": "Alisar",
+        "brushSize": "Pincel",
+        "strength": "Força",
+        "undo": "Desfazer",
+        "reset": "Resetar",
+        "done": "Concluir"
+      },
+      "modes": {
+        "reposition": "MODO REPOSICIONAR — Arraste as elipses",
+        "simulation": "SIMULAÇÃO ATIVA",
+        "detecting": "DETECTANDO ROSTO...",
+        "sculpt": "MODO ESCULPIR — Clique e arraste para deformar"
+      },
+      "loading": {
+        "model": "Carregando modelo de IA...",
+        "detecting": "Detectando pontos faciais...",
+        "success": "Modelo carregado com sucesso!"
+      },
+      "tercios": {
+        "superior": "Terço Superior",
+        "medio": "Terço Médio",
+        "inferior": "Terço Inferior",
+        "submentoniana": "Submentoniana"
+      }
+    }
   },
   "reports": {
     "title": "Relatórios",
