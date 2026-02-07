@@ -130,7 +130,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
                       onValueChange={(v) => setForm({ ...form, procedure_type: v as HofProcedureType })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
+                        <SelectValue placeholder={t("plan.selectPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(PROCEDURE_TYPE_LABELS).map(([key, label]) => (
@@ -149,7 +149,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
                       onValueChange={(v) => setForm({ ...form, facial_region: v as FacialRegion })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
+                        <SelectValue placeholder={t("plan.selectPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(FACIAL_REGION_LABELS).map(([key, label]) => (
@@ -166,7 +166,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
                     <Input
                       value={form.product_name}
                       onChange={(e) => setForm({ ...form, product_name: e.target.value })}
-                      placeholder="Ex: Botox, Juvederm..."
+                      placeholder={t("plan.productPlaceholder")}
                     />
                   </div>
 
@@ -175,7 +175,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
                     <Input
                       value={form.quantity}
                       onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                      placeholder="Ex: 50UI, 1ml..."
+                      placeholder={t("plan.quantityPlaceholder")}
                     />
                   </div>
 
@@ -195,7 +195,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
                     <Input
                       value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                      placeholder="Observações..."
+                      placeholder={t("plan.notesPlaceholder")}
                     />
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export function HofPlanTab({ patientId }: HofPlanTabProps) {
             <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-4">
                 <span className="text-sm text-muted-foreground">
-                  {completedCount}/{items.length} itens concluídos
+                  {completedCount}/{items.length} {t("plan.itemsCompleted")}
                 </span>
               </div>
               <div className="text-right">

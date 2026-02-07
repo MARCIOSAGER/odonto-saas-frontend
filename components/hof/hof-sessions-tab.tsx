@@ -109,12 +109,12 @@ export function HofSessionsTab({ patientId }: HofSessionsTabProps) {
                     onValueChange={(v) => setForm({ ...form, dentist_id: v })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione..." />
+                      <SelectValue placeholder={t("sessions.selectPlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       {dentists.map((d: { id: string; name: string }) => (
                         <SelectItem key={d.id} value={d.id}>
-                          Dr(a). {d.name}
+                          {t("sessions.doctorPrefix")} {d.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -126,7 +126,7 @@ export function HofSessionsTab({ patientId }: HofSessionsTabProps) {
                   <Textarea
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    placeholder="Observações da sessão..."
+                    placeholder={t("sessions.notesPlaceholder")}
                     rows={3}
                   />
                 </div>
@@ -192,10 +192,10 @@ function SessionItem({ session, expanded, onToggle }: SessionItemProps) {
 
   const statusLabel =
     session.status === "completed"
-      ? "Concluída"
+      ? t("sessions.completed")
       : session.status === "scheduled"
-      ? "Agendada"
-      : session.status
+      ? t("sessions.scheduled")
+      : t("sessions.cancelled")
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -215,7 +215,7 @@ function SessionItem({ session, expanded, onToggle }: SessionItemProps) {
           {session.dentist_name && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <User className="h-4 w-4" />
-              <span>Dr(a). {session.dentist_name}</span>
+              <span>{t("sessions.doctorPrefix")} {session.dentist_name}</span>
             </div>
           )}
         </div>
@@ -256,7 +256,7 @@ function SessionConsent({ sessionId }: { sessionId: string }) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
-        Carregando termo...
+        {t("consent.loading")}
       </div>
     )
   }
@@ -269,7 +269,7 @@ function SessionConsent({ sessionId }: { sessionId: string }) {
         ) : (
           <FileSignature className="h-4 w-4 mr-2" />
         )}
-        Gerar Termo de Consentimento
+        {t("consent.generate")}
       </Button>
     )
   }
@@ -290,7 +290,7 @@ function SessionConsent({ sessionId }: { sessionId: string }) {
       {consent.pdf_url && (
         <Button variant="ghost" size="sm" asChild>
           <a href={consent.pdf_url} target="_blank" rel="noopener noreferrer">
-            Ver PDF
+            {t("consent.viewPdf")}
           </a>
         </Button>
       )}

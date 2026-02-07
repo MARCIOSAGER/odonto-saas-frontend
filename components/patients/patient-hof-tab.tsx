@@ -2,11 +2,13 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
 import { FaceogramViewer } from "@/components/hof/faceogram"
 import { HofAnamnesisForm } from "@/components/hof/hof-anamnesis-form"
 import { HofPhotosTab } from "@/components/hof/hof-photos-tab"
 import { HofPlanTab } from "@/components/hof/hof-plan-tab"
 import { HofSessionsTab } from "@/components/hof/hof-sessions-tab"
+import { HofSimulatorModal } from "@/components/hof/hof-simulator-modal"
 import {
   Smile,
   ClipboardList,
@@ -15,21 +17,20 @@ import {
   ListTodo,
   Wand2,
 } from "lucide-react"
-import { HofSimulation } from "@/components/hof/simulation"
 
 interface PatientHofTabProps {
   patientId: string
 }
 
-type SubTabKey = "faceogram" | "simulation" | "anamnesis" | "photos" | "plan" | "sessions"
+type SubTabKey = "faceogram" | "anamnesis" | "photos" | "plan" | "sessions"
 
 export function PatientHofTab({ patientId }: PatientHofTabProps) {
   const t = useTranslations("hof")
   const [activeSubTab, setActiveSubTab] = useState<SubTabKey>("faceogram")
+  const [simulatorOpen, setSimulatorOpen] = useState(false)
 
   const subTabs: { key: SubTabKey; label: string; icon: React.ElementType }[] = [
     { key: "faceogram", label: t("faceogram.title"), icon: Smile },
-    { key: "simulation", label: t("simulation.title"), icon: Wand2 },
     { key: "anamnesis", label: t("anamnesis.title"), icon: ClipboardList },
     { key: "photos", label: t("photos.title"), icon: Camera },
     { key: "plan", label: t("plan.title"), icon: ListTodo },
@@ -38,8 +39,20 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
 
   return (
     <div className="space-y-6">
+      {/* Simulator Button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={() => setSimulatorOpen(true)}
+          className="gap-2"
+          variant="default"
+        >
+          <Wand2 className="h-4 w-4" />
+          {t("simulation.openSimulator")}
+        </Button>
+      </div>
+
       <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as SubTabKey)}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           {subTabs.map((tab) => {
             const Icon = tab.icon
             return (
@@ -53,12 +66,6 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
 
         <TabsContent value="faceogram" className="mt-6">
           <FaceogramViewer patientId={patientId} />
-        </TabsContent>
-
-        <TabsContent value="simulation" className="mt-6">
-          <div className="h-[calc(100vh-280px)] min-h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-            <HofSimulation patientId={patientId} />
-          </div>
         </TabsContent>
 
         <TabsContent value="anamnesis" className="mt-6">
@@ -77,6 +84,13 @@ export function PatientHofTab({ patientId }: PatientHofTabProps) {
           <HofSessionsTab patientId={patientId} />
         </TabsContent>
       </Tabs>
+
+      {/* Fullscreen Simulator Modal */}
+      <HofSimulatorModal
+        open={simulatorOpen}
+        onOpenChange={setSimulatorOpen}
+        patientId={patientId}
+      />
     </div>
   )
 }
