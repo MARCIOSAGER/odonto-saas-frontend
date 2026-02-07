@@ -35,9 +35,14 @@ export function HofSimulation({ patientId }: HofSimulationProps) {
   const photoCanvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Backend hooks (only when patientId is provided)
-  const faceogram = patientId ? useFaceogram(patientId) : null
-  const hofPhotos = patientId ? useHofPhotos(patientId) : null
+  // Backend hooks - always call but only use when patientId is provided
+  // Using empty string as fallback to satisfy hooks rules (hooks must be called unconditionally)
+  const faceogramResult = useFaceogram(patientId || '')
+  const hofPhotosResult = useHofPhotos(patientId || '')
+
+  // Only use the hooks when patientId is actually provided
+  const faceogram = patientId ? faceogramResult : null
+  const hofPhotos = patientId ? hofPhotosResult : null
 
   // MediaPipe hook
   const {
