@@ -45,3 +45,19 @@ export function SelectItem({ value, children }: { value: string; children: React
     </SelectPrimitive.Item>
   )
 }
+
+export function SelectGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <SelectPrimitive.Group className="py-1">
+      {children}
+    </SelectPrimitive.Group>
+  )
+}
+
+export function SelectLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <SelectPrimitive.Label className="px-3 py-1.5 text-xs font-semibold text-gray-500">
+      {children}
+    </SelectPrimitive.Label>
+  )
+}

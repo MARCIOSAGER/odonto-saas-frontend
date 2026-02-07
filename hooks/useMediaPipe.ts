@@ -59,10 +59,10 @@ export function useMediaPipe(): UseMediaPipeReturn {
       try {
         // Dynamic import of MediaPipe Vision Tasks
         // Files must be in public/mediapipe/
-        const { FaceLandmarker, FilesetResolver } = await import(
-          // @ts-expect-error - Dynamic import from public folder
-          '/mediapipe/vision_bundle.mjs'
-        )
+        // webpackIgnore tells webpack to skip this import at build time
+        const mediaPipePath = '/mediapipe/vision_bundle.mjs'
+        const module = await import(/* webpackIgnore: true */ mediaPipePath)
+        const { FaceLandmarker, FilesetResolver } = module
 
         if (cancelled) return
 
