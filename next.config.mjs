@@ -39,7 +39,7 @@ const nextConfig = {
       img-src 'self' data: https: blob:;
       font-src 'self' data:;
       connect-src ${connectSrcUrls.join(' ')};
-      frame-src https://accounts.google.com;
+      frame-src 'self' https://accounts.google.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
