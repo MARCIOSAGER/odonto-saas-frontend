@@ -267,12 +267,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f
     </div>
     <div class="examples-bar">
       <span>Exemplos:</span>
-      <img class="example-thumb" src="example_f1.jpg" onclick="loadExample(this,'F')" title="Feminino 1">
-      <img class="example-thumb" src="example_f2.jpg" onclick="loadExample(this,'F')" title="Feminino 2">
-      <img class="example-thumb" src="example_f3.jpg" onclick="loadExample(this,'F')" title="Feminino 3">
-      <img class="example-thumb" src="example_m1.jpg" onclick="loadExample(this,'M')" title="Masculino 1">
-      <img class="example-thumb" src="example_m2.jpg" onclick="loadExample(this,'M')" title="Masculino 2">
-      <img class="example-thumb" src="example_m3.jpg" onclick="loadExample(this,'M')" title="Masculino 3">
+      <img class="example-thumb" src="example_f1.jpg" onclick="loadExample(this,'F')" title="Feminino 1" onerror="this.style.display='none'">
+      <img class="example-thumb" src="example_f2.jpg" onclick="loadExample(this,'F')" title="Feminino 2" onerror="this.style.display='none'">
+      <img class="example-thumb" src="example_f3.jpg" onclick="loadExample(this,'F')" title="Feminino 3" onerror="this.style.display='none'">
+      <img class="example-thumb" src="example_m1.jpg" onclick="loadExample(this,'M')" title="Masculino 1" onerror="this.style.display='none'">
+      <img class="example-thumb" src="example_m2.jpg" onclick="loadExample(this,'M')" title="Masculino 2" onerror="this.style.display='none'">
+      <img class="example-thumb" src="example_m3.jpg" onclick="loadExample(this,'M')" title="Masculino 3" onerror="this.style.display='none'">
     </div>
   </div>
 
@@ -361,7 +361,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f
 
 <!-- MediaPipe Vision Tasks -->
 <script type="module">
-import { FaceLandmarker, FilesetResolver } from './mediapipe/vision_bundle.mjs';
+import { FaceLandmarker, FilesetResolver } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
 
 // ===========================
 // ZONE DEFINITIONS
@@ -866,10 +866,10 @@ async function initMediaPipe() {
   loadingText.textContent = 'Carregando modelo de IA (Face Landmarker)...';
 
   try {
-    const vision = await FilesetResolver.forVisionTasks('./mediapipe/');
+    const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
     faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
       baseOptions: {
-        modelAssetPath: './mediapipe/face_landmarker.task',
+        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
         delegate: 'GPU'
       },
       runningMode: 'IMAGE',

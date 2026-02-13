@@ -15,7 +15,9 @@ const nextConfig = {
       'https://api-odonto.marciosager.com',
       'wss://api-odonto.marciosager.com',
       'https://*.ingest.sentry.io',
-      'https://accounts.google.com'
+      'https://accounts.google.com',
+      'https://cdn.jsdelivr.net',
+      'https://storage.googleapis.com'
     ];
 
     // Only allow localhost in development
@@ -27,8 +29,8 @@ const nextConfig = {
     // CSP for scripts - allow unsafe-inline for both dev and prod since Next.js
     // injects inline scripts and Google OAuth requires inline scripts to work
     const scriptSrc = isDev
-      ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.gstatic.com"
-      : "'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com";
+      ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.gstatic.com https://cdn.jsdelivr.net"
+      : "'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://cdn.jsdelivr.net";
 
     const styleSrc = "'self' 'unsafe-inline' https://accounts.google.com"; // Tailwind + Google requires unsafe-inline
 
