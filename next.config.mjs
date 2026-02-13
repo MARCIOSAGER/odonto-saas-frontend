@@ -49,34 +49,63 @@ const nextConfig = {
       frame-ancestors 'self';
     `.replace(/\s+/g, ' ').trim();
 
+    // Permissive CSP for HOF simulator (needs unsafe-eval for MediaPipe WASM)
+    const hofCsp = `
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://storage.googleapis.com;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: https: blob:;
+      font-src 'self' data:;
+      connect-src 'self' https://cdn.jsdelivr.net https://storage.googleapis.com;
+      object-src 'none';
+      base-uri 'self';
+      worker-src 'self' blob:;
+      frame-ancestors 'self';
+    `.replace(/\s+/g, ' ').trim();
+
+    const securityHeaders = [
+      {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN'
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff'
+      },
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains'
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block'
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin'
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(), geolocation=()'
+      }
+    ];
+
     return [
+      {
+        // HOF simulator gets permissive CSP for MediaPipe WASM
+        source: '/hof.html',
+        headers: [
+          ...securityHeaders,
+          {
+            key: 'Content-Security-Policy',
+            value: hofCsp
+          }
+        ]
+      },
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          },
+          ...securityHeaders,
           {
             key: 'Content-Security-Policy',
             value: csp
