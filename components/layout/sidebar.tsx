@@ -39,7 +39,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useClinic } from "@/hooks/useClinic"
-import { getUploadUrl } from "@/lib/api"
+import { api, getUploadUrl } from "@/lib/api"
 
 const mainItems = [
   { href: "/home", labelKey: "dashboard", icon: LayoutDashboard },
@@ -92,6 +92,11 @@ export function Sidebar() {
 
   const user = session?.user
   const isAdmin = (user as any)?.role === "superadmin"
+
+  const handleLogout = async () => {
+    try { await api.post("/auth/logout") } catch {}
+    signOut({ callbackUrl: "/login" })
+  }
   const userInitials = user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "US"
 
   const renderNavItem = (item: { href: string; labelKey: string; icon: any; permission?: string }, useStartsWith = false) => {
@@ -280,7 +285,7 @@ export function Sidebar() {
                 variant="ghost"
                 size="sm"
                 className="flex-1 justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9"
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={handleLogout}
               >
                 <LogOut size={16} className="mr-2" />
                 {tc("logout")}
@@ -295,7 +300,7 @@ export function Sidebar() {
             </div>
             <LanguageSelector />
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleLogout}
               className="text-muted-foreground hover:text-destructive transition-colors"
             >
               <LogOut size={18} />

@@ -6,6 +6,8 @@ import { useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useClinic } from "@/hooks/useClinic"
 import { useNotificationSocket } from "@/hooks/useNotificationSocket"
+import { useIdleLogout } from "@/hooks/useIdleLogout"
+import { IdleLogoutWarning } from "@/components/idle-logout-warning"
 import { hexToHsl } from "@/lib/colors"
 import { getUploadUrl } from "@/lib/api"
 import { useSession } from "next-auth/react"
@@ -19,6 +21,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Socket.IO for real-time notifications
   useNotificationSocket()
+
+  // Auto-logout after 30 minutes of inactivity
+  const { showWarning, remainingSeconds, dismissWarning } = useIdleLogout()
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -108,6 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="container py-4 md:py-6">{children}</main>
       </div>
       <CommandPalette />
+      <IdleLogoutWarning open={showWarning} remainingSeconds={remainingSeconds} onStayLoggedIn={dismissWarning} />
     </div>
   )
 }

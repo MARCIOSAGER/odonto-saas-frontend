@@ -178,7 +178,10 @@
     "whatsappUnavailableResend": "WhatsApp unavailable. Code resent via email!",
     "resendError": "Error resending code",
     "completeLoginError": "Error completing login",
-    "invalidCode": "Invalid code"
+    "invalidCode": "Invalid code",
+    "idleWarningTitle": "Session about to expire",
+    "idleWarningDescription": "You will be logged out in {time} due to inactivity.",
+    "stayLoggedIn": "Stay logged in"
   },
   "dashboard": {
     "greeting": "Hello, {name}",

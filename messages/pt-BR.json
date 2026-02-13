@@ -178,7 +178,10 @@
     "whatsappUnavailableResend": "WhatsApp indisponível. Código reenviado por e-mail!",
     "resendError": "Erro ao reenviar código",
     "completeLoginError": "Erro ao completar login",
-    "invalidCode": "Código inválido"
+    "invalidCode": "Código inválido",
+    "idleWarningTitle": "Sessão prestes a expirar",
+    "idleWarningDescription": "Você será desconectado em {time} por inatividade.",
+    "stayLoggedIn": "Continuar conectado"
   },
   "dashboard": {
     "greeting": "Olá, {name}",

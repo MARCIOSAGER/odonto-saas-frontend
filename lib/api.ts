@@ -23,7 +23,17 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
   (res) => res,
-  (error) => {
+  async (error) => {
+    // Redirect to login on 401 (expired/blacklisted token)
+    if (
+      error?.response?.status === 401 &&
+      typeof window !== "undefined" &&
+      !window.location.pathname.startsWith("/login")
+    ) {
+      const { signOut } = await import("next-auth/react")
+      signOut({ callbackUrl: "/login?reason=expired" })
+      return Promise.reject(error)
+    }
     console.error("API Error:", error?.response?.data || error.message)
     return Promise.reject(error)
   }
