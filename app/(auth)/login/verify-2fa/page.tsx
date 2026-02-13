@@ -27,26 +27,14 @@ function Verify2faContent() {
   const [countdown, setCountdown] = useState(0)
   const [ready, setReady] = useState(false)
 
-  // Read token from sessionStorage (preferred) or URL params (fallback from server-side redirect)
-  // If found in URL, move to sessionStorage and clean the URL to avoid exposure in browser history
+  // Read token from sessionStorage only (URL params removed for security)
   useEffect(() => {
-    const urlToken = searchParams.get("token")
-    const urlMethod = searchParams.get("method")
-
-    if (urlToken) {
-      sessionStorage.setItem("2fa_token", urlToken)
-      if (urlMethod) sessionStorage.setItem("2fa_method", urlMethod)
-      setTwoFactorToken(urlToken)
-      setMethod(urlMethod || "whatsapp")
-      window.history.replaceState({}, "", "/login/verify-2fa")
-    } else {
-      const storedToken = sessionStorage.getItem("2fa_token")
-      const storedMethod = sessionStorage.getItem("2fa_method")
-      setTwoFactorToken(storedToken)
-      setMethod(storedMethod || "whatsapp")
-    }
+    const storedToken = sessionStorage.getItem("2fa_token")
+    const storedMethod = sessionStorage.getItem("2fa_method")
+    setTwoFactorToken(storedToken)
+    setMethod(storedMethod || "whatsapp")
     setReady(true)
-  }, [searchParams])
+  }, [])
 
   useEffect(() => {
     if (countdown > 0) {
