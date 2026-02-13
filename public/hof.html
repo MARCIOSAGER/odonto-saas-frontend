@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTER-IA | Módulo HOF - Harmonização Orofacial v7</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;overflow:hidden;height:100vh}
+.app{display:grid;grid-template-columns:210px 1fr 270px;grid-template-rows:42px 1fr;height:100vh}
+
+/* HEADER */
+.header{grid-column:1/-1;background:linear-gradient(135deg,#0d9488,#0f766e);padding:6px 16px;display:flex;align-items:center;gap:12px;height:42px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.header .logo{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.header .subtitle{font-size:10px;color:#ccfbf1;opacity:.8;margin-left:auto}
+.header .ai-badge{background:rgba(255,255,255,.15);padding:2px 8px;border-radius:10px;font-size:9px;color:#ccfbf1;font-weight:600}
+
+/* LEFT SIDEBAR */
+.left{background:#1e293b;overflow-y:auto;padding:6px;border-right:1px solid #334155}
+.left::-webkit-scrollbar{width:4px}
+.left::-webkit-scrollbar-thumb{background:#475569;border-radius:2px}
+.left h3{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:1.2px;margin:10px 0 3px 4px;font-weight:600}
+.zone-item{display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:4px;cursor:pointer;font-size:10.5px;transition:.15s;margin-bottom:1px;color:#cbd5e1}
+.zone-item:hover{background:#334155}
+.zone-item.selected{background:#0d9488;color:#fff;font-weight:600}
+.zone-item.has-proc{background:#1e3a5f;border-left:3px solid #3b82f6;padding-left:3px}
+.zone-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.gender-bar{display:flex;gap:4px;margin-bottom:6px}
+.gender-btn{flex:1;padding:4px;border:1px solid #475569;border-radius:4px;background:transparent;color:#94a3b8;font-size:10px;cursor:pointer;transition:.15s}
+.gender-btn.active{background:#0d9488;color:#fff;border-color:#0d9488}
+
+/* CENTER */
+.center{display:flex;flex-direction:column;background:#111827;position:relative}
+.toolbar{display:flex;align-items:center;gap:5px;padding:5px 8px;background:#1e293b;border-bottom:1px solid #334155;flex-wrap:wrap;min-height:36px}
+.tool-btn{padding:3px 8px;border:1px solid #475569;border-radius:4px;background:transparent;color:#cbd5e1;font-size:10px;cursor:pointer;transition:.15s;white-space:nowrap}
+.tool-btn:hover{background:#334155}
+.tool-btn.active{background:#0d9488;color:#fff;border-color:#0d9488}
+.tool-btn.warn{background:#f59e0b;color:#000;border-color:#f59e0b;font-weight:700;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.sep{width:1px;height:20px;background:#334155;margin:0 2px}
+.slider-group{display:flex;align-items:center;gap:3px}
+.slider-group label{font-size:9px;color:#94a3b8;white-space:nowrap}
+.slider-group input[type=range]{width:60px;height:3px;accent-color:#0d9488}
+.slider-group .val{font-size:9px;color:#67e8f9;min-width:28px}
+
+/* PHOTO AREA */
+.photo-area{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#1a2332,#111827)}
+.photo-container{position:relative;display:none;transform-origin:center center}
+.photo-container canvas{display:block;user-select:none;border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+#simCanvas{position:absolute;top:0;left:0;pointer-events:none;border-radius:6px}
+
+/* SVG OVERLAY */
+.svg-layer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+.svg-layer svg{width:100%;height:100%}
+.svg-layer.interactive{pointer-events:auto}
+.zone-el{cursor:pointer;transition:opacity .15s}
+.zone-el:hover ellipse{stroke-width:2.5 !important}
+.zone-el.drag-mode{cursor:grab}
+.zone-el.drag-mode:active{cursor:grabbing}
+.zone-el .zone-label{pointer-events:none;font-family:'Segoe UI',system-ui,sans-serif}
+.resize-handle{cursor:nwse-resize;opacity:0.7}
+.resize-handle:hover{opacity:1}
+
+/* MODE INDICATORS */
+.mode-badge{position:absolute;top:8px;left:50%;transform:translateX(-50%);padding:5px 16px;border-radius:6px;font-size:11px;font-weight:700;z-index:50;opacity:0;transition:.3s;pointer-events:none;letter-spacing:.5px}
+.mode-badge.active{opacity:1}
+.mode-badge.reposition{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;box-shadow:0 2px 12px rgba(245,158,11,.4)}
+.mode-badge.sim{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 2px 12px rgba(239,68,68,.4)}
+.mode-badge.detect{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 2px 12px rgba(59,130,246,.4)}
+
+/* LANDMARK DOTS */
+.landmark-dot{position:absolute;width:3px;height:3px;background:#00ff88;border-radius:50%;pointer-events:none;z-index:5;opacity:0;transition:opacity .3s}
+.landmark-dot.visible{opacity:0.7}
+
+/* PLACEHOLDER */
+.placeholder{text-align:center;color:#475569;padding:40px}
+.placeholder h2{font-size:15px;margin-bottom:6px;color:#64748b}
+.placeholder p{font-size:11px}
+
+/* EXAMPLES BAR */
+.examples-bar{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#1e293b;border-top:1px solid #334155}
+.examples-bar span{font-size:9px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.example-thumb{width:34px;height:34px;border-radius:4px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:.15s}
+.example-thumb:hover{border-color:#0d9488}
+.example-thumb.active{border-color:#0d9488;box-shadow:0 0 6px rgba(13,148,136,.5)}
+
+/* BEFORE/AFTER */
+.ba-container{display:none;flex:1;align-items:center;justify-content:center;gap:16px;padding:20px}
+.ba-container.active{display:flex}
+.ba-container canvas{border-radius:6px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.ba-label{text-align:center;font-size:11px;color:#94a3b8;margin-top:6px;font-weight:600}
+
+/* RIGHT SIDEBAR */
+.right{background:#1e293b;overflow-y:auto;padding:10px;border-left:1px solid #334155}
+.right::-webkit-scrollbar{width:4px}
+.right::-webkit-scrollbar-thumb{background:#475569;border-radius:2px}
+.right h3{font-size:12px;color:#e2e8f0;margin-bottom:2px}
+.right .sub{font-size:9px;color:#64748b;margin-bottom:10px}
+.proc-form{display:none;flex-direction:column;gap:5px}
+.proc-form.active{display:flex}
+.proc-form label{font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.proc-form input,.proc-form select,.proc-form textarea{background:#0f172a;border:1px solid #334155;border-radius:4px;padding:5px 8px;color:#e2e8f0;font-size:11px;outline:none}
+.proc-form input:focus,.proc-form select:focus,.proc-form textarea:focus{border-color:#0d9488}
+.proc-form textarea{height:50px;resize:vertical}
+.proc-form .btn-row{display:flex;gap:6px;margin-top:6px}
+.proc-form .btn-save{flex:1;padding:6px;background:#0d9488;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer}
+.proc-form .btn-save:hover{background:#0f766e}
+.proc-form .btn-cancel{padding:6px 10px;background:transparent;color:#94a3b8;border:1px solid #475569;border-radius:4px;font-size:11px;cursor:pointer}
+.intensity-row{display:flex;align-items:center;gap:6px}
+.intensity-row input[type=range]{flex:1;accent-color:#0d9488}
+.intensity-val{font-size:11px;color:#67e8f9;min-width:32px;text-align:right}
+
+/* PROC LIST */
+.proc-card{background:#0f172a;border-radius:6px;padding:8px;margin-bottom:6px;border-left:3px solid #3b82f6}
+.proc-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.proc-card-zone{font-size:11px;font-weight:600;color:#e2e8f0}
+.proc-card-type{font-size:9px;color:#67e8f9;background:#1e3a5f;padding:1px 6px;border-radius:3px}
+.proc-card-details{font-size:10px;color:#94a3b8;line-height:1.5}
+.proc-card-remove{font-size:9px;color:#ef4444;cursor:pointer;text-align:right;margin-top:4px;opacity:.7}
+.proc-card-remove:hover{opacity:1}
+.total-bar{background:#0d9488;color:#fff;padding:8px 10px;border-radius:6px;text-align:center;margin-top:8px;font-size:12px}
+
+/* TOOLTIP */
+.svg-tooltip{position:fixed;background:#1e293b;color:#e2e8f0;padding:4px 10px;border-radius:4px;font-size:10px;pointer-events:none;z-index:100;display:none;box-shadow:0 2px 8px rgba(0,0,0,.4);border:1px solid #334155}
+
+/* CUSTOM MODAL */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.7);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal-box{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid #334155;border-radius:12px;padding:24px 28px;max-width:380px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.5);text-align:center}
+.modal-icon{font-size:32px;margin-bottom:10px}
+.modal-title{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:6px}
+.modal-msg{font-size:12px;color:#94a3b8;line-height:1.5;margin-bottom:16px}
+.modal-btn{padding:8px 24px;background:#0d9488;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s;margin:0 4px}
+.modal-btn:hover{background:#0f766e}
+.modal-btn.cancel{background:#475569;color:#e2e8f0}
+.modal-btn.cancel:hover{background:#64748b}
+.modal-actions{display:flex;justify-content:center;gap:8px}
+
+/* ZONE VISIBILITY TOGGLE */
+.zone-item .zone-eye{margin-left:auto;font-size:10px;opacity:.4;cursor:pointer;padding:0 4px}
+.zone-item .zone-eye:hover{opacity:1}
+.zone-item .zone-eye.visible{opacity:.8;color:#0d9488}
+.show-all-btn{display:block;width:100%;padding:5px;margin:6px 0;border:1px solid #475569;border-radius:4px;background:transparent;color:#94a3b8;font-size:9px;cursor:pointer;transition:.15s;text-align:center}
+.show-all-btn:hover{background:#334155;color:#e2e8f0}
+.show-all-btn.active{background:#0d9488;color:#fff;border-color:#0d9488}
+
+/* SCULPT MODE */
+.sculpt-toolbar{display:none;align-items:center;gap:6px;padding:5px 8px;background:linear-gradient(135deg,#312e81,#1e1b4b);border-bottom:1px solid #4338ca;flex-wrap:wrap;min-height:36px}
+.sculpt-toolbar.active{display:flex}
+.sculpt-btn{padding:3px 8px;border:1px solid #6366f1;border-radius:4px;background:transparent;color:#c7d2fe;font-size:10px;cursor:pointer;transition:.15s;white-space:nowrap}
+.sculpt-btn:hover{background:#4338ca}
+.sculpt-btn.active{background:#6366f1;color:#fff;border-color:#818cf8;font-weight:600}
+.sculpt-slider{display:flex;align-items:center;gap:3px}
+.sculpt-slider label{font-size:9px;color:#a5b4fc;white-space:nowrap}
+.sculpt-slider input[type=range]{width:70px;height:3px;accent-color:#6366f1}
+.sculpt-slider .sval{font-size:9px;color:#c7d2fe;min-width:28px}
+.sculpt-cursor{position:absolute;border:2px solid rgba(99,102,241,.8);border-radius:50%;pointer-events:none;z-index:55;display:none;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(99,102,241,.3)}
+.mode-badge.sculpt{background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff;box-shadow:0 2px 12px rgba(99,102,241,.4)}
+
+/* LOADING OVERLAY */
+.loading-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;z-index:60;flex-direction:column;gap:12px}
+.loading-overlay.active{display:flex}
+.loading-spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#0d9488;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <span class="logo">INTER-IA</span>
+    <span style="font-size:11px;color:#ccfbf1">Módulo HOF v7</span>
+    <span class="ai-badge">MediaPipe AI</span>
+    <span class="subtitle">Harmonização Orofacial — Simulação com IA</span>
+  </div>
+
+  <!-- LEFT SIDEBAR -->
+  <div class="left">
+    <div class="gender-bar">
+      <button class="gender-btn active" onclick="switchGender('F')">Feminino</button>
+      <button class="gender-btn" onclick="switchGender('M')">Masculino</button>
+    </div>
+    <div id="zoneList"></div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="center">
+    <div class="toolbar">
+      <button class="tool-btn active" id="btnOverlay" onclick="toggleOverlay()">Overlay</button>
+      <button class="tool-btn" id="btnLandmarks" onclick="toggleLandmarks()">Landmarks</button>
+      <div class="sep"></div>
+      <button class="tool-btn" id="btnReposition" onclick="toggleReposition()" style="display:none">Reposicionar</button>
+      <button class="tool-btn" id="btnReset" onclick="resetPositions()" style="display:none">Reset</button>
+      <div class="sep"></div>
+      <button class="tool-btn" id="btnSculpt" onclick="toggleSculptMode()" style="display:none">Esculpir</button>
+      <div class="sep"></div>
+      <button class="tool-btn" id="btnBA" onclick="toggleBeforeAfter()">Antes/Depois</button>
+      <button class="tool-btn" onclick="exportImage()">Exportar</button>
+      <div class="sep"></div>
+      <div class="slider-group" id="sliderOpacity" style="display:none">
+        <label>Opacidade</label>
+        <input type="range" min="0" max="100" value="50" id="ctrlOpacity" oninput="updateOpacity()">
+        <span class="val" id="valOpacity">50%</span>
+      </div>
+      <div class="slider-group" id="sliderZoom" style="display:none">
+        <label>Zoom</label>
+        <input type="range" min="50" max="200" value="100" id="ctrlZoom" oninput="updateZoom()">
+        <span class="val" id="valZoom">100%</span>
+      </div>
+      <input type="file" id="uploadInput" accept="image/*" onchange="handleUpload(event)" style="display:none">
+      <button class="tool-btn" onclick="document.getElementById('uploadInput').click()">Upload Foto</button>
+    </div>
+
+    <div class="photo-area" id="photoArea">
+      <div class="placeholder" id="placeholder">
+        <h2>Carregue uma foto do paciente</h2>
+        <p>Use o botão Upload ou selecione um exemplo abaixo.<br>A IA detectará automaticamente os pontos faciais.</p>
+      </div>
+
+      <div class="photo-container" id="photoContainer">
+        <canvas id="photoCanvas"></canvas>
+        <canvas id="simCanvas"></canvas>
+        <div class="svg-layer interactive" id="svgLayer">
+          <svg id="svgOverlay" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+
+      <div class="ba-container" id="baContainer">
+        <div><canvas id="baOriginal"></canvas><div class="ba-label">ANTES (Original)</div></div>
+        <div><canvas id="baSimulated"></canvas><div class="ba-label">DEPOIS (Simulação)</div></div>
+      </div>
+
+      <div class="mode-badge reposition" id="modeReposition">MODO REPOSICIONAR — Arraste as elipses</div>
+      <div class="mode-badge sim" id="modeSim">SIMULAÇÃO ATIVA</div>
+      <div class="mode-badge detect" id="modeDetect">DETECTANDO ROSTO...</div>
+      <div class="mode-badge sculpt" id="modeSculpt">MODO ESCULPIR — Clique e arraste para deformar</div>
+      <div class="sculpt-cursor" id="sculptCursor"></div>
+
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Carregando modelo de IA...</div>
+      </div>
+    </div>
+
+    <div class="sculpt-toolbar" id="sculptToolbar">
+      <span style="font-size:10px;color:#a5b4fc;font-weight:600">Ferramentas:</span>
+      <button class="sculpt-btn active" data-tool="push" onclick="setSculptTool('push',this)">Puxar</button>
+      <button class="sculpt-btn" data-tool="inflate" onclick="setSculptTool('inflate',this)">Inflar</button>
+      <button class="sculpt-btn" data-tool="deflate" onclick="setSculptTool('deflate',this)">Contrair</button>
+      <button class="sculpt-btn" data-tool="smooth" onclick="setSculptTool('smooth',this)">Alisar</button>
+      <div style="width:1px;height:20px;background:#4338ca;margin:0 4px"></div>
+      <div class="sculpt-slider">
+        <label>Pincel</label>
+        <input type="range" min="10" max="120" value="40" id="sculptSize" oninput="updateSculptSize()">
+        <span class="sval" id="sculptSizeVal">40px</span>
+      </div>
+      <div class="sculpt-slider">
+        <label>Forca</label>
+        <input type="range" min="1" max="100" value="50" id="sculptStrength" oninput="updateSculptStrength()">
+        <span class="sval" id="sculptStrengthVal">50%</span>
+      </div>
+      <div style="width:1px;height:20px;background:#4338ca;margin:0 4px"></div>
+      <button class="sculpt-btn" onclick="sculptUndo()">Desfazer</button>
+      <button class="sculpt-btn" onclick="sculptReset()">Resetar</button>
+      <button class="sculpt-btn" style="background:#059669;border-color:#059669;color:#fff" onclick="toggleSculptMode()">Concluir</button>
+    </div>
+    <div class="examples-bar">
+      <span>Exemplos:</span>
+      <img class="example-thumb" src="example_f1.jpg" onclick="loadExample(this,'F')" title="Feminino 1">
+      <img class="example-thumb" src="example_f2.jpg" onclick="loadExample(this,'F')" title="Feminino 2">
+      <img class="example-thumb" src="example_f3.jpg" onclick="loadExample(this,'F')" title="Feminino 3">
+      <img class="example-thumb" src="example_m1.jpg" onclick="loadExample(this,'M')" title="Masculino 1">
+      <img class="example-thumb" src="example_m2.jpg" onclick="loadExample(this,'M')" title="Masculino 2">
+      <img class="example-thumb" src="example_m3.jpg" onclick="loadExample(this,'M')" title="Masculino 3">
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="right">
+    <h3 id="rightTitle">Procedimentos HOF</h3>
+    <div class="sub" id="rightSubtitle">Selecione uma zona para registrar</div>
+
+    <div class="proc-form" id="procForm">
+      <label>Zona Selecionada</label>
+      <input type="text" id="formZoneName" readonly style="font-weight:600;color:#0d9488">
+      <label>Procedimento</label>
+      <select id="formProcType">
+        <option value="">Selecione...</option>
+        <optgroup label="Toxina Botulínica">
+          <option value="botox">Botox (onabotulinumtoxinA)</option>
+          <option value="dysport">Dysport (abobotulinumtoxinA)</option>
+          <option value="xeomin">Xeomin (incobotulinumtoxinA)</option>
+        </optgroup>
+        <optgroup label="Preenchimento">
+          <option value="ah">Ácido Hialurônico</option>
+          <option value="hidroxiapatita">Hidroxiapatita de Cálcio (Radiesse)</option>
+          <option value="plla">PLLA (Sculptra)</option>
+          <option value="pcl">PCL (Ellansé)</option>
+        </optgroup>
+        <optgroup label="Fios">
+          <option value="pdo_liso">Fio PDO Liso</option>
+          <option value="pdo_espiculado">Fio PDO Espiculado</option>
+          <option value="pdo_mola">Fio PDO Mola</option>
+        </optgroup>
+        <optgroup label="Outros">
+          <option value="skinbooster">Skinbooster</option>
+          <option value="bioestimulador">Bioestimulador</option>
+          <option value="peeling">Peeling Químico</option>
+          <option value="laser">Laser / Luz Pulsada</option>
+          <option value="microagulhamento">Microagulhamento</option>
+          <option value="lipolise">Lipólise Enzimática</option>
+        </optgroup>
+      </select>
+      <label>Produto / Marca</label>
+      <input type="text" id="formProduct" placeholder="Ex: Juvederm Voluma, Botox 100U...">
+      <label>Dosagem / Volume</label>
+      <input type="text" id="formDosage" placeholder="Ex: 20U, 1ml, 2 fios...">
+      <label>Lote / Validade</label>
+      <input type="text" id="formLot" placeholder="Ex: LOT123 - Val: 12/2026">
+      <label>Custo (R$)</label>
+      <input type="number" id="formCost" placeholder="0.00" step="0.01">
+      <label>Intensidade da Simulação</label>
+      <div class="intensity-row">
+        <input type="range" min="0" max="100" value="70" id="formIntensity" oninput="document.getElementById('intensityVal').textContent=this.value+'%'">
+        <span class="intensity-val" id="intensityVal">70%</span>
+      </div>
+      <label>Observações</label>
+      <textarea id="formNotes" placeholder="Notas clínicas..."></textarea>
+      <div class="btn-row">
+        <button class="btn-save" onclick="saveProcedure()">Salvar Procedimento</button>
+        <button class="btn-cancel" onclick="cancelForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="proc-list" id="procList">
+      <p style="font-size:10px;color:#475569;text-align:center;margin-top:30px">Nenhum procedimento registrado.<br>Clique em uma zona do faceograma.</p>
+    </div>
+
+    <div class="total-bar" id="totalBar" style="display:none">
+      <b id="totalValue">R$ 0,00</b><br>
+      <span id="totalCount">0 procedimento(s)</span>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon" id="modalIcon"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-msg" id="modalMsg"></div>
+    <div class="modal-actions" id="modalActions">
+      <button class="modal-btn" id="modalBtnOk" onclick="closeModal()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="svg-tooltip" id="svgTooltip"></div>
+
+<!-- MediaPipe Vision Tasks -->
+<script type="module">
+import { FaceLandmarker, FilesetResolver } from './mediapipe/vision_bundle.mjs';
+
+// ===========================
+// ZONE DEFINITIONS
+// ===========================
+const ZONE_DEFS = [
+  // TERÇO SUPERIOR
+  {id:'testa',         name:'Testa / Frontal',     tercio:'Terço Superior',     color:'#3b82f6', simType:'smooth',  cx:.50,cy:.14,rx:.12,ry:.03, maxRx:.14,maxRy:.04,
+   landmarks:[10,67,109,108,69,104,68,71,63,105,66,107,9,336,296,334,299,333,298,301,293,297]},
+  {id:'glabela',       name:'Glabela',             tercio:'Terço Superior',     color:'#8b5cf6', simType:'smooth',  cx:.50,cy:.24,rx:.025,ry:.018, maxRx:.035,maxRy:.025,
+   landmarks:[9,8,168,6,197,195,5]},
+  {id:'sobrancelha_e', name:'Sobrancelha Esq.',    tercio:'Terço Superior',     color:'#f59e0b', simType:'lift',    cx:.36,cy:.26,rx:.045,ry:.01, maxRx:.06,maxRy:.015,
+   landmarks:[70,63,105,66,107,55,65,52,53,46]},
+  {id:'sobrancelha_d', name:'Sobrancelha Dir.',    tercio:'Terço Superior',     color:'#f59e0b', simType:'lift',    cx:.64,cy:.26,rx:.045,ry:.01, maxRx:.06,maxRy:.015,
+   landmarks:[300,293,334,296,336,285,295,282,283,276]},
+  {id:'temporal_e',    name:'Temporal Esq.',       tercio:'Terço Superior',     color:'#ec4899', simType:'volume',  cx:.18,cy:.24,rx:.025,ry:.025, maxRx:.035,maxRy:.035,
+   landmarks:[54,103,67,109]},
+  {id:'temporal_d',    name:'Temporal Dir.',       tercio:'Terço Superior',     color:'#ec4899', simType:'volume',  cx:.82,cy:.24,rx:.025,ry:.025, maxRx:.035,maxRy:.035,
+   landmarks:[284,332,297,338]},
+  {id:'pesGalinha_e',  name:'Pés de Galinha Esq.', tercio:'Terço Superior',     color:'#ef4444', simType:'smooth',  cx:.20,cy:.33,rx:.02,ry:.015, maxRx:.03,maxRy:.02,
+   landmarks:[130,247,30,29,27,28,56]},
+  {id:'pesGalinha_d',  name:'Pés de Galinha Dir.', tercio:'Terço Superior',     color:'#ef4444', simType:'smooth',  cx:.80,cy:.33,rx:.02,ry:.015, maxRx:.03,maxRy:.02,
+   landmarks:[359,467,260,259,257,258,286]},
+  // TERÇO MÉDIO
+  {id:'bunny_e',       name:'Bunny Lines Esq.',    tercio:'Terço Médio',        color:'#06b6d4', simType:'smooth',  cx:.46,cy:.38,rx:.015,ry:.012, maxRx:.02,maxRy:.015,
+   landmarks:[193,122,196,3,51]},
+  {id:'bunny_d',       name:'Bunny Lines Dir.',    tercio:'Terço Médio',        color:'#06b6d4', simType:'smooth',  cx:.54,cy:.38,rx:.015,ry:.012, maxRx:.02,maxRy:.015,
+   landmarks:[417,351,420,248,281]},
+  {id:'nariz',         name:'Nariz (Rinomodelação)',tercio:'Terço Médio',       color:'#a855f7', simType:'contour', cx:.50,cy:.44,rx:.02,ry:.035, maxRx:.025,maxRy:.045,
+   landmarks:[6,197,195,5,4,1,19,94,2,164,0,11,12,13,14,15,16,17,18,200]},
+  {id:'olheira_e',     name:'Olheira Esq.',        tercio:'Terço Médio',        color:'#6366f1', simType:'brighten',cx:.36,cy:.36,rx:.03,ry:.012, maxRx:.04,maxRy:.015,
+   landmarks:[111,117,118,119,120,121,128,245]},
+  {id:'olheira_d',     name:'Olheira Dir.',        tercio:'Terço Médio',        color:'#6366f1', simType:'brighten',cx:.64,cy:.36,rx:.03,ry:.012, maxRx:.04,maxRy:.015,
+   landmarks:[340,346,347,348,349,350,357,465]},
+  {id:'malar_e',       name:'Malar Esq.',          tercio:'Terço Médio',        color:'#f43f5e', simType:'volume',  cx:.28,cy:.42,rx:.035,ry:.025, maxRx:.045,maxRy:.03,
+   landmarks:[116,123,147,187,207,206,205]},
+  {id:'malar_d',       name:'Malar Dir.',          tercio:'Terço Médio',        color:'#f43f5e', simType:'volume',  cx:.72,cy:.42,rx:.035,ry:.025, maxRx:.045,maxRy:.03,
+   landmarks:[345,352,376,411,427,426,425]},
+  {id:'nasogeniano_e', name:'Nasogeniano Esq.',    tercio:'Terço Médio',        color:'#f97316', simType:'smooth',  cx:.41,cy:.53,rx:.015,ry:.025, maxRx:.02,maxRy:.035,
+   landmarks:[49,220,237,44,45,64]},
+  {id:'nasogeniano_d', name:'Nasogeniano Dir.',    tercio:'Terço Médio',        color:'#f97316', simType:'smooth',  cx:.59,cy:.53,rx:.015,ry:.025, maxRx:.02,maxRy:.035,
+   landmarks:[279,440,457,274,275,294]},
+  {id:'masseter_e',    name:'Masseter Esq.',       tercio:'Terço Médio',        color:'#84cc16', simType:'slim',    cx:.22,cy:.52,rx:.03,ry:.035, maxRx:.04,maxRy:.045,
+   landmarks:[116,117,118,100,36,142,126,217]},
+  {id:'masseter_d',    name:'Masseter Dir.',       tercio:'Terço Médio',        color:'#84cc16', simType:'slim',    cx:.78,cy:.52,rx:.03,ry:.035, maxRx:.04,maxRy:.045,
+   landmarks:[345,346,347,329,266,371,355,437]},
+  // TERÇO INFERIOR
+  {id:'sorrisoGengival',name:'Sorriso Gengival',   tercio:'Terço Inferior',     color:'#14b8a6', simType:'smooth',  cx:.50,cy:.57,rx:.04,ry:.012,
+   landmarks:[164,167,165,92,186,57,43,106,182,83,18,313,406,335,273,287,410,322,391,393]},
+  {id:'labioSup',      name:'Lábio Superior',      tercio:'Terço Inferior',     color:'#e11d48', simType:'volume',  cx:.50,cy:.59,rx:.035,ry:.012, maxRx:.04,maxRy:.015,
+   landmarks:[61,185,40,39,37,0,267,269,270,409,291,308,415,310,311,312,13,82,81,80,191]},
+  {id:'labioInf',      name:'Lábio Inferior',      tercio:'Terço Inferior',     color:'#e11d48', simType:'volume',  cx:.50,cy:.63,rx:.035,ry:.012, maxRx:.04,maxRy:.015,
+   landmarks:[61,146,91,181,84,17,314,405,321,375,291,308,324,318,402,317,14,87,178,88,95]},
+  {id:'codigoBarras',  name:'Código de Barras',    tercio:'Terço Inferior',     color:'#78716c', simType:'smooth',  cx:.50,cy:.57,rx:.04,ry:.008, maxRx:.05,maxRy:.012,
+   landmarks:[164,167,165,92,186,57,43,106,182,83,18,313,406,335,273,287,410,322,391,393]},
+  {id:'marionete_e',   name:'Marionete Esq.',      tercio:'Terço Inferior',     color:'#d946ef', simType:'smooth',  cx:.39,cy:.66,rx:.015,ry:.015, maxRx:.02,maxRy:.02,
+   landmarks:[61,146,91,181,84,43,106]},
+  {id:'marionete_d',   name:'Marionete Dir.',      tercio:'Terço Inferior',     color:'#d946ef', simType:'smooth',  cx:.61,cy:.66,rx:.015,ry:.015, maxRx:.02,maxRy:.02,
+   landmarks:[291,375,321,405,314,273,335]},
+  {id:'mento',         name:'Mento / Queixo',      tercio:'Terço Inferior',     color:'#0ea5e9', simType:'volume',  cx:.50,cy:.72,rx:.035,ry:.02, maxRx:.045,maxRy:.025,
+   landmarks:[152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109,10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,377,152]},
+  {id:'jawline_e',     name:'Jawline Esq.',        tercio:'Terço Inferior',     color:'#eab308', simType:'contour', cx:.27,cy:.65,rx:.035,ry:.018, maxRx:.045,maxRy:.025,
+   landmarks:[132,58,172,136,150,149,176,148,152]},
+  {id:'jawline_d',     name:'Jawline Dir.',        tercio:'Terço Inferior',     color:'#eab308', simType:'contour', cx:.73,cy:.65,rx:.035,ry:.018, maxRx:.045,maxRy:.025,
+   landmarks:[361,288,397,365,379,378,400,377,152]},
+  // SUBMENTONIANA
+  {id:'papada',        name:'Papada',              tercio:'Submentoniana',      color:'#a3a3a3', simType:'slim',    cx:.50,cy:.80,rx:.04,ry:.018, maxRx:.05,maxRy:.025,
+   landmarks:[152,377,400,378,379,365,397,288,361,323,454,356,389,251,284]},
+  {id:'pescoco',       name:'Pescoço / Platisma',  tercio:'Submentoniana',      color:'#737373', simType:'smooth',  cx:.50,cy:.88,rx:.06,ry:.025, maxRx:.07,maxRy:.03,
+   landmarks:[152,148,176,149,150,136,172,58,132]},
+];
+
+// ===========================
+// STATE
+// ===========================
+let currentGender = 'F';
+let selectedZone = null;
+let procedures = {};
+let originalImage = null;
+let photoLoaded = false;
+let overlayVisible = true;
+let overlayOpacity = 0.5;
+let repositionMode = false;
+let dragState = null;
+let showLandmarks = false;
+let visibleZones = new Set(); // zonas visíveis no overlay
+let showAllZones = false;
+
+// ===========================
+// CUSTOM MODAL (substitui alert)
+// ===========================
+let modalResolve = null;
+function showModal(icon, title, msg, showCancel = false) {
+  document.getElementById('modalIcon').textContent = icon;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMsg').textContent = msg;
+  const actions = document.getElementById('modalActions');
+  if(showCancel) {
+    actions.innerHTML = '<button class="modal-btn" onclick="resolveModal(true)">OK</button><button class="modal-btn cancel" onclick="resolveModal(false)">Cancelar</button>';
+  } else {
+    actions.innerHTML = '<button class="modal-btn" onclick="resolveModal(true)">OK</button>';
+  }
+  document.getElementById('modalOverlay').classList.add('active');
+  return new Promise(resolve => { modalResolve = resolve; });
+}
+function resolveModal(result) {
+  document.getElementById('modalOverlay').classList.remove('active');
+  if(modalResolve) { modalResolve(result); modalResolve = null; }
+}
+function closeModal() {
+  resolveModal(false);
+}
+window.showModal = showModal;
+window.closeModal = closeModal;
+window.resolveModal = resolveModal;
+let faceLandmarker = null;
+let detectedLandmarks = null; // Array of {x,y,z} normalized
+let modelLoaded = false;
+
+// Build runtime zones object
+let zones = {};
+function initZones() {
+  zones = {};
+  ZONE_DEFS.forEach(z => {
+    zones[z.id] = { ...z, simRegion: {cx:z.cx, cy:z.cy, rx:z.rx, ry:z.ry} };
+  });
+}
+initZones();
+
+// Make functions available globally
+window.switchGender = switchGender;
+window.toggleOverlay = toggleOverlay;
+window.toggleLandmarks = toggleLandmarks;
+window.toggleReposition = toggleReposition;
+window.resetPositions = resetPositions;
+window.toggleBeforeAfter = toggleBeforeAfter;
+window.exportImage = exportImage;
+window.handleUpload = handleUpload;
+window.loadExample = loadExample;
+window.selectZone = selectZone;
+window.saveProcedure = saveProcedure;
+window.cancelForm = cancelForm;
+window.removeProcedure = removeProcedure;
+window.updateOpacity = updateOpacity;
+window.updateZoom = updateZoom;
+
+// ===========================
+// SCULPT MODE - Interactive Image Deformation
+// ===========================
+let sculptMode = false;
+let sculptTool = 'push'; // push, inflate, deflate, smooth
+let sculptBrushSize = 40;
+let sculptStrength = 50;
+let sculptDragging = false;
+let sculptLastX = 0, sculptLastY = 0;
+let displacementMap = null; // Float32Array [dx, dy] per pixel
+let sculptHistory = []; // undo stack
+let sculptOriginalData = null; // original pixel data before any sculpting
+
+function toggleSculptMode() {
+  sculptMode = !sculptMode;
+  const btn = document.getElementById('btnSculpt');
+  const toolbar = document.getElementById('sculptToolbar');
+  const badge = document.getElementById('modeSculpt');
+  const cursor = document.getElementById('sculptCursor');
+  const svgLayer = document.getElementById('svgLayer');
+  
+  if(sculptMode) {
+    if(!photoLoaded) { showModal('\ud83d\udcf7', 'Foto Necessaria', 'Carregue uma foto primeiro.'); sculptMode = false; return; }
+    btn.classList.add('active');
+    btn.textContent = 'Concluir Escultura';
+    toolbar.classList.add('active');
+    badge.classList.add('active');
+    svgLayer.style.pointerEvents = 'none';
+    svgLayer.style.opacity = '0.15';
+    
+    // Initialize displacement map
+    const canvas = document.getElementById('photoCanvas');
+    const W = canvas.width, H = canvas.height;
+    if(!displacementMap || displacementMap.length !== W * H * 2) {
+      displacementMap = new Float32Array(W * H * 2);
+    }
+    // Store original image data for sculpting
+    if(!sculptOriginalData) {
+      const ctx = canvas.getContext('2d', {willReadFrequently: true});
+      ctx.drawImage(originalImage, 0, 0, W, H);
+      sculptOriginalData = ctx.getImageData(0, 0, W, H);
+    }
+    sculptHistory = [];
+    setupSculptEvents();
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = 'Esculpir';
+    toolbar.classList.remove('active');
+    badge.classList.remove('active');
+    cursor.style.display = 'none';
+    svgLayer.style.pointerEvents = 'auto';
+    svgLayer.style.opacity = '';
+    removeSculptEvents();
+  }
+}
+
+function setSculptTool(tool, el) {
+  sculptTool = tool;
+  document.querySelectorAll('.sculpt-btn[data-tool]').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+function updateSculptSize() {
+  sculptBrushSize = parseInt(document.getElementById('sculptSize').value);
+  document.getElementById('sculptSizeVal').textContent = sculptBrushSize + 'px';
+  const cursor = document.getElementById('sculptCursor');
+  cursor.style.width = sculptBrushSize * 2 + 'px';
+  cursor.style.height = sculptBrushSize * 2 + 'px';
+}
+
+function updateSculptStrength() {
+  sculptStrength = parseInt(document.getElementById('sculptStrength').value);
+  document.getElementById('sculptStrengthVal').textContent = sculptStrength + '%';
+}
+
+function sculptUndo() {
+  if(sculptHistory.length === 0) return;
+  displacementMap = sculptHistory.pop();
+  renderSculpt();
+}
+
+function sculptReset() {
+  if(!displacementMap) return;
+  displacementMap.fill(0);
+  sculptHistory = [];
+  renderSculpt();
+}
+
+function getCanvasCoords(e) {
+  const canvas = document.getElementById('photoCanvas');
+  const container = document.getElementById('photoContainer');
+  const rect = container.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY,
+    clientX: e.clientX,
+    clientY: e.clientY
+  };
+}
+
+function onSculptMouseDown(e) {
+  if(!sculptMode) return;
+  e.preventDefault();
+  sculptDragging = true;
+  const coords = getCanvasCoords(e);
+  sculptLastX = coords.x;
+  sculptLastY = coords.y;
+  // Save state for undo
+  sculptHistory.push(new Float32Array(displacementMap));
+  if(sculptHistory.length > 30) sculptHistory.shift();
+}
+
+function onSculptMouseMove(e) {
+  if(!sculptMode) return;
+  const coords = getCanvasCoords(e);
+  
+  // Update cursor position
+  const cursor = document.getElementById('sculptCursor');
+  const photoArea = document.getElementById('photoArea');
+  const areaRect = photoArea.getBoundingClientRect();
+  cursor.style.display = 'block';
+  cursor.style.left = (coords.clientX - areaRect.left) + 'px';
+  cursor.style.top = (coords.clientY - areaRect.top) + 'px';
+  cursor.style.width = sculptBrushSize * 2 + 'px';
+  cursor.style.height = sculptBrushSize * 2 + 'px';
+  
+  if(!sculptDragging) return;
+  e.preventDefault();
+  
+  const canvas = document.getElementById('photoCanvas');
+  const W = canvas.width, H = canvas.height;
+  const cx = coords.x, cy = coords.y;
+  const container = document.getElementById('photoContainer');
+  const rect = container.getBoundingClientRect();
+  const displayScale = canvas.width / rect.width;
+  const radius = sculptBrushSize * displayScale;
+  const strength = sculptStrength / 100;
+  
+  // Direction of mouse movement for push tool
+  const mdx = coords.x - sculptLastX;
+  const mdy = coords.y - sculptLastY;
+  sculptLastX = coords.x;
+  sculptLastY = coords.y;
+  
+  // Apply displacement in brush area
+  const r2 = radius * radius;
+  const x0 = Math.max(0, Math.floor(cx - radius));
+  const y0 = Math.max(0, Math.floor(cy - radius));
+  const x1 = Math.min(W - 1, Math.ceil(cx + radius));
+  const y1 = Math.min(H - 1, Math.ceil(cy + radius));
+  
+  for(let py = y0; py <= y1; py++) {
+    for(let px = x0; px <= x1; px++) {
+      const dx = px - cx;
+      const dy = py - cy;
+      const d2 = dx * dx + dy * dy;
+      if(d2 >= r2) continue;
+      
+      // Smooth falloff (Gaussian-like)
+      const dist = Math.sqrt(d2) / radius;
+      const falloff = Math.exp(-dist * dist * 3) * (1 - dist);
+      if(falloff <= 0) continue;
+      
+      const idx = (py * W + px) * 2;
+      const f = falloff * strength;
+      
+      switch(sculptTool) {
+        case 'push': // Move pixels in direction of mouse drag
+          displacementMap[idx]     += mdx * f * 0.8;
+          displacementMap[idx + 1] += mdy * f * 0.8;
+          break;
+        case 'inflate': // Push pixels outward from center
+          if(d2 > 0.1) {
+            const nd = Math.sqrt(d2);
+            displacementMap[idx]     += (dx / nd) * f * 3;
+            displacementMap[idx + 1] += (dy / nd) * f * 3;
+          }
+          break;
+        case 'deflate': // Pull pixels inward toward center
+          if(d2 > 0.1) {
+            const nd2 = Math.sqrt(d2);
+            displacementMap[idx]     -= (dx / nd2) * f * 3;
+            displacementMap[idx + 1] -= (dy / nd2) * f * 3;
+          }
+          break;
+        case 'smooth': // Average displacement with neighbors (reduce deformation)
+          displacementMap[idx]     *= (1 - f * 0.3);
+          displacementMap[idx + 1] *= (1 - f * 0.3);
+          break;
+      }
+    }
+  }
+  
+  renderSculpt();
+}
+
+function onSculptMouseUp(e) {
+  sculptDragging = false;
+}
+
+function onSculptMouseLeave(e) {
+  sculptDragging = false;
+  document.getElementById('sculptCursor').style.display = 'none';
+}
+
+let sculptEventsAttached = false;
+function setupSculptEvents() {
+  if(sculptEventsAttached) return;
+  const area = document.getElementById('photoArea');
+  area.addEventListener('mousedown', onSculptMouseDown);
+  area.addEventListener('mousemove', onSculptMouseMove);
+  area.addEventListener('mouseup', onSculptMouseUp);
+  area.addEventListener('mouseleave', onSculptMouseLeave);
+  sculptEventsAttached = true;
+}
+function removeSculptEvents() {
+  const area = document.getElementById('photoArea');
+  area.removeEventListener('mousedown', onSculptMouseDown);
+  area.removeEventListener('mousemove', onSculptMouseMove);
+  area.removeEventListener('mouseup', onSculptMouseUp);
+  area.removeEventListener('mouseleave', onSculptMouseLeave);
+  sculptEventsAttached = false;
+}
+
+function renderSculpt() {
+  if(!sculptOriginalData || !displacementMap) return;
+  const canvas = document.getElementById('photoCanvas');
+  const ctx = canvas.getContext('2d', {willReadFrequently: true});
+  const W = canvas.width, H = canvas.height;
+  const src = sculptOriginalData.data;
+  const dst = ctx.createImageData(W, H);
+  const dstData = dst.data;
+  
+  for(let y = 0; y < H; y++) {
+    for(let x = 0; x < W; x++) {
+      const idx = (y * W + x) * 2;
+      // Where to sample from (reverse mapping)
+      const srcX = x - displacementMap[idx];
+      const srcY = y - displacementMap[idx + 1];
+      
+      // Bilinear interpolation
+      if(srcX >= 0 && srcX < W - 1 && srcY >= 0 && srcY < H - 1) {
+        const sx0 = Math.floor(srcX);
+        const sy0 = Math.floor(srcY);
+        const fx = srcX - sx0;
+        const fy = srcY - sy0;
+        
+        const s00 = (sy0 * W + sx0) * 4;
+        const s10 = s00 + 4;
+        const s01 = s00 + W * 4;
+        const s11 = s01 + 4;
+        const di = (y * W + x) * 4;
+        
+        for(let c = 0; c < 3; c++) {
+          dstData[di + c] = Math.round(
+            (1-fy)*((1-fx)*src[s00+c] + fx*src[s10+c]) +
+            fy*((1-fx)*src[s01+c] + fx*src[s11+c])
+          );
+        }
+        dstData[di + 3] = 255;
+      } else {
+        // Out of bounds - use nearest edge pixel
+        const clampX = Math.max(0, Math.min(W-1, Math.round(srcX)));
+        const clampY = Math.max(0, Math.min(H-1, Math.round(srcY)));
+        const si = (clampY * W + clampX) * 4;
+        const di = (y * W + x) * 4;
+        dstData[di] = src[si]; dstData[di+1] = src[si+1]; dstData[di+2] = src[si+2]; dstData[di+3] = 255;
+      }
+    }
+  }
+  
+  ctx.putImageData(dst, 0, 0);
+}
+
+window.toggleSculptMode = toggleSculptMode;
+window.setSculptTool = setSculptTool;
+window.updateSculptSize = updateSculptSize;
+window.updateSculptStrength = updateSculptStrength;
+window.sculptUndo = sculptUndo;
+window.sculptReset = sculptReset;
+
+// Debug: test sculpt engine directly
+window.testSculpt = function(tool, cx, cy, radius, strength, dx, dy, steps) {
+  if(!sculptOriginalData || !displacementMap) {
+    console.log('Sculpt not initialized! sculptOriginalData:', !!sculptOriginalData, 'displacementMap:', !!displacementMap);
+    return 'NOT INITIALIZED';
+  }
+  const canvas = document.getElementById('photoCanvas');
+  const W = canvas.width, H = canvas.height;
+  tool = tool || 'push';
+  cx = cx || W/2; cy = cy || H/2;
+  radius = radius || 80; strength = strength || 1.0;
+  dx = dx || 0; dy = dy || -30; steps = steps || 20;
+  
+  // Save for undo
+  sculptHistory.push(new Float32Array(displacementMap));
+  
+  for(let s = 0; s < steps; s++) {
+    const r2 = radius * radius;
+    const x0 = Math.max(0, Math.floor(cx - radius));
+    const y0 = Math.max(0, Math.floor(cy - radius));
+    const x1 = Math.min(W - 1, Math.ceil(cx + radius));
+    const y1 = Math.min(H - 1, Math.ceil(cy + radius));
+    
+    for(let py = y0; py <= y1; py++) {
+      for(let px = x0; px <= x1; px++) {
+        const ddx = px - cx;
+        const ddy = py - cy;
+        const d2 = ddx * ddx + ddy * ddy;
+        if(d2 >= r2) continue;
+        const dist = Math.sqrt(d2) / radius;
+        const falloff = Math.exp(-dist * dist * 3) * (1 - dist);
+        if(falloff <= 0) continue;
+        const idx = (py * W + px) * 2;
+        const f = falloff * strength;
+        if(tool === 'push') {
+          displacementMap[idx] += dx * f * 0.8;
+          displacementMap[idx+1] += dy * f * 0.8;
+        } else if(tool === 'inflate') {
+          if(d2 > 0.1) {
+            const nd = Math.sqrt(d2);
+            displacementMap[idx] += (ddx/nd) * f * 5;
+            displacementMap[idx+1] += (ddy/nd) * f * 5;
+          }
+        } else if(tool === 'deflate') {
+          if(d2 > 0.1) {
+            const nd = Math.sqrt(d2);
+            displacementMap[idx] -= (ddx/nd) * f * 5;
+            displacementMap[idx+1] -= (ddy/nd) * f * 5;
+          }
+        }
+      }
+    }
+  }
+  
+  renderSculpt();
+  
+  // Count non-zero displacements
+  let nonZero = 0;
+  let maxDisp = 0;
+  for(let i = 0; i < displacementMap.length; i++) {
+    if(Math.abs(displacementMap[i]) > 0.01) nonZero++;
+    maxDisp = Math.max(maxDisp, Math.abs(displacementMap[i]));
+  }
+  return `Applied ${tool} at (${cx},${cy}) r=${radius} - ${nonZero} non-zero values, max displacement: ${maxDisp.toFixed(1)}px`;
+};
+
+// ===========================
+// INIT MEDIAPIPE
+// ===========================
+async function initMediaPipe() {
+  const loading = document.getElementById('loadingOverlay');
+  const loadingText = document.getElementById('loadingText');
+  loading.classList.add('active');
+  loadingText.textContent = 'Carregando modelo de IA (Face Landmarker)...';
+
+  try {
+    const vision = await FilesetResolver.forVisionTasks('./mediapipe/');
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: {
+        modelAssetPath: './mediapipe/face_landmarker.task',
+        delegate: 'GPU'
+      },
+      runningMode: 'IMAGE',
+      numFaces: 1,
+      outputFaceBlendshapes: false,
+      outputFacialTransformationMatrixes: false
+    });
+    modelLoaded = true;
+    loadingText.textContent = 'Modelo carregado com sucesso!';
+    setTimeout(() => loading.classList.remove('active'), 800);
+    console.log('MediaPipe Face Landmarker loaded successfully');
+  } catch(e) {
+    console.error('Failed to load MediaPipe:', e);
+    loadingText.textContent = 'Erro ao carregar modelo. Usando modo manual.';
+    setTimeout(() => loading.classList.remove('active'), 2000);
+  }
+}
+
+// ===========================
+// DETECT FACE LANDMARKS
+// ===========================
+async function detectFace(imageElement) {
+  if(!faceLandmarker || !modelLoaded) return null;
+
+  const loading = document.getElementById('loadingOverlay');
+  const loadingText = document.getElementById('loadingText');
+  loading.classList.add('active');
+  loadingText.textContent = 'Detectando pontos faciais...';
+  document.getElementById('modeDetect').classList.add('active');
+
+  try {
+    const results = faceLandmarker.detect(imageElement);
+    if(results.faceLandmarks && results.faceLandmarks.length > 0) {
+      detectedLandmarks = results.faceLandmarks[0]; // Array of 468 {x,y,z}
+      console.log(`Detected ${detectedLandmarks.length} landmarks`);
+      alignZonesToLandmarks();
+      loadingText.textContent = `${detectedLandmarks.length} pontos faciais detectados!`;
+    } else {
+      loadingText.textContent = 'Nenhum rosto detectado. Usando posições padrão.';
+      detectedLandmarks = null;
+    }
+  } catch(e) {
+    console.error('Face detection error:', e);
+    loadingText.textContent = 'Erro na detecção. Usando posições padrão.';
+    detectedLandmarks = null;
+  }
+
+  setTimeout(() => {
+    loading.classList.remove('active');
+    document.getElementById('modeDetect').classList.remove('active');
+  }, 1200);
+
+  return detectedLandmarks;
+}
+
+// ===========================
+// ALIGN ZONES TO LANDMARKS
+// ===========================
+function alignZonesToLandmarks() {
+  if(!detectedLandmarks) return;
+
+  ZONE_DEFS.forEach(zdef => {
+    if(!zdef.landmarks || zdef.landmarks.length === 0) return;
+    const zone = zones[zdef.id];
+
+    // Calculate centroid and bounding box from landmarks
+    let sumX = 0, sumY = 0, minX = 1, maxX = 0, minY = 1, maxY = 0;
+    let validCount = 0;
+
+    zdef.landmarks.forEach(idx => {
+      if(idx < detectedLandmarks.length) {
+        const lm = detectedLandmarks[idx];
+        sumX += lm.x;
+        sumY += lm.y;
+        minX = Math.min(minX, lm.x);
+        maxX = Math.max(maxX, lm.x);
+        minY = Math.min(minY, lm.y);
+        maxY = Math.max(maxY, lm.y);
+        validCount++;
+      }
+    });
+
+    if(validCount > 0) {
+      zone.simRegion.cx = sumX / validCount;
+      zone.simRegion.cy = sumY / validCount;
+      // Set rx/ry based on bounding box with reduced padding
+      const rangeX = (maxX - minX) / 2;
+      const rangeY = (maxY - minY) / 2;
+      if(rangeX > 0.005) {
+        zone.simRegion.rx = rangeX * 0.9; // tighter fit
+        if(zdef.maxRx) zone.simRegion.rx = Math.min(zone.simRegion.rx, zdef.maxRx);
+      }
+      if(rangeY > 0.005) {
+        zone.simRegion.ry = rangeY * 0.9;
+        if(zdef.maxRy) zone.simRegion.ry = Math.min(zone.simRegion.ry, zdef.maxRy);
+      }
+    }
+  });
+}
+
+// ===========================
+// BUILD ZONE LIST IN SIDEBAR
+// ===========================
+function buildZoneList() {
+  const container = document.getElementById('zoneList');
+  let html = '<button class="show-all-btn" id="btnShowAll" onclick="toggleShowAll()">Mostrar Todas as Zonas</button>';
+  let lastTercio = '';
+  ZONE_DEFS.forEach(z => {
+    if(z.tercio !== lastTercio) {
+      lastTercio = z.tercio;
+      html += `<h3>${z.tercio}</h3>`;
+    }
+    html += `<div class="zone-item" data-zone="${z.id}"><span class="zone-dot" style="background:${z.color}" onclick="selectZone('${z.id}')"></span><span onclick="selectZone('${z.id}')" style="flex:1">${z.name}</span><span class="zone-eye" data-eye="${z.id}" onclick="event.stopPropagation();toggleZoneVisibility('${z.id}')">&#128065;</span></div>`;
+  });
+  container.innerHTML = html;
+}
+
+function toggleZoneVisibility(zoneId) {
+  if(visibleZones.has(zoneId)) {
+    visibleZones.delete(zoneId);
+  } else {
+    visibleZones.add(zoneId);
+  }
+  updateZoneEyes();
+  drawOverlay();
+}
+
+function toggleShowAll() {
+  showAllZones = !showAllZones;
+  const btn = document.getElementById('btnShowAll');
+  if(showAllZones) {
+    ZONE_DEFS.forEach(z => visibleZones.add(z.id));
+    btn.textContent = 'Ocultar Todas as Zonas';
+    btn.classList.add('active');
+  } else {
+    visibleZones.clear();
+    // Keep zones with procedures visible
+    Object.keys(procedures).forEach(id => visibleZones.add(id));
+    btn.textContent = 'Mostrar Todas as Zonas';
+    btn.classList.remove('active');
+  }
+  updateZoneEyes();
+  drawOverlay();
+}
+
+function updateZoneEyes() {
+  document.querySelectorAll('.zone-eye').forEach(eye => {
+    const zid = eye.getAttribute('data-eye');
+    if(visibleZones.has(zid)) {
+      eye.classList.add('visible');
+    } else {
+      eye.classList.remove('visible');
+    }
+  });
+}
+
+window.toggleZoneVisibility = toggleZoneVisibility;
+window.toggleShowAll = toggleShowAll;
+
+buildZoneList();
+
+// ===========================
+// GENDER
+// ===========================
+function switchGender(g) {
+  currentGender = g;
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.gender-btn').forEach(b => {
+    if((g==='F' && b.textContent.includes('Feminino')) || (g==='M' && b.textContent.includes('Masculino')))
+      b.classList.add('active');
+  });
+}
+
+// ===========================
+// ZONE SELECTION
+// ===========================
+function selectZone(zoneId) {
+  if(repositionMode) return;
+  selectedZone = zoneId;
+  const zone = zones[zoneId];
+  // Tornar a zona visível ao selecionar
+  visibleZones.add(zoneId);
+  updateZoneEyes();
+
+  document.querySelectorAll('.zone-item').forEach(el => el.classList.remove('selected'));
+  const item = document.querySelector(`.zone-item[data-zone="${zoneId}"]`);
+  if(item) {
+    item.classList.add('selected');
+    item.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  document.getElementById('rightTitle').textContent = zone.name;
+  document.getElementById('rightSubtitle').textContent = 'Registrar procedimento';
+  document.getElementById('formZoneName').value = zone.name;
+  document.getElementById('procForm').classList.add('active');
+
+  if(procedures[zoneId]) {
+    const p = procedures[zoneId];
+    document.getElementById('formProcType').value = p.type;
+    document.getElementById('formProduct').value = p.product || '';
+    document.getElementById('formDosage').value = p.dosage || '';
+    document.getElementById('formLot').value = p.lot || '';
+    document.getElementById('formCost').value = p.cost || '';
+    document.getElementById('formIntensity').value = p.intensity || 70;
+    document.getElementById('intensityVal').textContent = (p.intensity || 70) + '%';
+    document.getElementById('formNotes').value = p.notes || '';
+  } else {
+    document.getElementById('formProcType').value = '';
+    document.getElementById('formProduct').value = '';
+    document.getElementById('formDosage').value = '';
+    document.getElementById('formLot').value = '';
+    document.getElementById('formCost').value = '';
+    document.getElementById('formIntensity').value = 70;
+    document.getElementById('intensityVal').textContent = '70%';
+    document.getElementById('formNotes').value = '';
+  }
+
+  drawOverlay();
+}
+
+// ===========================
+// SAVE / CANCEL / REMOVE
+// ===========================
+function saveProcedure() {
+  const type = document.getElementById('formProcType').value;
+  if(!type || !selectedZone) { showModal('⚠️', 'Atenção', 'Selecione um procedimento antes de salvar.'); return; }
+
+  const typeNames = {botox:'Botox',dysport:'Dysport',xeomin:'Xeomin',ah:'Ácido Hialurônico',
+    hidroxiapatita:'Radiesse',plla:'Sculptra',pcl:'Ellansé',pdo_liso:'Fio PDO Liso',
+    pdo_espiculado:'Fio PDO Espiculado',pdo_mola:'Fio PDO Mola',skinbooster:'Skinbooster',
+    bioestimulador:'Bioestimulador',peeling:'Peeling',laser:'Laser/IPL',
+    microagulhamento:'Microagulhamento',lipolise:'Lipólise'};
+
+  procedures[selectedZone] = {
+    zone: selectedZone,
+    zoneName: zones[selectedZone].name,
+    type, typeName: typeNames[type] || type,
+    product: document.getElementById('formProduct').value,
+    dosage: document.getElementById('formDosage').value,
+    lot: document.getElementById('formLot').value,
+    cost: parseFloat(document.getElementById('formCost').value) || 0,
+    intensity: parseInt(document.getElementById('formIntensity').value) || 70,
+    notes: document.getElementById('formNotes').value
+  };
+
+  // Garantir que a zona com procedimento fique visível
+  visibleZones.add(selectedZone);
+  updateZoneEyes();
+
+  refreshAll();
+  cancelForm();
+}
+
+function cancelForm() {
+  document.getElementById('procForm').classList.remove('active');
+  document.getElementById('rightTitle').textContent = 'Procedimentos HOF';
+  const n = Object.keys(procedures).length;
+  document.getElementById('rightSubtitle').textContent = n > 0 ? n + ' procedimento(s) registrado(s)' : 'Selecione uma zona para registrar';
+}
+
+function removeProcedure(zoneId) {
+  delete procedures[zoneId];
+  refreshAll();
+}
+
+// ===========================
+// REFRESH ALL
+// ===========================
+function refreshAll() {
+  updateZoneHighlights();
+  updateProcList();
+  if(photoLoaded) {
+    applySimulation();
+    drawOverlay();
+  }
+}
+
+function updateZoneHighlights() {
+  document.querySelectorAll('.zone-item').forEach(el => {
+    el.classList.toggle('has-proc', !!procedures[el.dataset.zone]);
+  });
+  document.getElementById('modeSim').classList.toggle('active', Object.keys(procedures).length > 0 && photoLoaded);
+}
+
+function updateProcList() {
+  const list = document.getElementById('procList');
+  const procs = Object.values(procedures);
+  const totalBar = document.getElementById('totalBar');
+  if(procs.length === 0) {
+    list.innerHTML = '<p style="font-size:10px;color:#475569;text-align:center;margin-top:30px">Nenhum procedimento registrado.<br>Clique em uma zona do faceograma.</p>';
+    totalBar.style.display = 'none';
+    return;
+  }
+  let html = '', totalCost = 0;
+  procs.forEach(p => {
+    totalCost += p.cost;
+    html += `<div class="proc-card" style="border-left-color:${zones[p.zone].color}">
+      <div class="proc-card-header"><span class="proc-card-zone">${p.zoneName}</span><span class="proc-card-type">${p.typeName}</span></div>
+      <div class="proc-card-details">
+        ${p.product?'<b>Produto:</b> '+p.product+'<br>':''}
+        ${p.dosage?'<b>Dosagem:</b> '+p.dosage+'<br>':''}
+        ${p.cost?'<b>Custo:</b> R$ '+p.cost.toFixed(2)+'<br>':''}
+        <b>Intensidade:</b> ${p.intensity}%
+      </div>
+      <div class="proc-card-remove" onclick="removeProcedure('${p.zone}')">Remover</div>
+    </div>`;
+  });
+  list.innerHTML = html;
+  totalBar.style.display = 'block';
+  document.getElementById('totalValue').textContent = 'R$ ' + totalCost.toFixed(2);
+  document.getElementById('totalCount').textContent = procs.length + ' procedimento(s)';
+}
+
+// ===========================
+// PHOTO LOADING
+// ===========================
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => loadImage(ev.target.result);
+  reader.readAsDataURL(file);
+}
+
+function loadExample(el, gender) {
+  if(gender !== currentGender) switchGender(gender);
+  document.querySelectorAll('.example-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadImage(el.src);
+}
+
+async function loadImage(src) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = async function() {
+    originalImage = img;
+    photoLoaded = true;
+
+    const canvas = document.getElementById('photoCanvas');
+    const simCanvas = document.getElementById('simCanvas');
+    const area = document.getElementById('photoArea');
+    const maxH = area.clientHeight - 10;
+    const maxW = area.clientWidth - 10;
+    const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // Setup simulation canvas (same size, on top)
+    simCanvas.width = canvas.width;
+    simCanvas.height = canvas.height;
+
+    // Update SVG viewBox
+    const svg = document.getElementById('svgOverlay');
+    svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
+
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('photoContainer').style.display = 'inline-block';
+    document.getElementById('btnReposition').style.display = '';
+    document.getElementById('btnReset').style.display = '';
+    document.getElementById('btnSculpt').style.display = '';
+    document.getElementById('sliderOpacity').style.display = 'flex';
+    document.getElementById('sliderZoom').style.display = 'flex';
+
+    overlayVisible = true;
+    document.getElementById('btnOverlay').classList.add('active');
+
+    // Detect face landmarks with MediaPipe
+    if(modelLoaded) {
+      await detectFace(img);
+    }
+
+    drawOverlay();
+    applySimulation();
+    updateZoneHighlights();
+  };
+  img.src = src;
+}
+
+// ===========================
+// SVG OVERLAY DRAWING
+// ===========================
+function drawOverlay() {
+  const svg = document.getElementById('svgOverlay');
+  const canvas = document.getElementById('photoCanvas');
+  if(!canvas.width) return;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+
+  if(!overlayVisible) {
+    document.getElementById('svgLayer').style.opacity = 0;
+    return;
+  }
+  document.getElementById('svgLayer').style.opacity = overlayOpacity;
+
+  const isRepos = repositionMode;
+
+  // Draw landmark dots if enabled
+  if(showLandmarks && detectedLandmarks) {
+    detectedLandmarks.forEach((lm, idx) => {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', lm.x * W);
+      dot.setAttribute('cy', lm.y * H);
+      dot.setAttribute('r', '1.5');
+      dot.setAttribute('fill', '#00ff88');
+      dot.setAttribute('opacity', '0.6');
+      dot.setAttribute('pointer-events', 'none');
+      svg.appendChild(dot);
+
+      // Show index for key landmarks
+      if([10,152,234,454,1,4,6,9,168,0,17,61,291,33,263,133,362,70,300,105,334].includes(idx)) {
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', lm.x * W + 3);
+        txt.setAttribute('y', lm.y * H - 3);
+        txt.setAttribute('fill', '#00ff88');
+        txt.setAttribute('font-size', '6');
+        txt.setAttribute('pointer-events', 'none');
+        txt.textContent = idx;
+        svg.appendChild(txt);
+      }
+    });
+  }
+
+  Object.entries(zones).forEach(([id, zone]) => {
+    const r = zone.simRegion;
+    const hasProc = !!procedures[id];
+    const isSel = id === selectedZone;
+
+    // Filtro de visibilidade: só mostrar se está visível, selecionada, com procedimento, ou em modo reposicionar
+    if(!isRepos && !hasProc && !isSel && !visibleZones.has(id)) return;
+
+    const cx = r.cx * W;
+    const cy = r.cy * H;
+    const rx = r.rx * W;
+    const ry = r.ry * H;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('class', 'zone-el' + (isRepos ? ' drag-mode' : ''));
+    g.setAttribute('data-zone', id);
+
+    const el = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    el.setAttribute('cx', cx);
+    el.setAttribute('cy', cy);
+    el.setAttribute('rx', rx);
+    el.setAttribute('ry', ry);
+    el.setAttribute('fill', zone.color + (hasProc ? '55' : '22'));
+    el.setAttribute('stroke', zone.color);
+    el.setAttribute('stroke-width', isSel ? '2.5' : (hasProc ? '2' : '1'));
+    if(!hasProc && !isSel) el.setAttribute('stroke-dasharray', '4,3');
+    g.appendChild(el);
+
+    if(hasProc) {
+      const icons = {botox:'💉',dysport:'💉',xeomin:'💉',ah:'💧',hidroxiapatita:'💧',plla:'💧',pcl:'💧',
+        pdo_liso:'🧵',pdo_espiculado:'🧵',pdo_mola:'🧵',skinbooster:'✨',bioestimulador:'🔬',
+        peeling:'🧪',laser:'⚡',microagulhamento:'📌',lipolise:'🔥'};
+      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      icon.setAttribute('x', cx);
+      icon.setAttribute('y', cy + 2);
+      icon.setAttribute('text-anchor', 'middle');
+      icon.setAttribute('dominant-baseline', 'middle');
+      icon.setAttribute('font-size', Math.max(10, Math.min(rx, ry) * 0.8));
+      icon.setAttribute('pointer-events', 'none');
+      icon.textContent = icons[procedures[id].type] || '✓';
+      g.appendChild(icon);
+    }
+
+    if(isRepos) {
+      const hx = cx + rx;
+      const hy = cy + ry;
+      const hs = 6;
+      const handle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      handle.setAttribute('x', hx - hs/2);
+      handle.setAttribute('y', hy - hs/2);
+      handle.setAttribute('width', hs);
+      handle.setAttribute('height', hs);
+      handle.setAttribute('fill', '#fff');
+      handle.setAttribute('stroke', zone.color);
+      handle.setAttribute('stroke-width', '1.5');
+      handle.setAttribute('rx', '1');
+      handle.setAttribute('class', 'resize-handle');
+      handle.setAttribute('data-zone', id);
+      g.appendChild(handle);
+
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lbl.setAttribute('x', cx);
+      lbl.setAttribute('y', cy - ry - 4);
+      lbl.setAttribute('text-anchor', 'middle');
+      lbl.setAttribute('fill', zone.color);
+      lbl.setAttribute('font-size', '9');
+      lbl.setAttribute('font-weight', '600');
+      lbl.setAttribute('class', 'zone-label');
+      lbl.textContent = zone.name;
+      g.appendChild(lbl);
+
+      setupDrag(g, id, 'move', el);
+      setupDrag(handle, id, 'resize', null);
+    } else {
+      g.style.cursor = 'pointer';
+      g.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectZone(id);
+      });
+    }
+
+    svg.appendChild(g);
+  });
+}
+
+// ===========================
+// DRAG SYSTEM
+// ===========================
+function setupDrag(element, zoneId, type, ellipseEl) {
+  const startDrag = (clientX, clientY) => {
+    const svg = document.getElementById('svgOverlay');
+    const svgRect = svg.getBoundingClientRect();
+    const r = zones[zoneId].simRegion;
+    dragState = {
+      type, zoneId,
+      startClientX: clientX, startClientY: clientY,
+      origCx: r.cx, origCy: r.cy, origRx: r.rx, origRy: r.ry,
+      scaleX: 1 / svgRect.width, scaleY: 1 / svgRect.height
+    };
+  };
+  element.addEventListener('mousedown', (e) => {
+    if(type === 'move' && e.target.classList.contains('resize-handle')) return;
+    e.preventDefault(); e.stopPropagation(); startDrag(e.clientX, e.clientY);
+  });
+  element.addEventListener('touchstart', (e) => {
+    if(type === 'move' && e.target.classList.contains('resize-handle')) return;
+    e.preventDefault(); e.stopPropagation();
+    startDrag(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:false});
+}
+
+document.addEventListener('mousemove', (e) => { if(dragState) { e.preventDefault(); handleDragMove(e.clientX, e.clientY); } });
+document.addEventListener('touchmove', (e) => { if(dragState) { e.preventDefault(); handleDragMove(e.touches[0].clientX, e.touches[0].clientY); } }, {passive:false});
+
+function handleDragMove(clientX, clientY) {
+  const ds = dragState;
+  const dx = (clientX - ds.startClientX) * ds.scaleX;
+  const dy = (clientY - ds.startClientY) * ds.scaleY;
+  const r = zones[ds.zoneId].simRegion;
+  if(ds.type === 'move') {
+    r.cx = clamp(ds.origCx + dx, 0.02, 0.98);
+    r.cy = clamp(ds.origCy + dy, 0.02, 0.98);
+  } else {
+    r.rx = clamp(ds.origRx + dx, 0.008, 0.25);
+    r.ry = clamp(ds.origRy + dy, 0.005, 0.25);
+  }
+  drawOverlay();
+}
+
+document.addEventListener('mouseup', endDrag);
+document.addEventListener('touchend', endDrag);
+
+function endDrag() {
+  if(!dragState) return;
+  dragState = null;
+  if(photoLoaded) applySimulation();
+}
+
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+// ===========================
+// TOOLTIP
+// ===========================
+document.getElementById('svgOverlay').addEventListener('mousemove', (e) => {
+  if(repositionMode) return;
+  const tooltip = document.getElementById('svgTooltip');
+  const target = e.target.closest('.zone-el');
+  if(target) {
+    const zoneId = target.dataset.zone;
+    const zone = zones[zoneId];
+    tooltip.textContent = zone.name + (procedures[zoneId] ? ' ✓ ' + procedures[zoneId].typeName : '');
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY - 20) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+document.getElementById('svgOverlay').addEventListener('mouseleave', () => {
+  document.getElementById('svgTooltip').style.display = 'none';
+});
+
+// ===========================
+// CONTROLS
+// ===========================
+function toggleOverlay() {
+  overlayVisible = !overlayVisible;
+  document.getElementById('btnOverlay').classList.toggle('active', overlayVisible);
+  drawOverlay();
+}
+
+function toggleLandmarks() {
+  showLandmarks = !showLandmarks;
+  document.getElementById('btnLandmarks').classList.toggle('active', showLandmarks);
+  drawOverlay();
+}
+
+function updateOpacity() {
+  overlayOpacity = parseInt(document.getElementById('ctrlOpacity').value) / 100;
+  document.getElementById('valOpacity').textContent = Math.round(overlayOpacity * 100) + '%';
+  document.getElementById('svgLayer').style.opacity = overlayOpacity;
+}
+
+function updateZoom() {
+  const z = parseInt(document.getElementById('ctrlZoom').value);
+  document.getElementById('valZoom').textContent = z + '%';
+  document.getElementById('photoContainer').style.transform = `scale(${z/100})`;
+}
+
+function toggleReposition() {
+  repositionMode = !repositionMode;
+  const btn = document.getElementById('btnReposition');
+  btn.classList.toggle('active', repositionMode);
+  btn.classList.toggle('warn', repositionMode);
+  btn.textContent = repositionMode ? 'Concluir Reposição' : 'Reposicionar';
+  document.getElementById('modeReposition').classList.toggle('active', repositionMode);
+  if(repositionMode) {
+    overlayOpacity = 0.8;
+    document.getElementById('ctrlOpacity').value = 80;
+    document.getElementById('valOpacity').textContent = '80%';
+    document.getElementById('svgLayer').style.opacity = 0.8;
+  } else {
+    overlayOpacity = 0.5;
+    document.getElementById('ctrlOpacity').value = 50;
+    document.getElementById('valOpacity').textContent = '50%';
+    document.getElementById('svgLayer').style.opacity = 0.5;
+  }
+  drawOverlay();
+}
+
+async function resetPositions() {
+  const ok = await showModal('🔄', 'Resetar Posições', 'Resetar todas as posições das zonas para o padrão?', true);
+  if(!ok) return;
+  initZones();
+  if(detectedLandmarks) alignZonesToLandmarks();
+  drawOverlay();
+  if(photoLoaded) applySimulation();
+}
+
+// ===========================
+// MLS WARPING ENGINE + SKIN EFFECTS
+// ===========================
+
+// --- MLS Core Classes (from imgwarp.js, optimized) ---
+class MLSPoint {
+  constructor(x, y) { this.x = x; this.y = y; }
+  add(o) { return new MLSPoint(this.x + o.x, this.y + o.y); }
+  sub(o) { return new MLSPoint(this.x - o.x, this.y - o.y); }
+  mul(s) { return new MLSPoint(this.x * s, this.y * s); }
+  dot(o) { return this.x * o.x + this.y * o.y; }
+  wXtX(w) { return [this.x*this.x*w, this.x*this.y*w, this.y*this.x*w, this.y*this.y*w]; }
+  mulM(m) { return new MLSPoint(this.x*m[0]+this.y*m[2], this.x*m[1]+this.y*m[3]); }
+  static wavg(pts, w) {
+    let sx=0,sy=0,sw=0;
+    for(let i=0;i<pts.length;i++){sx+=pts[i].x*w[i];sy+=pts[i].y*w[i];sw+=w[i];}
+    return new MLSPoint(sx/sw, sy/sw);
+  }
+}
+
+function mat22inv(m) {
+  const det = m[0]*m[3]-m[1]*m[2];
+  if(Math.abs(det)<1e-10) return [1,0,0,1];
+  const id = 1/det;
+  return [m[3]*id, -m[1]*id, -m[2]*id, m[0]*id];
+}
+
+// MLS Affine Deformation - compute where each pixel should sample from
+function mlsDeform(fromPts, toPts, point, alpha) {
+  const n = fromPts.length;
+  const w = new Array(n);
+  for(let i=0;i<n;i++) {
+    const t = fromPts[i].sub(point);
+    const d2 = t.x*t.x + t.y*t.y;
+    w[i] = d2 < 0.01 ? 1e8 : Math.pow(d2, -alpha);
+  }
+  const pAvg = MLSPoint.wavg(fromPts, w);
+  const qAvg = MLSPoint.wavg(toPts, w);
+  
+  // Build matrix B and solve
+  let B = [0,0,0,0];
+  for(let i=0;i<n;i++) {
+    const pr = fromPts[i].sub(pAvg);
+    const wx = pr.wXtX(w[i]);
+    B[0]+=wx[0]; B[1]+=wx[1]; B[2]+=wx[2]; B[3]+=wx[3];
+  }
+  const Binv = mat22inv(B);
+  const vpA = point.sub(pAvg).mulM(Binv);
+  
+  let rx = qAvg.x, ry = qAvg.y;
+  for(let j=0;j<n;j++) {
+    const pr = fromPts[j].sub(pAvg);
+    const qr = toPts[j].sub(qAvg);
+    const a = vpA.dot(pr) * w[j];
+    rx += qr.x * a;
+    ry += qr.y * a;
+  }
+  return new MLSPoint(rx, ry);
+}
+
+// --- Warp Displacement Vectors per Procedure Type ---
+// Each type defines how landmarks should be displaced
+function getWarpDisplacements(zoneId, zone, proc, W, H) {
+  if(!detectedLandmarks) return {from:[], to:[]};
+  
+  const intensity = (proc.intensity || 70) / 100;
+  const st = zone.simType;
+  const lmIndices = ZONE_DEFS.find(z => z.id === zoneId)?.landmarks || [];
+  if(lmIndices.length === 0) return {from:[], to:[]};
+  
+  const from = [];
+  const to = [];
+  
+  // Get zone center in pixels
+  const r = zone.simRegion;
+  const cx = r.cx * W;
+  const cy = r.cy * H;
+  
+  lmIndices.forEach(idx => {
+    if(idx >= detectedLandmarks.length) return;
+    const lm = detectedLandmarks[idx];
+    const px = lm.x * W;
+    const py = lm.y * H;
+    
+    let dx = 0, dy = 0;
+    const distFromCenter = Math.sqrt((px-cx)*(px-cx) + (py-cy)*(py-cy));
+    const maxDist = Math.max(r.rx * W, r.ry * H);
+    const falloff = Math.max(0, 1 - distFromCenter / (maxDist * 1.5));
+    
+    // Displacement magnitude scales with intensity and zone size
+    const mag = intensity * maxDist * 0.35;
+    
+    switch(st) {
+      case 'smooth': // Botox: slight smoothing pull toward center
+        dx = (cx - px) * 0.08 * intensity * falloff;
+        dy = (cy - py) * 0.08 * intensity * falloff;
+        break;
+      case 'lift': // Lift/Fios: pull upward
+        dx = 0;
+        dy = -mag * 0.6 * falloff;
+        break;
+      case 'volume': // Filler: push outward from center (inflate)
+        if(distFromCenter > 1) {
+          const nx = (px - cx) / distFromCenter;
+          const ny = (py - cy) / distFromCenter;
+          dx = nx * mag * 0.4 * falloff;
+          dy = ny * mag * 0.4 * falloff;
+        }
+        break;
+      case 'brighten': // Under-eye: slight upward + outward
+        dx = (px - cx) * 0.05 * intensity * falloff;
+        dy = -mag * 0.2 * falloff;
+        break;
+      case 'contour': // Nose/Jaw: pull inward (narrow)
+        if(distFromCenter > 1) {
+          const nx2 = (cx - px) / distFromCenter;
+          dx = nx2 * mag * 0.3 * falloff;
+          dy = 0;
+        }
+        break;
+      case 'slim': // Masseter/Papada: pull inward strongly
+        if(distFromCenter > 1) {
+          const nx3 = (cx - px) / distFromCenter;
+          const ny3 = (cy - py) / distFromCenter;
+          dx = nx3 * mag * 0.5 * falloff;
+          dy = ny3 * mag * 0.15 * falloff;
+        }
+        break;
+    }
+    
+    from.push(new MLSPoint(px, py));
+    to.push(new MLSPoint(px + dx, py + dy));
+  });
+  
+  // Add anchor points around the image edges to prevent global distortion
+  const step = 40;
+  for(let x = 0; x <= W; x += step) {
+    from.push(new MLSPoint(x, 0)); to.push(new MLSPoint(x, 0));
+    from.push(new MLSPoint(x, H)); to.push(new MLSPoint(x, H));
+  }
+  for(let y = step; y < H; y += step) {
+    from.push(new MLSPoint(0, y)); to.push(new MLSPoint(0, y));
+    from.push(new MLSPoint(W, y)); to.push(new MLSPoint(W, y));
+  }
+  
+  return {from, to};
+}
+
+// --- Main Simulation Function ---
+function applySimulation() {
+  if(!photoLoaded || !originalImage) return;
+  
+  const canvas = document.getElementById('photoCanvas');
+  const ctx = canvas.getContext('2d', {willReadFrequently: true});
+  const simCanvas = document.getElementById('simCanvas');
+  simCanvas.style.display = 'none';
+  const W = canvas.width;
+  const H = canvas.height;
+  
+  // ALWAYS start from original
+  ctx.drawImage(originalImage, 0, 0, W, H);
+  
+  const procs = Object.entries(procedures);
+  if(procs.length === 0) {
+    document.getElementById('modeSim').classList.remove('active');
+    return;
+  }
+  
+  document.getElementById('modeSim').classList.add('active');
+  
+  // Collect ALL warp points from all procedures
+  let allFrom = [];
+  let allTo = [];
+  let hasWarp = false;
+  
+  procs.forEach(([zoneId, proc]) => {
+    const zone = zones[zoneId];
+    const {from, to} = getWarpDisplacements(zoneId, zone, proc, W, H);
+    if(from.length > 0) {
+      allFrom = allFrom.concat(from);
+      allTo = allTo.concat(to);
+      hasWarp = true;
+    }
+  });
+  
+  if(!hasWarp || allFrom.length === 0) return;
+  
+  // Read original image data
+  const origData = ctx.getImageData(0, 0, W, H);
+  const newData = ctx.createImageData(W, H);
+  
+  // Copy original first
+  newData.data.set(origData.data);
+  
+  // Apply MLS warping: for each pixel, find where it maps to in the original
+  // Use grid-based approach for performance (compute warp at grid points, interpolate)
+  const gridSize = 8; // pixels between grid points
+  const gridW = Math.ceil(W / gridSize) + 1;
+  const gridH = Math.ceil(H / gridSize) + 1;
+  
+  // Precompute warp at grid points
+  const warpGrid = new Float32Array(gridW * gridH * 2);
+  for(let gy = 0; gy < gridH; gy++) {
+    for(let gx = 0; gx < gridW; gx++) {
+      const px = Math.min(gx * gridSize, W - 1);
+      const py = Math.min(gy * gridSize, H - 1);
+      const warped = mlsDeform(allTo, allFrom, new MLSPoint(px, py), 1);
+      const idx = (gy * gridW + gx) * 2;
+      warpGrid[idx] = warped.x;
+      warpGrid[idx + 1] = warped.y;
+    }
+  }
+  
+  // For each pixel, bilinearly interpolate from grid
+  for(let y = 0; y < H; y++) {
+    const gy = y / gridSize;
+    const gy0 = Math.floor(gy);
+    const gy1 = Math.min(gy0 + 1, gridH - 1);
+    const fy = gy - gy0;
+    
+    for(let x = 0; x < W; x++) {
+      const gx = x / gridSize;
+      const gx0 = Math.floor(gx);
+      const gx1 = Math.min(gx0 + 1, gridW - 1);
+      const fx = gx - gx0;
+      
+      // Bilinear interpolation of warp coordinates
+      const i00 = (gy0 * gridW + gx0) * 2;
+      const i10 = (gy0 * gridW + gx1) * 2;
+      const i01 = (gy1 * gridW + gx0) * 2;
+      const i11 = (gy1 * gridW + gx1) * 2;
+      
+      const srcX = (1-fy)*((1-fx)*warpGrid[i00] + fx*warpGrid[i10]) + fy*((1-fx)*warpGrid[i01] + fx*warpGrid[i11]);
+      const srcY = (1-fy)*((1-fx)*warpGrid[i00+1] + fx*warpGrid[i10+1]) + fy*((1-fx)*warpGrid[i01+1] + fx*warpGrid[i11+1]);
+      
+      // Bilinear sampling from original image
+      if(srcX >= 0 && srcX < W - 1 && srcY >= 0 && srcY < H - 1) {
+        const sx0 = Math.floor(srcX);
+        const sy0 = Math.floor(srcY);
+        const sx1 = sx0 + 1;
+        const sy1 = sy0 + 1;
+        const sfx = srcX - sx0;
+        const sfy = srcY - sy0;
+        
+        const dstIdx = (y * W + x) * 4;
+        const s00 = (sy0 * W + sx0) * 4;
+        const s10 = (sy0 * W + sx1) * 4;
+        const s01 = (sy1 * W + sx0) * 4;
+        const s11 = (sy1 * W + sx1) * 4;
+        
+        for(let c = 0; c < 3; c++) {
+          newData.data[dstIdx + c] = Math.round(
+            (1-sfy)*((1-sfx)*origData.data[s00+c] + sfx*origData.data[s10+c]) +
+            sfy*((1-sfx)*origData.data[s01+c] + sfx*origData.data[s11+c])
+          );
+        }
+        newData.data[dstIdx + 3] = 255;
+      }
+    }
+  }
+  
+  // Write warped image
+  ctx.putImageData(newData, 0, 0);
+  
+  // Apply skin effects on top of warped image (subtle blur + brightness)
+  procs.forEach(([zoneId, proc]) => {
+    const zone = zones[zoneId];
+    const r = zone.simRegion;
+    const intensity = (proc.intensity || 70) / 100;
+    const st = zone.simType;
+    
+    const cx = r.cx * W;
+    const cy = r.cy * H;
+    const rx = r.rx * W * 1.2;
+    const ry = r.ry * H * 1.2;
+    
+    const x1 = Math.max(0, Math.floor(cx - rx));
+    const y1 = Math.max(0, Math.floor(cy - ry));
+    const x2 = Math.min(W, Math.ceil(cx + rx));
+    const y2 = Math.min(H, Math.ceil(cy + ry));
+    const rw = x2 - x1;
+    const rh = y2 - y1;
+    if(rw <= 0 || rh <= 0) return;
+    
+    // Subtle skin smoothing on warped result
+    const region = document.createElement('canvas');
+    region.width = rw; region.height = rh;
+    const rctx = region.getContext('2d');
+    rctx.drawImage(canvas, x1, y1, rw, rh, 0, 0, rw, rh);
+    
+    const blurAmt = Math.round(2 + intensity * 6);
+    rctx.filter = `blur(${blurAmt}px)`;
+    rctx.drawImage(region, 0, 0);
+    rctx.filter = 'none';
+    
+    // Brightness adjustment per type
+    let bright = 1;
+    if(st === 'brighten') bright = 1 + 0.15 * intensity;
+    else if(st === 'volume') bright = 1 + 0.05 * intensity;
+    else if(st === 'smooth') bright = 1 + 0.03 * intensity;
+    
+    if(bright !== 1) {
+      rctx.filter = `brightness(${bright})`;
+      rctx.drawImage(region, 0, 0);
+      rctx.filter = 'none';
+    }
+    
+    // Blend with elliptical feather
+    const origRegion = ctx.getImageData(x1, y1, rw, rh);
+    const blurRegion = rctx.getImageData(0, 0, rw, rh);
+    const localCx = cx - x1;
+    const localCy = cy - y1;
+    
+    for(let py = 0; py < rh; py++) {
+      for(let px = 0; px < rw; px++) {
+        const ddx = (px - localCx) / rx;
+        const ddy = (py - localCy) / ry;
+        const dist = Math.sqrt(ddx*ddx + ddy*ddy);
+        if(dist > 1) continue;
+        
+        let blend = 1 - dist;
+        blend = blend * blend * (3 - 2 * blend);
+        blend *= intensity * 0.5; // subtle
+        
+        const idx = (py * rw + px) * 4;
+        origRegion.data[idx]   = Math.round(origRegion.data[idx]   * (1-blend) + blurRegion.data[idx]   * blend);
+        origRegion.data[idx+1] = Math.round(origRegion.data[idx+1] * (1-blend) + blurRegion.data[idx+1] * blend);
+        origRegion.data[idx+2] = Math.round(origRegion.data[idx+2] * (1-blend) + blurRegion.data[idx+2] * blend);
+        origRegion.data[idx+3] = 255;
+      }
+    }
+    ctx.putImageData(origRegion, x1, y1);
+  });
+}
+
+// ===========================
+// BEFORE / AFTER
+// ===========================
+function toggleBeforeAfter() {
+  const ba = document.getElementById('baContainer');
+  const container = document.getElementById('photoContainer');
+
+  if(ba.classList.contains('active')) {
+    ba.classList.remove('active');
+    if(photoLoaded) container.style.display = 'inline-block';
+    else document.getElementById('placeholder').style.display = 'block';
+    document.getElementById('btnBA').classList.remove('active');
+    return;
+  }
+
+  if(!photoLoaded || !originalImage) { showModal('📷', 'Foto Necessária', 'Carregue uma foto do paciente primeiro.'); return; }
+
+  container.style.display = 'none';
+  ba.classList.add('active');
+  document.getElementById('btnBA').classList.add('active');
+
+  const origCanvas = document.getElementById('baOriginal');
+  const maxH = document.getElementById('photoArea').clientHeight - 60;
+  const scale = Math.min(1, maxH / originalImage.height);
+  origCanvas.width = originalImage.width * scale;
+  origCanvas.height = originalImage.height * scale;
+  origCanvas.getContext('2d').drawImage(originalImage, 0, 0, origCanvas.width, origCanvas.height);
+
+  // Create the simulated version from photoCanvas (which already has effects applied)
+  const simCanvas = document.getElementById('baSimulated');
+  const srcCanvas = document.getElementById('photoCanvas');
+  simCanvas.width = origCanvas.width;
+  simCanvas.height = origCanvas.height;
+  const simCtx = simCanvas.getContext('2d');
+  simCtx.drawImage(srcCanvas, 0, 0, simCanvas.width, simCanvas.height);
+}
+
+// ===========================
+// EXPORT
+// ===========================
+function exportImage() {
+  if(!photoLoaded) { showModal('📷', 'Foto Necessária', 'Carregue uma foto do paciente primeiro.'); return; }
+  const canvas = document.getElementById('photoCanvas');
+
+  // photoCanvas already has effects applied directly
+  const exportCanvas = document.createElement('canvas');
+  exportCanvas.width = canvas.width;
+  exportCanvas.height = canvas.height;
+  const ctx = exportCanvas.getContext('2d');
+  ctx.drawImage(canvas, 0, 0);
+
+  const link = document.createElement('a');
+  link.download = 'HOF_simulacao_' + new Date().toISOString().slice(0,10) + '.png';
+  link.href = exportCanvas.toDataURL('image/png');
+  link.click();
+}
+
+// ===========================
+// INIT
+// ===========================
+drawOverlay();
+initMediaPipe();
+
+</script>
+</body>
+</html>

@@ -43,7 +43,7 @@ const nextConfig = {
       object-src 'none';
       base-uri 'self';
       form-action 'self';
-      frame-ancestors 'none';
+      frame-ancestors 'self';
     `.replace(/\s+/g, ' ').trim();
 
     return [
@@ -52,7 +52,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'DENY'
+            value: 'SAMEORIGIN'
           },
           {
             key: 'X-Content-Type-Options',
