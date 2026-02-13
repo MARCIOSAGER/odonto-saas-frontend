@@ -1,4 +1,4 @@
-const CACHE_NAME = 'odonto-saas-v1';
+const CACHE_NAME = 'odonto-saas-v2';
 const STATIC_ASSETS = [
   '/home',
   '/appointments',
@@ -35,8 +35,8 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip API calls and auth endpoints
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/login')) return;
+  // Skip API calls, auth endpoints, and HOF simulator (needs fresh CSP headers)
+  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/login') || url.pathname === '/hof.html') return;
 
   // Network-first strategy for HTML pages
   if (request.headers.get('accept')?.includes('text/html')) {
