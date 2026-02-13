@@ -848,20 +848,34 @@ async function initMediaPipe() {
 
   try {
     const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
-    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
-        delegate: 'GPU'
-      },
-      runningMode: 'IMAGE',
-      numFaces: 1,
-      outputFaceBlendshapes: false,
-      outputFacialTransformationMatrixes: false
-    });
+
+    // Try GPU first, fallback to CPU
+    async function createLandmarker(delegate) {
+      return FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+          delegate
+        },
+        runningMode: 'IMAGE',
+        numFaces: 1,
+        outputFaceBlendshapes: false,
+        outputFacialTransformationMatrixes: false
+      });
+    }
+
+    try {
+      faceLandmarker = await createLandmarker('GPU');
+      console.log('MediaPipe loaded with GPU delegate');
+    } catch(gpuErr) {
+      console.warn('GPU delegate failed, falling back to CPU:', gpuErr);
+      loadingText.textContent = 'GPU indisponivel, carregando via CPU...';
+      faceLandmarker = await createLandmarker('CPU');
+      console.log('MediaPipe loaded with CPU delegate');
+    }
+
     modelLoaded = true;
     loadingText.textContent = 'Modelo carregado com sucesso!';
     setTimeout(() => loading.classList.remove('active'), 800);
-    console.log('MediaPipe Face Landmarker loaded successfully');
   } catch(e) {
     console.error('Failed to load MediaPipe:', e);
     loadingText.textContent = 'Erro ao carregar modelo. Usando modo manual.';

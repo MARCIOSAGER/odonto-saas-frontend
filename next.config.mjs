@@ -30,7 +30,7 @@ const nextConfig = {
     // injects inline scripts and Google OAuth requires inline scripts to work
     const scriptSrc = isDev
       ? "'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.gstatic.com https://cdn.jsdelivr.net"
-      : "'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com https://cdn.jsdelivr.net";
+      : "'self' 'unsafe-inline' 'wasm-unsafe-eval' https://accounts.google.com https://www.gstatic.com https://cdn.jsdelivr.net";
 
     const styleSrc = "'self' 'unsafe-inline' https://accounts.google.com"; // Tailwind + Google requires unsafe-inline
 
@@ -45,6 +45,7 @@ const nextConfig = {
       object-src 'none';
       base-uri 'self';
       form-action 'self';
+      worker-src 'self' blob:;
       frame-ancestors 'self';
     `.replace(/\s+/g, ' ').trim();
 
